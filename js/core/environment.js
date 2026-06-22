@@ -326,10 +326,9 @@ const SoolEnvironment = (() => {
     const pos   = new Float32Array(COUNT * 3);
 
     for (let i = 0; i < COUNT; i++) {
-      pos[i*3]     = (Math.random() - 0.5) * 120;
-      pos[i*3+1]   =  12 + Math.random() * 40;
-      pos[i*3+2]   = (Math.random() - 0.5) * 120;
-      sizes[i]     = Math.random();
+      pos[i*3]   = (Math.random() - 0.5) * 120;
+      pos[i*3+1] =  12 + Math.random() * 40;
+      pos[i*3+2] = (Math.random() - 0.5) * 120;
     }
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
 

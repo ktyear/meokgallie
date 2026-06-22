@@ -90,16 +90,19 @@ const SoolBuildings = (() => {
     } else if (type === 'flat') {
       mesh = new THREE.Mesh(new THREE.BoxGeometry(w + 0.1, 0.15, d + 0.1), mat);
     } else if (type === 'gable') {
-      // 박공 지붕 (삼각형)
-      const shape = new THREE.Shape();
-      shape.moveTo(-w / 2 - 0.1, 0);
-      shape.lineTo( w / 2 + 0.1, 0);
-      shape.lineTo(0, height);
-      shape.closePath();
-      const extrudeSettings = { depth: d + 0.2, bevelEnabled: false };
-      mesh = new THREE.Mesh(new THREE.ExtrudeGeometry(shape, extrudeSettings), mat);
-      mesh.rotation.y = Math.PI / 2;
-      mesh.position.z = -(d + 0.2) / 2;
+      // ★ ExtrudeGeometry → CylinderGeometry(삼각기둥) 방식으로 교체
+      //   r128에서 ExtrudeGeometry + ShapeGeometry 조합이 불안정한 경우가 있음
+      mesh = new THREE.Mesh(
+        new THREE.CylinderGeometry(0, (w / 2 + 0.1) * 1.1, height, 3, 1),
+        mat
+      );
+      mesh.scale.set(1.0, 1.0, (d + 0.2) / (w + 0.2));
+      mesh.rotation.y = Math.PI / 6; // 삼각기둥 정렬
+    }
+
+    // mesh가 정의되지 않은 타입이면 flat으로 폴백
+    if (!mesh) {
+      mesh = new THREE.Mesh(new THREE.BoxGeometry(w + 0.1, 0.15, d + 0.1), mat);
     }
 
     mesh.position.y = baseY + (type === 'dome' ? 0 : height / 2);
@@ -280,8 +283,6 @@ const SoolBuildings = (() => {
         buildingW: bodyW,
         lightColor: windowColor,
         intensity: 0.8 + Math.random() * 0.3,
-        addPointLight: f === 0,
-        pointLightColor: windowColor,
       });
     }
 

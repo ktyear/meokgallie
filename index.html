@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="description" content="술마을 — 모든 술을 한 곳에서. 리뷰, 커뮤니티, 교육, 쇼핑까지.">
+  <title>술마을 — 술 종합 플랫폼</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ── WebGL 미지원 안내 ── -->
+  <div id="no-webgl">
+    <div class="no-webgl-inner">
+      <div class="no-webgl-icon">😢</div>
+      <h2>3D 마을을 표시할 수 없어요</h2>
+      <p>이 기기 또는 브라우저에서 WebGL을 지원하지 않습니다.<br>
+         최신 Chrome 또는 Safari를 사용해주세요.</p>
+    </div>
+  </div>
+
+  <!-- ── 로딩 화면 ── -->
+  <div id="loading">
+    <div class="loader-ring"></div>
+    <div id="loading-text">마을을 불러오는 중...</div>
+  </div>
+
+  <!-- ── 상단 타이틀 ── -->
+  <div id="title-bar">
+    <div class="eyebrow">Sool Village</div>
+    <div class="logo">술마을</div>
+  </div>
+
+  <!-- ── 미니맵 ── -->
+  <div id="minimap">
+    <canvas id="minimap-canvas" width="120" height="120"></canvas>
+    <div id="minimap-label">마을 지도</div>
+  </div>
+
+  <!-- ── 건물 정보 팝업 ── -->
+  <div id="popup">
+    <div id="popup-inner">
+      <button id="popup-close">✕</button>
+      <span id="popup-emoji">🍸</span>
+      <div id="popup-name">—</div>
+      <div id="popup-sub">—</div>
+      <div id="popup-desc">—</div>
+      <div id="popup-tags"></div>
+      <button id="popup-enter">입장하기 →</button>
+    </div>
+  </div>
+
+  <!-- ── 조작 힌트 ── -->
+  <div id="hint-bar">
+    <div class="hint-item"><span class="hint-key">드래그</span>돌아보기</div>
+    <div class="hint-item"><span class="hint-key">스크롤</span>줌</div>
+    <div class="hint-item"><span class="hint-key">핀치</span>줌</div>
+    <div class="hint-item"><span class="hint-key">탭·클릭</span>건물 보기</div>
+  </div>
+
+  <!-- ── 나침반 ── -->
+  <div id="compass">
+    <div id="compass-needle">N</div>
+  </div>
+
+  <!-- ── Three.js CDN ── -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- ── 앱 모듈 로드 순서 ── -->
+  <!-- core -->
+  <script src="js/core/scene.js"></script>
+  <script src="js/core/environment.js"></script>
+  <script src="js/core/controls.js"></script>
+
+  <!-- buildings -->
+  <script src="js/buildings/base.js"></script>
+  <script src="js/buildings/bar.js"></script>
+  <script src="js/buildings/library.js"></script>
+  <script src="js/buildings/community.js"></script>
+  <script src="js/buildings/shop.js"></script>
+  <script src="js/buildings/brewery.js"></script>
+  <script src="js/buildings/studio.js"></script>
+  <script src="js/buildings/infoCenter.js"></script>
+  <script src="js/buildings/popupSquare.js"></script>
+  <script src="js/buildings/myspace.js"></script>
+  <script src="js/buildings/cafe.js"></script>
+  <script src="js/buildings/restaurant.js"></script>
+
+  <!-- ui -->
+  <script src="js/ui/loading.js"></script>
+  <script src="js/ui/popup.js"></script>
+  <script src="js/ui/minimap.js"></script>
+
+  <!-- 진입점 -->
+  <script src="js/core/main.js"></script>
+
+</body>
+</html>

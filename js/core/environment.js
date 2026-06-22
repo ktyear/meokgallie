@@ -227,7 +227,7 @@ const SoolEnvironment = (() => {
     animated.fountainStar = star;
 
     // 분수 조명 (보라)
-    const fLight = new THREE.PointLight(0x9966ff, 1.4, 7);
+    const fLight = new THREE.PointLight(0x9966ff, 0.9, 5) // ★ 최적화: 강도 낮춤;
     fLight.position.set(0, 2.0, 0);
     _scene.add(fLight);
     animated.fountainLight = fLight;
@@ -321,10 +321,9 @@ const SoolEnvironment = (() => {
 
   // ── 별 파티클 ─────────────────────────────────
   function makeStars() {
-    const COUNT = 1000;
+    const COUNT = 600; // ★ 최적화
     const geo   = new THREE.BufferGeometry();
     const pos   = new Float32Array(COUNT * 3);
-    const sizes = new Float32Array(COUNT);
 
     for (let i = 0; i < COUNT; i++) {
       pos[i*3]     = (Math.random() - 0.5) * 120;
@@ -350,7 +349,7 @@ const SoolEnvironment = (() => {
 
   // ── 반딧불이 파티클 ───────────────────────────
   function makeFireflies() {
-    const COUNT = 80;
+    const COUNT = 40; // ★ 최적화
     const geo   = new THREE.BufferGeometry();
     const pos   = new Float32Array(COUNT * 3);
 
@@ -426,7 +425,7 @@ const SoolEnvironment = (() => {
 
     // 분수 조명 맥동
     if (animated.fountainLight) {
-      animated.fountainLight.intensity = 1.2 + Math.sin(t * 1.6) * 0.45;
+      animated.fountainLight.intensity = 0.8 + Math.sin(t * 1.6) * 0.2 // ★ 최적화;
     }
 
     // 반딧불이 이동

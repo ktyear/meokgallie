@@ -42,18 +42,29 @@
   SoolControls.init(
     camera,
     renderer.domElement,
-    (cx, cy) => SoolPopup.onTap(cx, cy)  // 탭/클릭 → 팝업
+    (cx, cy) => SoolPopup.onTap(cx, cy)
   );
 
   // ── 로딩 완료 ─────────────────────────────────
   await SoolLoading.finish(300);
 
   // ── 애니메이션 루프 ───────────────────────────
-  let t = 0;
+  // ★ 최적화: 목표 프레임 60fps (모바일은 30fps)
+  const isMobile  = /iPhone|iPad|Android/i.test(navigator.userAgent);
+  const TARGET_FPS = isMobile ? 30 : 60;
+  const FRAME_MS   = 1000 / TARGET_FPS;
 
-  function animate() {
+  let t         = 0;
+  let lastTime  = 0;
+
+  function animate(now) {
     requestAnimationFrame(animate);
-    t += 0.016;
+
+    // ★ 최적화: 목표 fps 이하일 때만 렌더 (프레임 스킵)
+    const delta = now - lastTime;
+    if (delta < FRAME_MS) return;
+    lastTime = now - (delta % FRAME_MS);
+    t += delta * 0.001; // 초 단위 누적
 
     // 컨트롤 업데이트 (카메라 이동)
     SoolControls.update();
@@ -71,6 +82,6 @@
     renderer.render(scene, camera);
   }
 
-  animate();
+  requestAnimationFrame(animate);
 
 })();

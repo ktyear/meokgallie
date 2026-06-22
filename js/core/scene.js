@@ -22,13 +22,16 @@ const SoolScene = (() => {
 
   // ── Renderer 초기화 ─────────────────────────
   function initRenderer() {
+    // 모바일 여부 감지 — 모바일은 antialias 끔 (성능 우선)
+    const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
     renderer = new THREE.WebGLRenderer({
-      antialias: true,
+      antialias: !isMobile,
       powerPreference: 'high-performance',
       alpha: false,
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // ★ 최적화: pixelRatio 1.0 고정 (Retina 2.0 → 렌더링 픽셀 4배 감소)
+    renderer.setPixelRatio(1.0);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -65,14 +68,15 @@ const SoolScene = (() => {
     const moon = new THREE.DirectionalLight(0x8899cc, 0.45);
     moon.position.set(-14, 24, 12);
     moon.castShadow = true;
-    moon.shadow.mapSize.set(2048, 2048);
+    // ★ 최적화: 그림자 맵 2048 → 512 (메모리 & 렌더 시간 대폭 감소)
+    moon.shadow.mapSize.set(512, 512);
     moon.shadow.camera.near = 0.5;
-    moon.shadow.camera.far  = 80;
-    moon.shadow.camera.left   = -30;
-    moon.shadow.camera.right  =  30;
-    moon.shadow.camera.top    =  30;
-    moon.shadow.camera.bottom = -30;
-    moon.shadow.bias = -0.0004;
+    moon.shadow.camera.far  = 60;
+    moon.shadow.camera.left   = -25;
+    moon.shadow.camera.right  =  25;
+    moon.shadow.camera.top    =  25;
+    moon.shadow.camera.bottom = -25;
+    moon.shadow.bias = -0.001;
     scene.add(moon);
 
     // 보조 달빛 (반대편 약한 채움)
@@ -91,54 +95,47 @@ const SoolScene = (() => {
 
     // 기둥
     const pole = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.04, 0.05, 4.0, 8),
-      new THREE.MeshStandardMaterial({ color: 0x3a3a4a, roughness: 0.8 })
+      new THREE.CylinderGeometry(0.04, 0.05, 4.0, 6),
+      new THREE.MeshLambertMaterial({ color: 0x3a3a4a })
     );
     pole.position.y = 2.0;
-    pole.castShadow = true;
+    pole.castShadow = false; // ★ 최적화: 가로등 그림자 제거
     group.add(pole);
 
     // 가로등 갓
     const shade = new THREE.Mesh(
-      new THREE.ConeGeometry(0.22, 0.18, 8),
-      new THREE.MeshStandardMaterial({ color: 0x2a2a3a, roughness: 0.7 })
+      new THREE.ConeGeometry(0.22, 0.18, 6),
+      new THREE.MeshLambertMaterial({ color: 0x2a2a3a })
     );
     shade.position.y = 4.12;
     group.add(shade);
 
-    // 전구
+    // 전구 (emissive로 빛나는 효과 — 포인트라이트 불필요)
     const bulb = new THREE.Mesh(
-      new THREE.SphereGeometry(0.1, 8, 8),
+      new THREE.SphereGeometry(0.1, 6, 6),
       new THREE.MeshStandardMaterial({
         color: 0xFFEEAA,
         emissive: 0xFFCC44,
-        emissiveIntensity: 2.2,
+        emissiveIntensity: 2.5,
       })
     );
     bulb.position.y = 4.0;
     group.add(bulb);
 
-    // 포인트 라이트
-    const light = new THREE.PointLight(0xFFCC66, 0.55, 10);
-    light.position.y = 4.0;
-    light.castShadow = false; // 가로등 그림자는 성능상 제외
-    group.add(light);
+    // ★ 최적화: 포인트 라이트 제거 — emissive 전구로 시각적 효과 대체
 
     group.position.set(x, 0, z);
     scene.add(group);
 
-    return { group, light, bulb };
+    return { group, bulb };
   }
 
   function initStreetLamps() {
-    // 메인 도로 가로등 — 맵 확장에 맞춰 배치
+    // ★ 최적화: 가로등 13개 → 6개로 축소 (중심부만 유지)
     const lampPositions = [
-      // 중앙 가로 도로
-      [-8, 1.2], [-4, 1.2], [0, 1.2], [4, 1.2], [8, 1.2],
-      // 중앙 세로 도로
-      [1.2, -8], [1.2, -4], [1.2, 4], [1.2, 8],
-      // 외곽 순환 도로
-      [-10, -6], [10, -6], [-10, 6], [10, 6],
+      [-4, 1.2], [4, 1.2],          // 중앙 가로 도로
+      [1.2, -4], [1.2, 4],          // 중앙 세로 도로
+      [-8, -1.2], [8, -1.2],        // 외곽 도로 핵심 지점
     ];
     const lamps = lampPositions.map(([x, z]) => addStreetLamp(x, z));
     return lamps;

@@ -13,11 +13,19 @@ const SoolBuildings = (() => {
   const allWindowLights = []; // 애니메이션 업데이트용
 
   // ── 재질 캐시 (동일 색상 재사용) ─────────────
+  // ★ 최적화: MeshStandardMaterial → MeshLambertMaterial
+  //   Lambert = PBR 계산 없음 → CPU/GPU 부하 대폭 감소
+  //   창문(emissive)·그라운드 등 단순 오브젝트에 적용
   const _matCache = {};
   function getMat(color, roughness = 0.85, metalness = 0.0) {
-    const key = `${color}_${roughness}_${metalness}`;
+    const key = `${color}_lambert`;
     if (!_matCache[key]) {
-      _matCache[key] = new THREE.MeshStandardMaterial({ color, roughness, metalness });
+      // metalness가 필요한 경우(금속 효과)만 Standard 유지
+      if (metalness > 0) {
+        _matCache[key] = new THREE.MeshStandardMaterial({ color, roughness, metalness });
+      } else {
+        _matCache[key] = new THREE.MeshLambertMaterial({ color });
+      }
     }
     return _matCache[key];
   }
@@ -56,13 +64,9 @@ const SoolBuildings = (() => {
       win.position.set(x, y, faceZ + 0.01);
       group.add(win);
     }
-
-    // 첫 번째 창문 위치에만 포인트라이트 추가
-    if (addPointLight) {
-      const pl = new THREE.PointLight(pointLightColor || lightColor, 0.35, 4);
-      pl.position.set(0, y, faceZ + 0.4);
-      group.add(pl);
-    }
+    // ★ 최적화: 창문 포인트 라이트 완전 제거
+    //   emissive 창문으로 시각적 효과 충분히 표현 가능
+    //   포인트 라이트 11개 건물 × 층당 1개 = 최대 33개 제거
   }
 
   // ── 지붕 생성 ─────────────────────────────────

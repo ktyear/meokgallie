@@ -127,8 +127,20 @@ const SoolMinimap = (() => {
   }
 
   // ── 매 프레임 업데이트 ───────────────────────
+  // ── 매 프레임 업데이트 ───────────────────────
+  // ★ 최적화: 카메라 각도가 변했을 때만 Canvas 2D 재렌더
+  //   매 프레임 draw() 호출 → 0.5도 이상 변화 시만 호출
+  let _lastTheta = null;
+  const THETA_THRESHOLD = 0.009; // ~0.5도
+
   function update(cameraTheta) {
-    draw(cameraTheta);
+    const changed = _lastTheta === null ||
+                    Math.abs(cameraTheta - _lastTheta) > THETA_THRESHOLD;
+    if (changed) {
+      draw(cameraTheta);
+      _lastTheta = cameraTheta;
+    }
+    // 나침반은 매 프레임 (CSS transform이라 저렴)
     updateCompass(cameraTheta);
   }
 
@@ -139,8 +151,8 @@ const SoolMinimap = (() => {
     _compass  = document.getElementById('compass-needle');
 
     if (_canvas) {
-      // 레티나 대응
-      const dpr = Math.min(window.devicePixelRatio, 2);
+      // ★ 최적화: 레티나 cap을 1로 낮춤 (미니맵은 해상도 덜 중요)
+      const dpr = 1;
       _canvas.width  = MAP.size * dpr;
       _canvas.height = MAP.size * dpr;
       _canvas.style.width  = MAP.size + 'px';

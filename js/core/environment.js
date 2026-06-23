@@ -460,6 +460,14 @@ const SoolEnvironment = (() => {
     makeMoon();
   }
 
-  return { init, update };
+  return {
+    init,
+    update,
+    // ★ skySystem 연동용 파티클 참조 노출
+    getParticles: () => ({
+      starPoints: animated.starPoints,
+      fireflies:  animated.fireflies,
+    }),
+  };
 
 })();

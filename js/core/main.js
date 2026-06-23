@@ -49,6 +49,19 @@
     // ── 로딩 완료 ───────────────────────────────
     await SoolLoading.finish(300);
 
+    // ── 하늘 시스템 초기화 (로딩 후 비동기) ────
+    // 조명 & 파티클 참조 수집
+    const lights    = SoolScene.getLights();
+    const particles = SoolEnvironment.getParticles();
+    // 초기화 (await 없이 — 날씨 로딩 중에도 씬 동작)
+    SoolSky.init(scene, renderer, {
+      moonLight:  lights.moonLight,
+      ambient:    lights.ambient,
+      hemi:       lights.hemi,
+      starPoints: particles.starPoints,
+      fireflies:  particles.fireflies,
+    });
+
     // ── 애니메이션 루프 ─────────────────────────
     const isMobile   = /iPhone|iPad|Android/i.test(navigator.userAgent);
     const TARGET_FPS = isMobile ? 30 : 60;
@@ -67,6 +80,7 @@
       SoolControls.update();
       SoolEnvironment.update(t);
       SoolBuildings.update(t);
+      SoolSky.update(t);           // ★ 하늘 시스템 업데이트
       SoolMinimap.update(SoolControls.getTheta());
       renderer.render(scene, camera);
     }

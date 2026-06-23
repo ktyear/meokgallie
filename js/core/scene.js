@@ -169,9 +169,18 @@ const SoolScene = (() => {
 
   return {
     init,
-    getRenderer: () => renderer,
-    getScene:    () => scene,
-    getCamera:   () => camera,
+    getRenderer:  () => renderer,
+    getScene:     () => scene,
+    getCamera:    () => camera,
+    // ★ skySystem 연동용 조명 참조 노출
+    getLights: () => ({
+      moonLight: scene ? scene.children.find(c =>
+        c.isDirectionalLight && c.castShadow) : null,
+      ambient: scene ? scene.children.find(c =>
+        c.isAmbientLight) : null,
+      hemi: scene ? scene.children.find(c =>
+        c.isHemisphereLight) : null,
+    }),
   };
 
 })();

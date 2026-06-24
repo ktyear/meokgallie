@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>팝업 광장 — 술마을</title>
+<style>
+  :root {
+    --pink-50:  #FFF0F5;
+    --pink-100: #FFB8D2;
+    --pink-200: #FF6B9D;
+    --pink-400: #D94F80;
+    --pink-600: #A33060;
+    --pink-900: #3D0E22;
+    --purple-100: #E8D5FF;
+    --purple-200: #B47FFF;
+    --yellow-100: #FFF3B0;
+    --yellow-200: #FFD93D;
+    --teal-100:  #B2F0E8;
+    --teal-200:  #2EC4B6;
+    --bg: #FDF5F9;
+    --bg-card: #ffffff;
+    --text-primary: #1a0a12;
+    --text-secondary: #6b3a52;
+    --text-muted: #a07890;
+    --border: rgba(0,0,0,0.07);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+  }
+
+  /* 네비게이션 */
+  nav {
+    background: var(--bg-card);
+    border-bottom: 0.5px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .nav-back {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .nav-back:hover { color: var(--pink-400); }
+  .nav-back svg { width: 16px; height: 16px; }
+  .nav-logo {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .nav-logo-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--pink-200);
+  }
+  .nav-spacer { width: 80px; }
+
+  /* 히어로 */
+  .hero {
+    background: linear-gradient(135deg, #FFF0F5 0%, #F0E8FF 50%, #FFF3B0 100%);
+    border-bottom: 0.5px solid var(--border);
+    padding: 28px 24px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-deco {
+    position: absolute;
+    font-size: 48px;
+    opacity: 0.12;
+    pointer-events: none;
+  }
+  .hero-deco-1 { top: -8px; right: 16px; transform: rotate(15deg); }
+  .hero-deco-2 { bottom: -12px; right: 60px; transform: rotate(-10deg); font-size: 36px; }
+  .hero-inner {
+    max-width: 640px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .hero-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--pink-600);
+    background: var(--pink-100);
+    padding: 3px 10px;
+    border-radius: 99px;
+    margin-bottom: 10px;
+  }
+  .hero-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--pink-900);
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+  .hero-sub {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.65;
+    margin-bottom: 16px;
+  }
+
+  /* 라이브 배지 */
+  .live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-card);
+    border: 0.5px solid var(--border);
+    border-radius: 99px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+  .live-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #EF4444;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* 섹션 공통 */
+  .section {
+    padding: 20px 24px;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  .section-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .section-divider {
+    border: none;
+    border-top: 0.5px solid var(--border);
+    margin: 4px 0;
+  }
+
+  /* 이벤트 카드 — 메인 (진행중) */
+  .event-main {
+    background: var(--bg-card);
+    border: 0.5px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: box-shadow 0.15s;
+  }
+  .event-main:hover { box-shadow: 0 4px 16px rgba(212,79,128,0.12); }
+  .event-banner {
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    position: relative;
+  }
+  .event-status {
+    position: absolute;
+    top: 10px; left: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 99px;
+  }
+  .status-live { background: #EF4444; color: #fff; }
+  .status-soon { background: var(--yellow-200); color: #5a3d00; }
+  .status-end  { background: var(--border); color: var(--text-muted); }
+  .event-body { padding: 14px 16px; }
+  .event-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  .event-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.55;
+    margin-bottom: 10px;
+  }
+  .event-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .event-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .event-meta-item svg { width: 13px; height: 13px; }
+  .event-xp {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--pink-600);
+    background: var(--pink-50);
+    border: 0.5px solid var(--pink-100);
+    padding: 2px 8px;
+    border-radius: 99px;
+    margin-left: auto;
+  }
+
+  /* 이벤트 카드 — 소형 그리드 */
+  .event-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .event-small {
+    background: var(--bg-card);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .event-small:hover { border-color: var(--pink-200); }
+  .event-small-icon { font-size: 22px; margin-bottom: 8px; }
+  .event-small-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 3px;
+  }
+  .event-small-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.45;
+  }
+  .event-small-status {
+    margin-top: 8px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .text-live  { color: #EF4444; }
+  .text-soon  { color: #D97706; }
+
+  /* 정기 이벤트 캘린더 */
+  .calendar-list { display: flex; flex-direction: column; gap: 8px; }
+  .cal-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg-card);
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 14px;
+  }
+  .cal-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .cal-body { flex: 1; }
+  .cal-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+  }
+  .cal-when {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .cal-badge {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 99px;
+    white-space: nowrap;
+  }
+
+  /* 하단 안내 */
+  .notice {
+    background: var(--pink-50);
+    border: 0.5px solid var(--pink-100);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+  .notice strong { color: var(--pink-600); }
+
+  /* 모바일 */
+  @media (max-width: 480px) {
+    nav { padding: 12px 16px; }
+    .hero { padding: 20px 16px 20px; }
+    .section { padding: 16px 16px; }
+    .event-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-back" onclick="goBack()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>
+    마을로 돌아가기
+  </a>
+  <div class="nav-logo">
+    <div class="nav-logo-dot"></div>
+    술마을
+  </div>
+  <div class="nav-spacer"></div>
+</nav>
+
+<div class="hero">
+  <div class="hero-deco hero-deco-1">🎪</div>
+  <div class="hero-deco hero-deco-2">🎉</div>
+  <div class="hero-inner">
+    <div class="hero-tag">팝업 광장 · 이벤트 & 체험</div>
+    <h1 class="hero-title">지금 마을에서 무슨 일이?</h1>
+    <p class="hero-sub">한정 팝업, 시즌 이벤트, 특별 체험까지.<br>광장에서는 항상 새로운 일이 일어나고 있어요.</p>
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      현재 2개 이벤트 진행 중
+    </div>
+  </div>
+</div>
+
+<!-- 진행중 이벤트 -->
+<div class="section" style="margin-top:16px;">
+  <p class="section-title">지금 진행 중</p>
+
+  <div class="event-main">
+    <div class="event-banner" style="background: linear-gradient(135deg, #FFF3B0, #FFD93D);">
+      🍺
+      <span class="event-status status-live">LIVE</span>
+    </div>
+    <div class="event-body">
+      <div class="event-title">이번 주의 술 — 여름 하이볼 투표</div>
+      <div class="event-desc">이번 주 가장 핫한 여름 하이볼을 골라주세요. 1위 술은 다음 주 술 바 메인에 올라와요.</div>
+      <div class="event-meta">
+        <div class="event-meta-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          ~7월 4일 자정
+        </div>
+        <div class="event-meta-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          247명 참여 중
+        </div>
+        <div class="event-xp">+20 XP</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="event-main">
+    <div class="event-banner" style="background: linear-gradient(135deg, #B2F0E8, #2EC4B6, #0A8A80);">
+      🍶
+      <span class="event-status status-live">LIVE</span>
+    </div>
+    <div class="event-body">
+      <div class="event-title">7월 월간 테이스팅 챌린지 — 전통주 편</div>
+      <div class="event-desc">이번 달 주제는 전통주! 막걸리·청주·약주 중 하나 이상을 마시고 리뷰를 남겨보세요.</div>
+      <div class="event-meta">
+        <div class="event-meta-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          ~7월 31일
+        </div>
+        <div class="event-meta-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          89명 참여 중
+        </div>
+        <div class="event-xp">+100 XP</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- 곧 시작 -->
+<div class="section">
+  <p class="section-title">곧 시작해요</p>
+  <div class="event-grid">
+    <div class="event-small">
+      <div class="event-small-icon">🌸</div>
+      <div class="event-small-title">유명 바텐더 방문</div>
+      <div class="event-small-desc">술 바에 특별 손님이 찾아와요. 한정 퀘스트 오픈 예정.</div>
+      <div class="event-small-status text-soon">⏰ 7월 10일 오픈</div>
+    </div>
+    <div class="event-small">
+      <div class="event-small-icon">🏆</div>
+      <div class="event-small-title">리뷰 랭킹 이벤트</div>
+      <div class="event-small-desc">7월 리뷰 왕을 뽑아요. 상위 10명에게 히든 뱃지 지급.</div>
+      <div class="event-small-status text-soon">⏰ 7월 15일 오픈</div>
+    </div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- 정기 이벤트 -->
+<div class="section">
+  <p class="section-title">정기 이벤트 일정</p>
+  <div class="calendar-list">
+    <div class="cal-item">
+      <div class="cal-icon" style="background:#FFF3B0;">🍺</div>
+      <div class="cal-body">
+        <div class="cal-title">이번 주의 술 투표</div>
+        <div class="cal-when">매주 금요일 자정 마감</div>
+      </div>
+      <span class="cal-badge" style="background:#FFF3B0; color:#856404;">매주</span>
+    </div>
+    <div class="cal-item">
+      <div class="cal-icon" style="background:#E8D5FF;">🧪</div>
+      <div class="cal-body">
+        <div class="cal-title">월간 테이스팅 챌린지</div>
+        <div class="cal-when">매월 1일 오픈 · 말일 마감</div>
+      </div>
+      <span class="cal-badge" style="background:#E8D5FF; color:#5B21B6;">매월</span>
+    </div>
+    <div class="cal-item">
+      <div class="cal-icon" style="background:#B2F0E8;">🍂</div>
+      <div class="cal-body">
+        <div class="cal-title">가을 전통주 수확제</div>
+        <div class="cal-when">9월 예정</div>
+      </div>
+      <span class="cal-badge" style="background:#B2F0E8; color:#065F46;">시즌</span>
+    </div>
+    <div class="cal-item">
+      <div class="cal-icon" style="background:#FFE4E6;">🥃</div>
+      <div class="cal-body">
+        <div class="cal-title">겨울 위스키 위크</div>
+        <div class="cal-when">12월 예정</div>
+      </div>
+      <span class="cal-badge" style="background:#FFE4E6; color:#9F1239;">시즌</span>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="notice">
+    <strong>팝업 광장 이벤트 주최권</strong>은 Lv.20 이상 유저에게 개방돼요.<br>
+    레벨을 올리고 직접 이벤트를 열어보세요! 🎪
+  </div>
+</div>
+
+<script>
+  function goBack() {
+    if (document.referrer && document.referrer.includes(location.hostname)) {
+      history.back();
+    } else {
+      location.href = 'index.html';
+    }
+  }
+</script>
+
+</body>
+</html>

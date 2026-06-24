@@ -13,7 +13,7 @@ const BuildingInfoCenter = (() => {
     desc: '술마을에 처음 오셨나요? 플랫폼 소개, 이용 가이드, 각 건물 안내까지. 여기서 시작하면 마을이 더 즐거워져요.',
     tags: ['소개', '가이드', '온보딩', '지도'],
     pos:  [0, 0, -11.0],
-    url:  '#info',
+    url:  'infoCenter.html',
   };
 
   function makeInfoExtras(group, { bodyW, bodyH, bodyD }) {

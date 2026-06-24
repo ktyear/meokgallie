@@ -53,6 +53,22 @@ const SoolEnvironment = (() => {
   }
 
   // ── 도로망 ────────────────────────────────────
+  // 건물 좌표를 기반으로 광장(0,0)에서 각 건물까지 도로를 자동 생성
+  // 건물 추가/삭제/이동 시 이 목록만 수정하면 도로가 자동으로 따라옴
+  const BUILDING_POSITIONS = [
+    { x: -5.5, z: -3.5 },  // 술 바
+    { x:  5.5, z: -3.5 },  // 도서관
+    { x:  0,   z: -7.5 },  // 커뮤니티
+    { x:  7.0, z:  0   },  // 주류 상점
+    { x: -7.0, z:  0   },  // 양조장
+    { x:  0,   z:  5.5 },  // 영상관
+    { x: -2.5, z: -11.0 }, // 안내소 (커뮤니티와 x축 분리)
+    { x: -11.0,z: -5.0 },  // 팝업 광장
+    { x:  11.0,z: -5.0 },  // 내 공간
+    { x: -11.0,z:  5.0 },  // 소버 카페
+    { x:  11.0,z:  5.0 },  // 페어링 식당
+  ];
+
   function makeRoads() {
     const roadMat = new THREE.MeshStandardMaterial({
       color: 0x22203c, roughness: 0.88,
@@ -60,47 +76,73 @@ const SoolEnvironment = (() => {
     const markMat = new THREE.MeshStandardMaterial({
       color: 0x3a3860, roughness: 0.9,
     });
+    const ROAD_W = 2.2; // 도로 폭
 
-    // 메인 가로 도로
-    const hRoad = new THREE.Mesh(new THREE.PlaneGeometry(50, 3), roadMat);
-    hRoad.rotation.x = -Math.PI / 2;
-    hRoad.position.set(0, 0.01, 0);
-    _scene.add(hRoad);
+    // ── 1. 중앙 광장 연결 도로 (광장 → 각 건물)
+    BUILDING_POSITIONS.forEach(({ x, z }) => {
+      const dist  = Math.sqrt(x * x + z * z);
+      const angle = Math.atan2(x, z);
 
-    // 메인 세로 도로
-    const vRoad = new THREE.Mesh(new THREE.PlaneGeometry(3, 50), roadMat);
-    vRoad.rotation.x = -Math.PI / 2;
-    vRoad.position.set(0, 0.01, 0);
-    _scene.add(vRoad);
+      const road = new THREE.Mesh(
+        new THREE.PlaneGeometry(ROAD_W, dist),
+        roadMat
+      );
+      road.rotation.x = -Math.PI / 2;
+      road.rotation.z = -angle;
+      road.position.set(x / 2, 0.01, z / 2);
+      _scene.add(road);
 
-    // 외곽 순환 도로 (사각형 링)
-    [
-      [0, -14, 32, 2.4],  // 북쪽
-      [0,  14, 32, 2.4],  // 남쪽
-      [-14, 0, 2.4, 32],  // 서쪽
-      [ 14, 0, 2.4, 32],  // 동쪽
-    ].forEach(([x, z, w, d]) => {
-      const r = new THREE.Mesh(new THREE.PlaneGeometry(w, d), roadMat);
-      r.rotation.x = -Math.PI / 2;
-      r.position.set(x, 0.01, z);
-      _scene.add(r);
+      // 도로 중앙선 점선
+      const steps = Math.floor(dist / 1.6);
+      for (let i = 1; i < steps; i++) {
+        const t = i / steps;
+        const mark = new THREE.Mesh(
+          new THREE.PlaneGeometry(0.1, 0.9),
+          markMat
+        );
+        mark.rotation.x = -Math.PI / 2;
+        mark.rotation.z = -angle;
+        mark.position.set(x * t, 0.015, z * t);
+        _scene.add(mark);
+      }
     });
 
-    // 도로 중앙선 (점선)
-    for (let i = -5; i <= 5; i++) {
-      if (i === 0) continue;
-      const mark = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.12), markMat);
-      mark.rotation.x = -Math.PI / 2;
-      mark.position.set(i * 4, 0.015, 0);
-      _scene.add(mark);
+    // ── 2. 외곽 순환 도로 (건물들을 잇는 링)
+    // 외곽 건물 8개를 각도 순으로 정렬해 이웃한 건물끼리 연결
+    const outerBuildings = BUILDING_POSITIONS
+      .filter(({ x, z }) => Math.sqrt(x * x + z * z) > 6)
+      .map(b => ({ ...b, angle: Math.atan2(b.x, b.z) }))
+      .sort((a, b) => a.angle - b.angle);
+
+    for (let i = 0; i < outerBuildings.length; i++) {
+      const a = outerBuildings[i];
+      const b = outerBuildings[(i + 1) % outerBuildings.length];
+
+      const mx = (a.x + b.x) / 2;
+      const mz = (a.z + b.z) / 2;
+      const dx = b.x - a.x;
+      const dz = b.z - a.z;
+      const len = Math.sqrt(dx * dx + dz * dz);
+      const ang = Math.atan2(dx, dz);
+
+      const seg = new THREE.Mesh(
+        new THREE.PlaneGeometry(ROAD_W, len),
+        roadMat
+      );
+      seg.rotation.x = -Math.PI / 2;
+      seg.rotation.z = -ang;
+      seg.position.set(mx, 0.01, mz);
+      _scene.add(seg);
     }
-    for (let i = -5; i <= 5; i++) {
-      if (i === 0) continue;
-      const mark = new THREE.Mesh(new THREE.PlaneGeometry(0.12, 1.2), markMat);
-      mark.rotation.x = -Math.PI / 2;
-      mark.position.set(0, 0.015, i * 4);
-      _scene.add(mark);
-    }
+
+    // ── 3. 중앙 광장 바닥 (도로 교차점 메움)
+    const centerPad = new THREE.Mesh(
+      new THREE.CircleGeometry(3.2, 24),
+      roadMat
+    );
+    centerPad.rotation.x = -Math.PI / 2;
+    centerPad.position.set(0, 0.01, 0);
+    _scene.add(centerPad);
   }
 
   // ── 중앙 광장 ─────────────────────────────────

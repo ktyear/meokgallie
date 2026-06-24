@@ -1,6 +1,7 @@
 /* ═══════════════════════════════════════════════
-   술마을 — Sky System (v1.4.0)
+   술마을 — Sky System (v1.4.4)
    로컬 시간 3단계 + Open-Meteo 실시간 날씨 연동
+   섬 배경 분위기로 색상 전면 업데이트
    API 키 불필요 / 무제한 무료 (비상업적 용도)
    ═══════════════════════════════════════════════ */
 
@@ -37,47 +38,51 @@ const SoolSky = (() => {
   let _sunLight       = null;
 
   // ── 시간대별 설정값 ───────────────────────────
+  // ── 섬 배경 시간대별 설정값 ──────────────────
+  // 낮: 맑고 투명한 열대 섬 하늘 + 바다 반사
+  // 노을: 수평선 너머로 지는 석양, 바다가 붉게 물드는 느낌
+  // 밤: 별 가득한 남태평양 밤바다 느낌
   const TIME_CONFIGS = {
     day: {
-      bgColor:      0x87CEEB,  // 하늘 파란색
-      fogColor:     0xC8E8F8,
-      fogDensity:   0.018,
-      ambientColor: 0xFFEECC,
-      ambientInt:   1.2,
-      hemiSky:      0xFFEECC,
-      hemiGround:   0x88AA66,
-      hemiInt:      0.6,
+      bgColor:      0x5BA8D4,  // 열대 섬 하늘 — 진한 하늘색
+      fogColor:     0x88CCE8,  // 바다 수평선 안개 — 밝은 청색
+      fogDensity:   0.016,     // 낮에는 안개 옅게 — 섬 전체 시야 확보
+      ambientColor: 0xFFEEDD,  // 따뜻한 햇살
+      ambientInt:   1.3,
+      hemiSky:      0x88CCEE,  // 하늘빛 파랑
+      hemiGround:   0x4A8A44,  // 잔디·모래 반사 녹색
+      hemiInt:      0.65,
       moonInt:      0.0,       // 달빛 OFF
-      sunInt:       1.2,       // 태양 ON
-      sunColor:     0xFFDD99,
+      sunInt:       1.3,       // 태양 ON (밝게)
+      sunColor:     0xFFEE88,  // 따뜻한 노란 햇살
       stars:        false,
       fireflies:    false,
     },
     sunset: {
-      bgColor:      0xFF7043,  // 주황·붉은색
-      fogColor:     0xFF8C55,
-      fogDensity:   0.025,
-      ambientColor: 0xFF8844,
-      ambientInt:   0.9,
-      hemiSky:      0xFF6622,
-      hemiGround:   0x442200,
+      bgColor:      0xE8603A,  // 수평선 석양 — 진한 주황
+      fogColor:     0xCC5533,  // 바다 물드는 색
+      fogDensity:   0.022,
+      ambientColor: 0xFF7733,  // 붉은 노을빛
+      ambientInt:   0.85,
+      hemiSky:      0xFF6622,  // 하늘 주황
+      hemiGround:   0x331A00,  // 어두워지는 땅
       hemiInt:      0.4,
-      moonInt:      0.15,      // 달빛 약하게
-      sunInt:       0.5,       // 태양 약하게
-      sunColor:     0xFF5500,
+      moonInt:      0.2,       // 달 서서히 뜨기 시작
+      sunInt:       0.4,       // 수평선 너머 약한 태양
+      sunColor:     0xFF4400,  // 붉은 석양
       stars:        true,      // 별 서서히 등장
-      fireflies:    true,
+      fireflies:    true,      // 반딧불이 등장
     },
     night: {
-      bgColor:      0x060618,  // 현재 다크 네이비
-      fogColor:     0x0a0820,
-      fogDensity:   0.032,
-      ambientColor: 0x1a1040,
-      ambientInt:   0.75,
-      hemiSky:      0x1a1050,
-      hemiGround:   0x0a0820,
-      hemiInt:      0.3,
-      moonInt:      0.45,      // 달빛 ON
+      bgColor:      0x060e1a,  // 섬 밤하늘 — 짙은 네이비 (scene.js와 통일)
+      fogColor:     0x0a1e2e,  // 바다 안개 — 청남색
+      fogDensity:   0.022,     // 섬 전체 보이도록 기존보다 옅게
+      ambientColor: 0x0e1a30,  // 바다 반사 청록 환경광
+      ambientInt:   0.8,
+      hemiSky:      0x0e1a40,  // 밤하늘 청색
+      hemiGround:   0x0a1e2e,  // 바다 반사
+      hemiInt:      0.35,
+      moonInt:      0.5,       // 달빛 ON (바다 위 달빛 — 약간 밝게)
       sunInt:       0.0,       // 태양 OFF
       sunColor:     0xFFDD99,
       stars:        true,
@@ -85,7 +90,8 @@ const SoolSky = (() => {
     },
   };
 
-  // ── 날씨별 추가 설정값 ────────────────────────
+  // ── 섬 날씨별 추가 설정값 ────────────────────
+  // 섬이라 흐림·비 시에 안개가 바다 위를 덮는 효과
   const WEATHER_CONFIGS = {
     clear: {
       fogMult:    1.0,   // 안개 밀도 배수
@@ -94,14 +100,14 @@ const SoolSky = (() => {
       cloudOn:    false,
     },
     cloudy: {
-      fogMult:    1.8,
-      bgDarken:   0.25,
+      fogMult:    2.0,   // 섬 바다 위 구름 안개 — 더 짙게
+      bgDarken:   0.3,
       rainOn:     false,
       cloudOn:    true,
     },
     rain: {
-      fogMult:    2.8,
-      bgDarken:   0.5,
+      fogMult:    3.2,   // 비 오는 바다 — 수평선이 안 보일 정도
+      bgDarken:   0.55,
       rainOn:     true,
       cloudOn:    true,
     },
@@ -338,7 +344,7 @@ const SoolSky = (() => {
         position:   'fixed',
         top:        '20px',
         left:       '20px',
-        color:      'rgba(200,185,255,0.55)',
+        color:      'rgba(180,220,255,0.55)',  // 바다빛 청색
         fontSize:   '11px',
         fontFamily: 'Arial, sans-serif',
         letterSpacing: '0.06em',

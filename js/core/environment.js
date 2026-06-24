@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════
    술마을 — Environment
-   지면 / 도로 / 광장 / 분수 / 나무 / 별 / 반딧불이
+   섬 지형 / 바다 / 광장 / 분수 / 나무 / 별 / 반딧불이
    ═══════════════════════════════════════════════ */
 
 const SoolEnvironment = (() => {
@@ -20,86 +20,147 @@ const SoolEnvironment = (() => {
     fountainLight: null,
   };
 
-  // ── 지면 3레이어 ──────────────────────────────
-  // 레이어 1 (가장 아래): 잔디 — 마을 전체 배경
-  // 레이어 2 (중간):     벽돌 — 마을 내부 (반경 16)
-  // 레이어 3 (위):       광장 — 중앙 (반경 4.5)
+  // ── 섬 지면 레이어 ────────────────────────────
+  // 레이어 1: 바다 — 전체 배경 (넓은 수면)
+  // 레이어 2: 모래사장 — 섬 해변 (반경 22)
+  // 레이어 3: 잔디 — 섬 내륙 (반경 17)
+  // 레이어 4: 벽돌 타일 — 마을 구역 (반경 14)
+  // 레이어 5: 광장 — 중앙 (반경 4.5)
   function makeGround() {
 
-    // ── 레이어 1: 잔디 (전체 배경) ──────────────
-    const grass = new THREE.Mesh(
-      new THREE.PlaneGeometry(120, 120),
-      new THREE.MeshLambertMaterial({ color: 0x1a2e18 })
-    );
-    grass.rotation.x = -Math.PI / 2;
-    grass.position.y = 0;
-    grass.receiveShadow = true;
-    _scene.add(grass);
+    // ── 레이어 1: 바다 (전체 배경) ───────────────
+    const seaMat = new THREE.MeshLambertMaterial({ color: 0x0a2a4a });
+    const sea = new THREE.Mesh(new THREE.PlaneGeometry(300, 300), seaMat);
+    sea.rotation.x = -Math.PI / 2;
+    sea.position.y = -0.5;
+    _scene.add(sea);
 
-    // 잔디 질감 — 작은 어두운 점들로 풀잎 느낌
-    const tuftMat = new THREE.MeshLambertMaterial({ color: 0x162814 });
-    for (let i = 0; i < 300; i++) {
+    // 바다 물결 — 밝은 톤의 원형 레이어로 깊이감 표현
+    const waveMat = new THREE.MeshLambertMaterial({ color: 0x0e3860 });
+    const wave = new THREE.Mesh(new THREE.CircleGeometry(60, 64), waveMat);
+    wave.rotation.x = -Math.PI / 2;
+    wave.position.y = -0.45;
+    _scene.add(wave);
+
+    // 바다 파티클 — 작은 점들로 윤슬 표현
+    const sparkCount = 200;
+    const sparkGeo   = new THREE.BufferGeometry();
+    const sparkPos   = new Float32Array(sparkCount * 3);
+    for (let i = 0; i < sparkCount; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const r     = 17 + Math.random() * 35;
+      const r     = 25 + Math.random() * 30;
+      sparkPos[i*3]   = Math.cos(angle) * r;
+      sparkPos[i*3+1] = -0.3 + Math.random() * 0.1;
+      sparkPos[i*3+2] = Math.sin(angle) * r;
+    }
+    sparkGeo.setAttribute('position', new THREE.BufferAttribute(sparkPos, 3));
+    const sparkMat = new THREE.PointsMaterial({
+      color: 0x4488cc, size: 0.18, sizeAttenuation: true,
+      transparent: true, opacity: 0.5,
+    });
+    _scene.add(new THREE.Points(sparkGeo, sparkMat));
+
+    // ── 레이어 2: 모래사장 — 해변 (반경 22) ──────
+    const sandMat = new THREE.MeshLambertMaterial({ color: 0xc8a86a });
+    const sand = new THREE.Mesh(new THREE.CircleGeometry(22, 64), sandMat);
+    sand.rotation.x = -Math.PI / 2;
+    sand.position.y = 0;
+    sand.receiveShadow = true;
+    _scene.add(sand);
+
+    // 모래 질감 — 작은 점들로 모래알 느낌
+    const grainMat = new THREE.MeshLambertMaterial({ color: 0xb89858 });
+    for (let i = 0; i < 400; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const r     = 14 + Math.random() * 7.5;
+      const grain = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.15 + Math.random() * 0.2, 0.15 + Math.random() * 0.2),
+        grainMat
+      );
+      grain.rotation.x = -Math.PI / 2;
+      grain.position.set(Math.cos(angle) * r, 0.002, Math.sin(angle) * r);
+      _scene.add(grain);
+    }
+
+    // 해변 바위들
+    const rockMat = new THREE.MeshLambertMaterial({ color: 0x8a7a6a });
+    const rockPositions = [
+      [18, 8], [-17, 10], [14, -16], [-15, -14],
+      [20, -5], [-19, -6], [8, 20], [-9, 19],
+    ];
+    rockPositions.forEach(([x, z]) => {
+      const scale = 0.4 + Math.random() * 0.5;
+      const rock  = new THREE.Mesh(
+        new THREE.DodecahedronGeometry(scale, 0),
+        rockMat
+      );
+      rock.position.set(x, scale * 0.3, z);
+      rock.rotation.y = Math.random() * Math.PI * 2;
+      rock.castShadow = true;
+      _scene.add(rock);
+    });
+
+    // ── 레이어 3: 잔디 — 섬 내륙 (반경 17) ───────
+    const grassMat = new THREE.MeshLambertMaterial({ color: 0x1e3a1a });
+    const grassBase = new THREE.Mesh(new THREE.CircleGeometry(17, 48), grassMat);
+    grassBase.rotation.x = -Math.PI / 2;
+    grassBase.position.y = 0.008;
+    grassBase.receiveShadow = true;
+    _scene.add(grassBase);
+
+    // 잔디 질감
+    const tuftMat = new THREE.MeshLambertMaterial({ color: 0x162e14 });
+    for (let i = 0; i < 200; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const r     = 14.5 + Math.random() * 2.2;
       const tuft  = new THREE.Mesh(
-        new THREE.PlaneGeometry(
-          0.3 + Math.random() * 0.4,
-          0.3 + Math.random() * 0.4
-        ),
+        new THREE.PlaneGeometry(0.25 + Math.random() * 0.3, 0.25 + Math.random() * 0.3),
         tuftMat
       );
       tuft.rotation.x = -Math.PI / 2;
-      tuft.position.set(
-        Math.cos(angle) * r,
-        0.002,
-        Math.sin(angle) * r
-      );
+      tuft.position.set(Math.cos(angle) * r, 0.012, Math.sin(angle) * r);
       _scene.add(tuft);
     }
 
-    // ── 레이어 2: 벽돌 타일 — 마을 내부 (반경 16) ──
-    // 원형 베이스
+    // ── 레이어 4: 벽돌 타일 — 마을 구역 (반경 14) ─
     const brickBase = new THREE.Mesh(
-      new THREE.CircleGeometry(16, 48),
+      new THREE.CircleGeometry(14, 48),
       new THREE.MeshLambertMaterial({ color: 0x4a3c2e })
     );
     brickBase.rotation.x = -Math.PI / 2;
-    brickBase.position.y = 0.005;
+    brickBase.position.y = 0.014;
     brickBase.receiveShadow = true;
     _scene.add(brickBase);
 
-    // 벽돌 줄눈 (가로선)
+    // 벽돌 줄눈
     const groutMat = new THREE.MeshLambertMaterial({ color: 0x352a1e });
-    const TW = 1.2, TH = 0.7; // 타일 크기
-    const ROWS = Math.ceil(32 / TH);
-    const COLS = Math.ceil(32 / TW);
-
+    const TW = 1.2, TH = 0.7;
+    const ROWS = Math.ceil(28 / TH);
+    const COLS = Math.ceil(28 / TW);
     for (let row = 0; row < ROWS; row++) {
       for (let col = 0; col < COLS; col++) {
         const offset = (row % 2 === 0) ? 0 : TW / 2;
-        const tx = -16 + col * TW + offset;
-        const tz = -16 + row * TH;
-        // 원형 범위 안에 있는 타일만 생성
+        const tx = -14 + col * TW + offset;
+        const tz = -14 + row * TH;
         const cx = tx + TW / 2, cz = tz + TH / 2;
-        if (cx * cx + cz * cz > 16 * 16) continue;
-
+        if (cx * cx + cz * cz > 14 * 14) continue;
         const grout = new THREE.Mesh(
           new THREE.PlaneGeometry(TW - 0.06, TH - 0.06),
           groutMat
         );
         grout.rotation.x = -Math.PI / 2;
-        grout.position.set(cx, 0.007, cz);
+        grout.position.set(cx, 0.016, cz);
         _scene.add(grout);
       }
     }
 
-    // ── 레이어 3: 광장 — 중앙 (반경 4.5) ──────────
+    // ── 레이어 5: 광장 — 중앙 (반경 4.5) ──────────
     const plaza = new THREE.Mesh(
       new THREE.CircleGeometry(4.5, 32),
       new THREE.MeshLambertMaterial({ color: 0x28245a })
     );
     plaza.rotation.x = -Math.PI / 2;
-    plaza.position.y = 0.012;
+    plaza.position.y = 0.022;
     plaza.receiveShadow = true;
     _scene.add(plaza);
 
@@ -109,11 +170,11 @@ const SoolEnvironment = (() => {
       new THREE.MeshLambertMaterial({ color: 0x3a3478 })
     );
     ring.rotation.x = -Math.PI / 2;
-    ring.position.y = 0.015;
+    ring.position.y = 0.025;
     _scene.add(ring);
   }
 
-  // makeRoads 제거 — 바닥 레이어로 대체됨
+  // makeRoads 제거 — 섬 레이어로 대체됨
   function makeRoads() {}
 
   // ── 중앙 광장 ─────────────────────────────────
@@ -298,20 +359,29 @@ const SoolEnvironment = (() => {
   }
 
   function makeTrees() {
-    // 맵 확장 — 더 넓게 나무 배치
+    // 섬 구조에 맞게 재배치
+    // 벽돌 구역(반경 14) 밖, 잔디 구역(반경 17) 안에 나무 배치
+    // 해변(반경 17~22) 에는 야자수 느낌의 나무 배치
     const treeData = [
-      // 중앙 광장 주변
-      [-5.5, -5.5, 0.9, 0], [5.5, -5.5, 0.85, 1], [-5.5, 5.5, 0.95, 0], [5.5, 5.5, 0.9, 1],
-      // 건물 사이 빈 공간
-      [-2, -7, 0.8, 0], [2, -7, 0.75, 1], [-7, 2, 0.85, 0], [7, -2, 0.8, 1],
-      // 외곽 순환 안쪽
-      [-11, -3, 1.0, 0], [11, -3, 1.0, 0], [-11, 3, 1.0, 1], [11, 3, 1.0, 1],
-      [-3, -11, 0.9, 0], [3, -11, 0.9, 1], [-3, 11, 0.95, 0], [3, 11, 0.9, 1],
-      // 코너 숲
-      [-13, -11, 1.1, 0], [-11, -13, 1.0, 1], [13, -11, 1.1, 0], [11, -13, 1.0, 1],
-      [-13,  11, 1.1, 1], [-11,  13, 1.0, 0], [13,  11, 1.1, 1], [11,  13, 1.0, 0],
-      [-15, -5, 1.2, 0], [15, -5, 1.2, 1], [-15, 5, 1.1, 0], [15, 5, 1.2, 1],
-      [-5, -15, 1.1, 0], [5, -15, 1.0, 1], [-5, 15, 1.2, 0], [5, 15, 1.1, 1],
+      // 광장 주변 (건물 사이 빈 공간)
+      [-5.5, -5.5, 0.9, 0], [5.5, -5.5, 0.85, 1],
+      [-5.5,  5.5, 0.95, 0], [5.5,  5.5, 0.9, 1],
+      [-2, -7, 0.8, 0], [2, -7, 0.75, 1],
+      [-7,  2, 0.85, 0], [7, -2, 0.8, 1],
+      // 잔디 구역 내 나무 (반경 14~16.5)
+      [-14.5, -3, 1.1, 1], [14.5, -3, 1.1, 0],
+      [-14.5,  3, 1.0, 0], [14.5,  3, 1.0, 1],
+      [-3, -14.5, 1.0, 1], [3, -14.5, 1.1, 0],
+      [-3,  14.5, 1.0, 0], [3,  14.5, 1.1, 1],
+      [-10, -11, 1.0, 0], [10, -11, 1.0, 1],
+      [-10,  11, 1.1, 1], [10,  11, 1.1, 0],
+      [-11, -10, 1.0, 1], [11, -10, 1.0, 0],
+      [-11,  10, 1.1, 0], [11,  10, 1.0, 1],
+      // 해변 근처 나무 (반경 17~20)
+      [-17,  0, 1.2, 1], [17,  0, 1.2, 0],
+      [0, -17, 1.1, 1], [0,  17, 1.1, 0],
+      [-13, -13, 1.2, 0], [13, -13, 1.2, 1],
+      [-13,  13, 1.2, 1], [13,  13, 1.2, 0],
     ];
     treeData.forEach(([x, z, s, v]) => makeTree(x, z, s, v));
   }

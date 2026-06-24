@@ -1,5 +1,6 @@
 /* ═══════════════════════════════════════════════
    술마을 — Scene, Camera, Lights
+   섬 배경 · 바다 안개 · 야간 조명
    ═══════════════════════════════════════════════ */
 
 const SoolScene = (() => {
@@ -42,8 +43,12 @@ const SoolScene = (() => {
   // ── Scene 초기화 ────────────────────────────
   function initScene() {
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x060618);
-    scene.fog = new THREE.FogExp2(0x0a0820, 0.032); // 맵 확장으로 안개 조금 줄임
+    // 바다·섬 배경 — 짙은 네이비 하늘
+    scene.background = new THREE.Color(0x060e1a);
+    // 바다 안개 — 수평선 너머로 자연스럽게 사라지는 효과
+    // 색상: 바다 수면과 어울리는 짙은 청남색
+    // 밀도: 0.022 (기존 0.032보다 옅게 — 섬 전체가 잘 보이도록)
+    scene.fog = new THREE.FogExp2(0x0a1e2e, 0.022);
   }
 
   // ── Camera 초기화 ───────────────────────────
@@ -52,7 +57,7 @@ const SoolScene = (() => {
       52,
       window.innerWidth / window.innerHeight,
       0.1,
-      150 // 맵 확장 — far 늘림
+      200 // 섬 확장 — 바다 수평선까지 렌더링
     );
     camera.position.set(0, 12, 20);
     camera.lookAt(0, 0, 0);
@@ -60,12 +65,12 @@ const SoolScene = (() => {
 
   // ── 조명 설정 ───────────────────────────────
   function initLights() {
-    // 환경광 (밤하늘 분위기)
-    const ambient = new THREE.AmbientLight(0x1a1040, 0.75);
+    // 환경광 — 바다 반사광 느낌의 청록 계열
+    const ambient = new THREE.AmbientLight(0x0e1a30, 0.8);
     scene.add(ambient);
 
-    // 달빛 (메인 방향광)
-    const moon = new THREE.DirectionalLight(0x8899cc, 0.45);
+    // 달빛 (메인 방향광) — 바다 위 달빛은 좀 더 차갑고 밝게
+    const moon = new THREE.DirectionalLight(0x99aacc, 0.5);
     moon.position.set(-14, 24, 12);
     moon.castShadow = true;
     // ★ 최적화: 그림자 맵 2048 → 512 (메모리 & 렌더 시간 대폭 감소)
@@ -84,8 +89,8 @@ const SoolScene = (() => {
     fillLight.position.set(10, 10, -10);
     scene.add(fillLight);
 
-    // 하늘 반사 (위에서 아래로)
-    const hemi = new THREE.HemisphereLight(0x1a1050, 0x0a0820, 0.3);
+    // 하늘 반사 — 위는 밤하늘 청색, 아래는 바다 반사 청록
+    const hemi = new THREE.HemisphereLight(0x0e1a40, 0x0a1e2e, 0.35);
     scene.add(hemi);
   }
 

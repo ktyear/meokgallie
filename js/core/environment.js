@@ -20,150 +20,105 @@ const SoolEnvironment = (() => {
     fountainLight: null,
   };
 
-  // ── 지면 ──────────────────────────────────────
+  // ── 지면 3레이어 ──────────────────────────────
+  // 레이어 1 (가장 아래): 잔디 — 마을 전체 배경
+  // 레이어 2 (중간):     벽돌 — 마을 내부 (반경 16)
+  // 레이어 3 (위):       광장 — 중앙 (반경 4.5)
   function makeGround() {
-    // 메인 지면
-    const ground = new THREE.Mesh(
-      new THREE.PlaneGeometry(80, 80, 1, 1),
-      new THREE.MeshStandardMaterial({
-        color: 0x16152e,
-        roughness: 0.95,
-        metalness: 0.0,
-      })
+
+    // ── 레이어 1: 잔디 (전체 배경) ──────────────
+    const grass = new THREE.Mesh(
+      new THREE.PlaneGeometry(120, 120),
+      new THREE.MeshLambertMaterial({ color: 0x1a2e18 })
     );
-    ground.rotation.x = -Math.PI / 2;
-    ground.receiveShadow = true;
-    _scene.add(ground);
+    grass.rotation.x = -Math.PI / 2;
+    grass.position.y = 0;
+    grass.receiveShadow = true;
+    _scene.add(grass);
 
-    // 잔디 구역 (건물 주변 녹지)
-    const grassPositions = [
-      [-12, -10], [12, -10], [-12, 10], [12, 10],
-      [-6, -12],  [6, -12],  [-6, 12],  [6, 12],
-    ];
-    const grassMat = new THREE.MeshStandardMaterial({
-      color: 0x141e18, roughness: 0.95,
-    });
-    grassPositions.forEach(([x, z]) => {
-      const g = new THREE.Mesh(new THREE.CircleGeometry(3.5, 12), grassMat);
-      g.rotation.x = -Math.PI / 2;
-      g.position.set(x, 0.005, z);
-      g.receiveShadow = true;
-      _scene.add(g);
-    });
-  }
-
-  // ── 도로망 ────────────────────────────────────
-  // 건물 좌표를 기반으로 광장(0,0)에서 각 건물까지 도로를 자동 생성
-  // 건물 추가/삭제/이동 시 이 목록만 수정하면 도로가 자동으로 따라옴
-  const BUILDING_POSITIONS = [
-    { x: -5.5, z: -3.5 },  // 술 바
-    { x:  5.5, z: -3.5 },  // 도서관
-    { x:  0,   z: -7.5 },  // 커뮤니티
-    { x:  7.0, z:  0   },  // 주류 상점
-    { x: -7.0, z:  0   },  // 양조장
-    { x:  0,   z:  5.5 },  // 영상관
-    { x: -2.5, z: -11.0 }, // 안내소 (커뮤니티와 x축 분리)
-    { x: -11.0,z: -5.0 },  // 팝업 광장
-    { x:  11.0,z: -5.0 },  // 내 공간
-    { x: -11.0,z:  5.0 },  // 소버 카페
-    { x:  11.0,z:  5.0 },  // 페어링 식당
-  ];
-
-  function makeRoads() {
-    const roadMat = new THREE.MeshStandardMaterial({
-      color: 0x22203c, roughness: 0.88,
-    });
-    const markMat = new THREE.MeshStandardMaterial({
-      color: 0x3a3860, roughness: 0.9,
-    });
-    const ROAD_W = 2.2; // 도로 폭
-
-    // ── 1. 중앙 광장 연결 도로 (광장 → 각 건물)
-    BUILDING_POSITIONS.forEach(({ x, z }) => {
-      const dist  = Math.sqrt(x * x + z * z);
-      const angle = Math.atan2(x, z);
-
-      const road = new THREE.Mesh(
-        new THREE.PlaneGeometry(ROAD_W, dist),
-        roadMat
+    // 잔디 질감 — 작은 어두운 점들로 풀잎 느낌
+    const tuftMat = new THREE.MeshLambertMaterial({ color: 0x162814 });
+    for (let i = 0; i < 300; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const r     = 17 + Math.random() * 35;
+      const tuft  = new THREE.Mesh(
+        new THREE.PlaneGeometry(
+          0.3 + Math.random() * 0.4,
+          0.3 + Math.random() * 0.4
+        ),
+        tuftMat
       );
-      road.rotation.x = -Math.PI / 2;
-      road.rotation.z = -angle;
-      road.position.set(x / 2, 0.01, z / 2);
-      _scene.add(road);
-
-      // 도로 중앙선 점선
-      const steps = Math.floor(dist / 1.6);
-      for (let i = 1; i < steps; i++) {
-        const t = i / steps;
-        const mark = new THREE.Mesh(
-          new THREE.PlaneGeometry(0.1, 0.9),
-          markMat
-        );
-        mark.rotation.x = -Math.PI / 2;
-        mark.rotation.z = -angle;
-        mark.position.set(x * t, 0.015, z * t);
-        _scene.add(mark);
-      }
-    });
-
-    // ── 2. 외곽 순환 도로 (건물들을 잇는 링)
-    // 외곽 건물 8개를 각도 순으로 정렬해 이웃한 건물끼리 연결
-    const outerBuildings = BUILDING_POSITIONS
-      .filter(({ x, z }) => Math.sqrt(x * x + z * z) > 6)
-      .map(b => ({ ...b, angle: Math.atan2(b.x, b.z) }))
-      .sort((a, b) => a.angle - b.angle);
-
-    for (let i = 0; i < outerBuildings.length; i++) {
-      const a = outerBuildings[i];
-      const b = outerBuildings[(i + 1) % outerBuildings.length];
-
-      const mx = (a.x + b.x) / 2;
-      const mz = (a.z + b.z) / 2;
-      const dx = b.x - a.x;
-      const dz = b.z - a.z;
-      const len = Math.sqrt(dx * dx + dz * dz);
-      const ang = Math.atan2(dx, dz);
-
-      const seg = new THREE.Mesh(
-        new THREE.PlaneGeometry(ROAD_W, len),
-        roadMat
+      tuft.rotation.x = -Math.PI / 2;
+      tuft.position.set(
+        Math.cos(angle) * r,
+        0.002,
+        Math.sin(angle) * r
       );
-      seg.rotation.x = -Math.PI / 2;
-      seg.rotation.z = -ang;
-      seg.position.set(mx, 0.01, mz);
-      _scene.add(seg);
+      _scene.add(tuft);
     }
 
-    // ── 3. 중앙 광장 바닥 (도로 교차점 메움)
-    const centerPad = new THREE.Mesh(
-      new THREE.CircleGeometry(3.2, 24),
-      roadMat
+    // ── 레이어 2: 벽돌 타일 — 마을 내부 (반경 16) ──
+    // 원형 베이스
+    const brickBase = new THREE.Mesh(
+      new THREE.CircleGeometry(16, 48),
+      new THREE.MeshLambertMaterial({ color: 0x4a3c2e })
     );
-    centerPad.rotation.x = -Math.PI / 2;
-    centerPad.position.set(0, 0.01, 0);
-    _scene.add(centerPad);
-  }
+    brickBase.rotation.x = -Math.PI / 2;
+    brickBase.position.y = 0.005;
+    brickBase.receiveShadow = true;
+    _scene.add(brickBase);
 
-  // ── 중앙 광장 ─────────────────────────────────
-  function makeSquare() {
-    // 광장 바닥
+    // 벽돌 줄눈 (가로선)
+    const groutMat = new THREE.MeshLambertMaterial({ color: 0x352a1e });
+    const TW = 1.2, TH = 0.7; // 타일 크기
+    const ROWS = Math.ceil(32 / TH);
+    const COLS = Math.ceil(32 / TW);
+
+    for (let row = 0; row < ROWS; row++) {
+      for (let col = 0; col < COLS; col++) {
+        const offset = (row % 2 === 0) ? 0 : TW / 2;
+        const tx = -16 + col * TW + offset;
+        const tz = -16 + row * TH;
+        // 원형 범위 안에 있는 타일만 생성
+        const cx = tx + TW / 2, cz = tz + TH / 2;
+        if (cx * cx + cz * cz > 16 * 16) continue;
+
+        const grout = new THREE.Mesh(
+          new THREE.PlaneGeometry(TW - 0.06, TH - 0.06),
+          groutMat
+        );
+        grout.rotation.x = -Math.PI / 2;
+        grout.position.set(cx, 0.007, cz);
+        _scene.add(grout);
+      }
+    }
+
+    // ── 레이어 3: 광장 — 중앙 (반경 4.5) ──────────
     const plaza = new THREE.Mesh(
       new THREE.CircleGeometry(4.5, 32),
-      new THREE.MeshStandardMaterial({ color: 0x28245a, roughness: 0.82 })
+      new THREE.MeshLambertMaterial({ color: 0x28245a })
     );
     plaza.rotation.x = -Math.PI / 2;
-    plaza.position.set(0, 0.02, 0);
+    plaza.position.y = 0.012;
+    plaza.receiveShadow = true;
     _scene.add(plaza);
 
     // 광장 테두리 링
     const ring = new THREE.Mesh(
       new THREE.RingGeometry(4.3, 4.6, 32),
-      new THREE.MeshStandardMaterial({ color: 0x3a3478, roughness: 0.7 })
+      new THREE.MeshLambertMaterial({ color: 0x3a3478 })
     );
     ring.rotation.x = -Math.PI / 2;
-    ring.position.set(0, 0.025, 0);
+    ring.position.y = 0.015;
     _scene.add(ring);
+  }
+
+  // makeRoads 제거 — 바닥 레이어로 대체됨
+  function makeRoads() {}
+
+  // ── 중앙 광장 ─────────────────────────────────
+  function makeSquare() {
+    // 광장 바닥·링은 makeGround() 레이어 3에서 생성
 
     // 광장 벤치 4개
     const benchAngles = [Math.PI / 4, 3 * Math.PI / 4, 5 * Math.PI / 4, 7 * Math.PI / 4];

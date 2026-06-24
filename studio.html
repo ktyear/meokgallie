@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>영상관 — 술마을</title>
+<style>
+  :root{--pink-50:#FFF0F8;--pink-100:#FFB8DD;--pink-200:#FF44AA;--pink-400:#DD2288;--pink-600:#AA1166;--pink-900:#3A0422;--bg:#FBF0F8;--bg-card:#fff;--text-primary:#1a0410;--text-secondary:#6b2848;--text-muted:#a07888;--border:rgba(0,0,0,0.07);}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;}
+  nav{background:var(--bg-card);border-bottom:0.5px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+  .nav-back{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-secondary);text-decoration:none;cursor:pointer;}.nav-back:hover{color:var(--pink-400);}.nav-back svg{width:16px;height:16px;}
+  .nav-logo{font-size:15px;font-weight:600;display:flex;align-items:center;gap:7px;}
+  .nav-logo-dot{width:8px;height:8px;border-radius:50%;background:var(--pink-200);}
+  .nav-spacer{width:80px;}
+  .hero{background:linear-gradient(135deg,#3A0422 0%,#8A1A55 100%);padding:32px 24px 28px;}
+  .hero-inner{max-width:640px;margin:0 auto;}
+  .hero-tag{display:inline-block;font-size:11px;font-weight:600;color:#FFB8DD;background:rgba(255,255,255,0.1);padding:3px 10px;border-radius:99px;margin-bottom:10px;}
+  .hero-title{font-size:24px;font-weight:700;color:#fff;margin-bottom:6px;}
+  .hero-sub{font-size:14px;color:rgba(255,255,255,0.7);line-height:1.65;}
+  .section{padding:20px 24px;max-width:640px;margin:0 auto;}
+  .section-title{font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:14px;}
+  .tabs{background:var(--bg-card);border-bottom:0.5px solid var(--border);display:flex;overflow-x:auto;}.tabs::-webkit-scrollbar{display:none;}
+  .tab{padding:12px 18px;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.15s;}.tab.active{color:var(--pink-400);border-bottom-color:var(--pink-200);}
+  .tab-content{display:none;}.tab-content.active{display:block;}
+  .video-card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:10px;cursor:pointer;transition:border-color 0.15s;}.video-card:hover{border-color:var(--pink-200);}
+  .video-thumb{height:140px;display:flex;align-items:center;justify-content:center;font-size:48px;position:relative;}
+  .video-play{position:absolute;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center;font-size:18px;}
+  .video-body{padding:12px 14px;}
+  .video-title{font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:4px;}
+  .video-meta{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-muted);}
+  .video-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+  .upload-btn{width:100%;background:var(--pink-200);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px;transition:background 0.15s;}.upload-btn:hover{background:var(--pink-400);}
+  @media(max-width:480px){nav{padding:12px 16px;}.hero{padding:20px 16px 20px;}.section{padding:16px;}.video-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<nav>
+  <a class="nav-back" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>마을로 돌아가기</a>
+  <div class="nav-logo"><div class="nav-logo-dot"></div>술마을</div>
+  <div class="nav-spacer"></div>
+</nav>
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-tag">영상관 · 숏폼 & 콘텐츠</div>
+    <h1 class="hero-title">🎬 영상관</h1>
+    <p class="hero-sub">하이볼 레시피, 칵테일 튜토리얼, 바텐더 인터뷰.<br>보고 바로 따라하는 술 콘텐츠.</p>
+  </div>
+</div>
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('trending',this)">트렌딩</div>
+  <div class="tab" onclick="switchTab('recipe',this)">레시피</div>
+  <div class="tab" onclick="switchTab('upload',this)">업로드</div>
+</div>
+<div id="tab-trending" class="tab-content active">
+  <div class="section">
+    <p class="section-title">지금 뜨는 영상</p>
+    <div class="video-card"><div class="video-thumb" style="background:linear-gradient(135deg,#FFB8DD,#FF44AA);">🍸<div class="video-play">▶</div></div><div class="video-body"><div class="video-title">3분 완성 유자 하이볼 레시피</div><div class="video-meta"><span>바텐더K</span><span>·</span><span>조회 12,400</span><span>·</span><span>2일 전</span></div></div></div>
+    <div class="video-card"><div class="video-thumb" style="background:linear-gradient(135deg,#F0D89A,#D4A040);">🥃<div class="video-play">▶</div></div><div class="video-body"><div class="video-title">위스키 테이스팅 노트 쓰는 법</div><div class="video-meta"><span>위스키덕후</span><span>·</span><span>조회 8,200</span><span>·</span><span>3일 전</span></div></div></div>
+    <div class="video-card"><div class="video-thumb" style="background:linear-gradient(135deg,#B8EAC8,#44CC66);">🍶<div class="video-play">▶</div></div><div class="video-body"><div class="video-title">편의점 막걸리 5종 블라인드 테스트</div><div class="video-meta"><span>전통주러버</span><span>·</span><span>조회 22,800</span><span>·</span><span>1주 전</span></div></div></div>
+  </div>
+</div>
+<div id="tab-recipe" class="tab-content">
+  <div class="section">
+    <p class="section-title">레시피 영상</p>
+    <div class="video-grid">
+      <div class="video-card"><div class="video-thumb" style="background:linear-gradient(135deg,#FFE0B2,#FF9800);height:100px;font-size:32px;">🍊<div class="video-play" style="width:36px;height:36px;font-size:14px;">▶</div></div><div class="video-body"><div class="video-title" style="font-size:12px;">오렌지 하이볼</div></div></div>
+      <div class="video-card"><div class="video-thumb" style="background:linear-gradient(135deg,#B3E5FC,#0288D1);height:100px;font-size:32px;">🫐<div class="video-play" style="width:36px;height:36px;font-size:14px;">▶</div></div><div class="video-body"><div class="video-title" style="font-size:12px;">블루베리 막걸리</div></div></div>
+      <div class="video-card"><div class="video-thumb" style="background:linear-gradient(135deg,#F8BBD9,#E91E63);height:100px;font-size:32px;">🌸<div class="video-play" style="width:36px;height:36px;font-size:14px;">▶</div></div><div class="video-body"><div class="video-title" style="font-size:12px;">벚꽃 칵테일</div></div></div>
+      <div class="video-card"><div class="video-thumb" style="background:linear-gradient(135deg,#DCEDC8,#8BC34A);height:100px;font-size:32px;">🍵<div class="video-play" style="width:36px;height:36px;font-size:14px;">▶</div></div><div class="video-body"><div class="video-title" style="font-size:12px;">녹차 소주 칵테일</div></div></div>
+    </div>
+  </div>
+</div>
+<div id="tab-upload" class="tab-content">
+  <div class="section">
+    <div style="background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
+      <div style="font-size:36px;margin-bottom:12px;">🎥</div>
+      <div style="font-size:14px;color:var(--text-secondary);margin-bottom:8px;line-height:1.6;">나만의 술 레시피와 테이스팅 영상을 올려보세요!</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">업로드 권한: <strong>Lv.15 이상</strong></div>
+      <button class="upload-btn" onclick="alert('영상 업로드 기능은 준비 중이에요!')">영상 업로드</button>
+    </div>
+  </div>
+</div>
+<script>
+  function switchTab(name,el){document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');el.classList.add('active');}
+  function goBack(){if(document.referrer&&document.referrer.includes(location.hostname)){history.back();}else{location.href='index.html';}}
+</script>
+</body>
+</html>

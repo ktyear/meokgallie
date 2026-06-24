@@ -13,7 +13,7 @@ const BuildingStudio = (() => {
     desc: '하이볼 레시피 숏폼, 칵테일 튜토리얼, 바텐더 인터뷰. 보고 바로 따라하기. MZ세대를 위한 술 콘텐츠 스튜디오.',
     tags: ['숏폼', '레시피', '칵테일', '콘텐츠'],
     pos:  [0, 0, 5.5],
-    url:  '#studio',
+    url:  'studio.html',
   };
 
   function makeStudioExtras(group, { bodyW, bodyH, bodyD }) {

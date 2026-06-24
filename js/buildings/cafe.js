@@ -13,7 +13,7 @@ const BuildingCafe = (() => {
     desc: '취하지 않아도 즐거운 술. 무알코올·저알코올 음료 리뷰, 절주 챌린지, 오늘의 한 잔 큐레이션. 소버 라이프를 즐기는 모든 분을 환영해요.',
     tags: ['무알코올', '저알코올', '소버라이프', '절주'],
     pos:  [-11.0, 0, 5.0],
-    url:  '#cafe',
+    url:  'cafe.html',
   };
 
   function makeCafeExtras(group, { bodyW, bodyH, bodyD }) {

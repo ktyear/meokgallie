@@ -13,7 +13,7 @@ const BuildingMyspace = (() => {
     desc: '나만의 술 셀러, 테이스팅 기록, 취향 프로필. 내가 마신 술을 아카이빙하고, 취향 뱃지를 모아보세요.',
     tags: ['마이페이지', '셀러', '기록', '뱃지'],
     pos:  [11.0, 0, -5.0],
-    url:  '#myspace',
+    url:  'myspace.html',
   };
 
   function makeMyspaceExtras(group, { bodyW, bodyH, bodyD }) {

@@ -13,7 +13,7 @@ const BuildingLibrary = (() => {
     desc: '조주기능사 강의, 주류 교육 콘텐츠, 수료증 발급. 위스키·전통주·와인의 역사부터 제조 과정까지. 잘 알고 마시는 것이 진짜 즐거움.',
     tags: ['교육', '강의', '수료증', '조주기능사'],
     pos:  [5.5, 0, -3.5],
-    url:  '#library',
+    url:  'library.html',
   };
 
   function makeLibraryExtras(group, { bodyW, bodyH, bodyD }) {

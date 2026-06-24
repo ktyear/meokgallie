@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>양조장 — 술마을</title>
+<style>
+  :root{--brown-50:#FDF5E8;--brown-100:#F0D89A;--brown-200:#D4A040;--brown-400:#A87820;--brown-600:#7A5410;--brown-900:#3A2404;--bg:#FAF4E8;--bg-card:#fff;--text-primary:#1a0e04;--text-secondary:#5a3e18;--text-muted:#a08050;--border:rgba(0,0,0,0.07);}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;}
+  nav{background:var(--bg-card);border-bottom:0.5px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+  .nav-back{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-secondary);text-decoration:none;cursor:pointer;}.nav-back:hover{color:var(--brown-400);}.nav-back svg{width:16px;height:16px;}
+  .nav-logo{font-size:15px;font-weight:600;display:flex;align-items:center;gap:7px;}
+  .nav-logo-dot{width:8px;height:8px;border-radius:50%;background:var(--brown-200);}
+  .nav-spacer{width:80px;}
+  .hero{background:linear-gradient(135deg,#3A2404 0%,#7A4A10 100%);padding:32px 24px 28px;}
+  .hero-inner{max-width:640px;margin:0 auto;}
+  .hero-tag{display:inline-block;font-size:11px;font-weight:600;color:#F0D89A;background:rgba(255,255,255,0.1);padding:3px 10px;border-radius:99px;margin-bottom:10px;}
+  .hero-title{font-size:24px;font-weight:700;color:#fff;margin-bottom:6px;}
+  .hero-sub{font-size:14px;color:rgba(255,255,255,0.7);line-height:1.65;}
+  .section{padding:20px 24px;max-width:640px;margin:0 auto;}
+  .section-title{font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:14px;}
+  .tabs{background:var(--bg-card);border-bottom:0.5px solid var(--border);display:flex;overflow-x:auto;}.tabs::-webkit-scrollbar{display:none;}
+  .tab{padding:12px 18px;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.15s;}.tab.active{color:var(--brown-400);border-bottom-color:var(--brown-200);}
+  .tab-content{display:none;}.tab-content.active{display:block;}
+  .story-card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;cursor:pointer;transition:border-color 0.15s;}.story-card:hover{border-color:var(--brown-200);}
+  .story-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:8px;}
+  .story-icon{font-size:28px;flex-shrink:0;}
+  .story-title{font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:3px;}
+  .story-sub{font-size:12px;color:var(--text-secondary);}
+  .story-body{font-size:13px;color:var(--text-secondary);line-height:1.6;}
+  .story-tag{display:inline-block;font-size:11px;background:var(--brown-50);color:var(--brown-600);padding:2px 8px;border-radius:99px;margin-top:8px;}
+  .brewery-card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px;display:flex;gap:12px;align-items:center;cursor:pointer;transition:border-color 0.15s;}.brewery-card:hover{border-color:var(--brown-200);}
+  .brewery-icon{font-size:28px;}
+  .brewery-name{font-size:14px;font-weight:600;margin-bottom:2px;}
+  .brewery-region{font-size:12px;color:var(--text-secondary);}
+  .brewery-drink{font-size:11px;color:var(--text-muted);margin-top:3px;}
+  @media(max-width:480px){nav{padding:12px 16px;}.hero{padding:20px 16px 20px;}.section{padding:16px;}}
+</style>
+</head>
+<body>
+<nav>
+  <a class="nav-back" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>마을로 돌아가기</a>
+  <div class="nav-logo"><div class="nav-logo-dot"></div>술마을</div>
+  <div class="nav-spacer"></div>
+</nav>
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-tag">양조장 · 전통주 & 스토리</div>
+    <h1 class="hero-title">🏺 양조장</h1>
+    <p class="hero-sub">전통주 스토리텔링, 장인의 이야기.<br>막걸리부터 증류식 소주까지 우리 술의 역사.</p>
+  </div>
+</div>
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('stories',this)">스토리</div>
+  <div class="tab" onclick="switchTab('breweries',this)">양조장 탐방</div>
+  <div class="tab" onclick="switchTab('types',this)">주종 가이드</div>
+</div>
+<div id="tab-stories" class="tab-content active">
+  <div class="section">
+    <p class="section-title">장인의 이야기</p>
+    <div class="story-card"><div class="story-header"><div class="story-icon">🏺</div><div><div class="story-title">600년 전통, 안동소주 이야기</div><div class="story-sub">경북 안동 · 조선옥</div></div></div><div class="story-body">고려시대 원나라에서 전해진 증류 기술이 안동 지방에 뿌리내린 이야기. 14대째 가업을 이어온 장인의 철학...</div><span class="story-tag">증류식 소주</span></div>
+    <div class="story-card"><div class="story-header"><div class="story-icon">🍶</div><div><div class="story-title">쌀 한 톨의 기다림 — 막걸리 발효 72시간</div><div class="story-sub">경기도 포천 · 이동막걸리</div></div></div><div class="story-body">일교차가 큰 포천의 기후가 빚어내는 독특한 맛. 전통 누룩부터 현대화까지의 여정...</div><span class="story-tag">막걸리</span></div>
+    <div class="story-card"><div class="story-header"><div class="story-icon">🌾</div><div><div class="story-title">전통 청주의 부활 — 한산소곡주</div><div class="story-sub">충남 서천 · 한산 소곡주 양조장</div></div></div><div class="story-body">백제 시대부터 내려온 1500년의 역사. 100일 동안 숙성된 청주가 완성되기까지...</div><span class="story-tag">청주</span></div>
+  </div>
+</div>
+<div id="tab-breweries" class="tab-content">
+  <div class="section">
+    <p class="section-title">추천 양조장</p>
+    <div class="brewery-card"><div class="brewery-icon">🏺</div><div><div class="brewery-name">화요 증류소</div><div class="brewery-region">경기도 여주</div><div class="brewery-drink">화요 25·41·53도</div></div></div>
+    <div class="brewery-card"><div class="brewery-icon">🍶</div><div><div class="brewery-name">국순당</div><div class="brewery-region">강원도 횡성</div><div class="brewery-drink">백세주, 막걸리 시리즈</div></div></div>
+    <div class="brewery-card"><div class="brewery-icon">🌾</div><div><div class="brewery-name">한산 소곡주 양조장</div><div class="brewery-region">충남 서천</div><div class="brewery-drink">한산 소곡주 시리즈</div></div></div>
+    <div class="brewery-card"><div class="brewery-icon">🏡</div><div><div class="brewery-name">경주법주 양조장</div><div class="brewery-region">경북 경주</div><div class="brewery-drink">교동법주, 경주법주</div></div></div>
+  </div>
+</div>
+<div id="tab-types" class="tab-content">
+  <div class="section">
+    <p class="section-title">전통주 종류 가이드</p>
+    <div class="story-card"><div class="story-header"><div class="story-icon">🍶</div><div><div class="story-title">막걸리 (濁酒)</div><div class="story-sub">도수 6~8도</div></div></div><div class="story-body">쌀·밀·옥수수 등을 발효시킨 한국의 대표 탁주. 유산균이 풍부하고 은은한 단맛과 산미가 특징.</div></div>
+    <div class="story-card"><div class="story-header"><div class="story-icon">🍵</div><div><div class="story-title">약주·청주 (藥酒·淸酒)</div><div class="story-sub">도수 13~16도</div></div></div><div class="story-body">막걸리를 맑게 걸러낸 술. 깔끔하고 섬세한 맛이 특징이며 음식과의 페어링이 뛰어남.</div></div>
+    <div class="story-card"><div class="story-header"><div class="story-icon">🏺</div><div><div class="story-title">증류식 소주 (蒸溜式燒酒)</div><div class="story-sub">도수 25~53도</div></div></div><div class="story-body">전통 방식으로 발효주를 증류한 소주. 희석식 소주와 달리 원료 본래의 맛과 향이 살아있음.</div></div>
+  </div>
+</div>
+<script>
+  function switchTab(name,el){document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');el.classList.add('active');}
+  function goBack(){if(document.referrer&&document.referrer.includes(location.hostname)){history.back();}else{location.href='index.html';}}
+</script>
+</body>
+</html>

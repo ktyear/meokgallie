@@ -13,7 +13,7 @@ const BuildingRestaurant = (() => {
     desc: '술과 음식의 완벽한 조합. 위스키와 어울리는 안주, 전통주에 맞는 한식, 와인 페어링 레시피까지. 술이 더 맛있어지는 방법.',
     tags: ['페어링', '안주', '레시피', '음식'],
     pos:  [11.0, 0, 5.0],
-    url:  '#restaurant',
+    url:  'restaurant.html',
   };
 
   function makeRestaurantExtras(group, { bodyW, bodyH, bodyD }) {

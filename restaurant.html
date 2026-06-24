@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>페어링 식당 — 술마을</title>
+<style>
+  :root{--orange-50:#FFF4EE;--orange-100:#FFCCA8;--orange-200:#FF6644;--orange-400:#DD4422;--orange-600:#AA2810;--orange-900:#3A0E04;--bg:#FAF1EE;--bg-card:#fff;--text-primary:#1a0804;--text-secondary:#6b2c1a;--text-muted:#a07060;--border:rgba(0,0,0,0.07);}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;}
+  nav{background:var(--bg-card);border-bottom:0.5px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+  .nav-back{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-secondary);text-decoration:none;cursor:pointer;}.nav-back:hover{color:var(--orange-400);}.nav-back svg{width:16px;height:16px;}
+  .nav-logo{font-size:15px;font-weight:600;display:flex;align-items:center;gap:7px;}
+  .nav-logo-dot{width:8px;height:8px;border-radius:50%;background:var(--orange-200);}
+  .nav-spacer{width:80px;}
+  .hero{background:linear-gradient(135deg,#3A0E04 0%,#8A3010 100%);padding:32px 24px 28px;}
+  .hero-inner{max-width:640px;margin:0 auto;}
+  .hero-tag{display:inline-block;font-size:11px;font-weight:600;color:#FFCCA8;background:rgba(255,255,255,0.1);padding:3px 10px;border-radius:99px;margin-bottom:10px;}
+  .hero-title{font-size:24px;font-weight:700;color:#fff;margin-bottom:6px;}
+  .hero-sub{font-size:14px;color:rgba(255,255,255,0.7);line-height:1.65;}
+  .section{padding:20px 24px;max-width:640px;margin:0 auto;}
+  .section-title{font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:14px;}
+  .tabs{background:var(--bg-card);border-bottom:0.5px solid var(--border);display:flex;overflow-x:auto;}.tabs::-webkit-scrollbar{display:none;}
+  .tab{padding:12px 18px;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.15s;}.tab.active{color:var(--orange-400);border-bottom-color:var(--orange-200);}
+  .tab-content{display:none;}.tab-content.active{display:block;}
+  .pairing-card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;cursor:pointer;transition:border-color 0.15s;}.pairing-card:hover{border-color:var(--orange-200);}
+  .pairing-header{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+  .pairing-combo{display:flex;align-items:center;gap:6px;font-size:22px;}
+  .pairing-plus{font-size:14px;color:var(--text-muted);}
+  .pairing-title{font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:4px;}
+  .pairing-body{font-size:13px;color:var(--text-secondary);line-height:1.55;}
+  .pairing-tag{display:inline-block;font-size:11px;background:var(--orange-50);color:var(--orange-600);padding:2px 8px;border-radius:99px;margin-top:8px;}
+  .recipe-card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;}
+  .recipe-title{font-size:14px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+  .recipe-ingredient{font-size:13px;color:var(--text-secondary);line-height:1.7;margin-bottom:8px;}
+  .recipe-step{font-size:12px;color:var(--text-muted);line-height:1.7;}
+  .recipe-step span{font-weight:600;color:var(--orange-400);}
+  @media(max-width:480px){nav{padding:12px 16px;}.hero{padding:20px 16px 20px;}.section{padding:16px;}}
+</style>
+</head>
+<body>
+<nav>
+  <a class="nav-back" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>마을로 돌아가기</a>
+  <div class="nav-logo"><div class="nav-logo-dot"></div>술마을</div>
+  <div class="nav-spacer"></div>
+</nav>
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-tag">페어링 식당 · 안주 & 페어링</div>
+    <h1 class="hero-title">🍽️ 페어링 식당</h1>
+    <p class="hero-sub">술과 음식의 완벽한 조합.<br>술이 더 맛있어지는 페어링 레시피.</p>
+  </div>
+</div>
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('pairings',this)">페어링 추천</div>
+  <div class="tab" onclick="switchTab('recipes',this)">안주 레시피</div>
+  <div class="tab" onclick="switchTab('search',this)">술로 찾기</div>
+</div>
+<div id="tab-pairings" class="tab-content active">
+  <div class="section">
+    <p class="section-title">오늘의 페어링 추천</p>
+    <div class="pairing-card"><div class="pairing-header"><div class="pairing-combo"><span>🥃</span><span class="pairing-plus">+</span><span>🧀</span></div><div><div class="pairing-title">위스키 × 치즈</div></div></div><div class="pairing-body">스모키한 아이슬레이 위스키에는 블루치즈, 부드러운 하이랜드 위스키엔 체더치즈가 잘 어울려요.</div><span class="pairing-tag">위스키</span></div>
+    <div class="pairing-card"><div class="pairing-header"><div class="pairing-combo"><span>🍶</span><span class="pairing-plus">+</span><span>🥟</span></div><div><div class="pairing-title">막걸리 × 전</div></div></div><div class="pairing-body">비 오는 날 파전과 막걸리의 조합은 역시 클래식. 막걸리의 산미가 기름진 전을 깔끔하게 잡아줘요.</div><span class="pairing-tag">전통주</span></div>
+    <div class="pairing-card"><div class="pairing-header"><div class="pairing-combo"><span>🍷</span><span class="pairing-plus">+</span><span>🥩</span></div><div><div class="pairing-title">레드와인 × 스테이크</div></div></div><div class="pairing-body">타닌이 강한 까베르네 소비뇽은 지방이 풍부한 채끝 스테이크와 최고의 조화를 이뤄요.</div><span class="pairing-tag">와인</span></div>
+    <div class="pairing-card"><div class="pairing-header"><div class="pairing-combo"><span>🍺</span><span class="pairing-plus">+</span><span>🍕</span></div><div><div class="pairing-title">IPA × 피자</div></div></div><div class="pairing-body">홉의 쓴맛이 피자의 느끼함을 잡아주고 탄산이 입을 개운하게 해줘요.</div><span class="pairing-tag">맥주</span></div>
+  </div>
+</div>
+<div id="tab-recipes" class="tab-content">
+  <div class="section">
+    <p class="section-title">안주 레시피</p>
+    <div class="recipe-card">
+      <div class="recipe-title">🧀 위스키 치즈 보드</div>
+      <div class="recipe-ingredient">재료: 체더치즈, 블루치즈, 크래커, 꿀, 호두, 포도</div>
+      <div class="recipe-step"><span>1.</span> 치즈를 실온에 30분 꺼내 풍미를 살린다.<br><span>2.</span> 나무 보드에 치즈를 간격을 두고 배치한다.<br><span>3.</span> 빈 공간에 크래커, 포도, 호두를 채운다.<br><span>4.</span> 꿀을 블루치즈 위에 살짝 뿌려 완성.</div>
+    </div>
+    <div class="recipe-card">
+      <div class="recipe-title">🥟 막걸리 파전</div>
+      <div class="recipe-ingredient">재료: 부침가루 1컵, 막걸리 1컵, 대파 3대, 홍고추, 식용유</div>
+      <div class="recipe-step"><span>1.</span> 부침가루와 막걸리를 1:1로 섞어 반죽한다.<br><span>2.</span> 대파와 홍고추를 적당히 썰어 넣는다.<br><span>3.</span> 기름 두른 팬에 반죽을 얇게 펴 굽는다.<br><span>4.</span> 노릇하게 앞뒤로 구워 완성.</div>
+    </div>
+  </div>
+</div>
+<div id="tab-search" class="tab-content">
+  <div class="section">
+    <p class="section-title">마시는 술로 안주 찾기</p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+      <div style="background:var(--bg-card);border:0.5px solid var(--border);border-radius:10px;padding:14px;text-align:center;cursor:pointer;" onclick="alert('위스키 페어링 목록은 준비 중이에요!')"><div style="font-size:24px;margin-bottom:6px;">🥃</div><div style="font-size:12px;font-weight:500;">위스키</div></div>
+      <div style="background:var(--bg-card);border:0.5px solid var(--border);border-radius:10px;padding:14px;text-align:center;cursor:pointer;" onclick="alert('전통주 페어링 목록은 준비 중이에요!')"><div style="font-size:24px;margin-bottom:6px;">🍶</div><div style="font-size:12px;font-weight:500;">전통주</div></div>
+      <div style="background:var(--bg-card);border:0.5px solid var(--border);border-radius:10px;padding:14px;text-align:center;cursor:pointer;" onclick="alert('와인 페어링 목록은 준비 중이에요!')"><div style="font-size:24px;margin-bottom:6px;">🍷</div><div style="font-size:12px;font-weight:500;">와인</div></div>
+      <div style="background:var(--bg-card);border:0.5px solid var(--border);border-radius:10px;padding:14px;text-align:center;cursor:pointer;" onclick="alert('맥주 페어링 목록은 준비 중이에요!')"><div style="font-size:24px;margin-bottom:6px;">🍺</div><div style="font-size:12px;font-weight:500;">맥주</div></div>
+      <div style="background:var(--bg-card);border:0.5px solid var(--border);border-radius:10px;padding:14px;text-align:center;cursor:pointer;" onclick="alert('칵테일 페어링 목록은 준비 중이에요!')"><div style="font-size:24px;margin-bottom:6px;">🍸</div><div style="font-size:12px;font-weight:500;">칵테일</div></div>
+      <div style="background:var(--bg-card);border:0.5px solid var(--border);border-radius:10px;padding:14px;text-align:center;cursor:pointer;" onclick="alert('기타 페어링 목록은 준비 중이에요!')"><div style="font-size:24px;margin-bottom:6px;">🥂</div><div style="font-size:12px;font-weight:500;">기타</div></div>
+    </div>
+  </div>
+</div>
+<script>
+  function switchTab(name,el){document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');el.classList.add('active');}
+  function goBack(){if(document.referrer&&document.referrer.includes(location.hostname)){history.back();}else{location.href='index.html';}}
+</script>
+</body>
+</html>

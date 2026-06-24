@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>내 공간 — 술마을</title>
+<style>
+  :root {
+    --gold-50:  #FDF8EE;
+    --gold-100: #F5E6B0;
+    --gold-200: #E8C840;
+    --gold-400: #C4A020;
+    --gold-600: #8A6E10;
+    --gold-900: #3A2C04;
+    --bg: #F8F4EC;
+    --bg-card: #ffffff;
+    --text-primary: #1a1408;
+    --text-secondary: #6b5c3e;
+    --text-muted: #a09070;
+    --border: rgba(0,0,0,0.07);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+  }
+
+  /* 네비 */
+  nav {
+    background: var(--bg-card);
+    border-bottom: 0.5px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .nav-back {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; color: var(--text-secondary);
+    text-decoration: none; cursor: pointer;
+  }
+  .nav-back:hover { color: var(--gold-400); }
+  .nav-back svg { width: 16px; height: 16px; }
+  .nav-logo {
+    font-size: 15px; font-weight: 600; color: var(--text-primary);
+    display: flex; align-items: center; gap: 7px;
+  }
+  .nav-logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold-200); }
+  .nav-spacer { width: 80px; }
+
+  /* 히어로 */
+  .hero {
+    background: linear-gradient(135deg, #FDF8EE 0%, #F5E6B0 100%);
+    border-bottom: 0.5px solid var(--border);
+    padding: 28px 24px 24px;
+  }
+  .hero-inner { max-width: 640px; margin: 0 auto; display: flex; gap: 20px; align-items: flex-start; }
+  .house-avatar {
+    width: 72px; height: 72px; border-radius: 14px;
+    background: var(--gold-200); border: 2px solid var(--gold-400);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; flex-shrink: 0;
+  }
+  .hero-tag {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    color: var(--gold-600); background: var(--gold-100);
+    padding: 3px 10px; border-radius: 99px; margin-bottom: 8px;
+  }
+  .hero-title { font-size: 20px; font-weight: 700; color: var(--gold-900); margin-bottom: 4px; }
+  .hero-sub { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px; }
+
+  /* 성장 단계 바 */
+  .stage-bar { display: flex; align-items: center; gap: 10px; }
+  .stage-label { font-size: 12px; font-weight: 600; color: var(--gold-600); white-space: nowrap; }
+  .stage-track { flex: 1; height: 6px; background: var(--gold-100); border-radius: 99px; overflow: hidden; }
+  .stage-fill { height: 100%; background: var(--gold-200); border-radius: 99px; transition: width 0.6s; }
+  .stage-next { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+
+  /* 탭 */
+  .tabs {
+    background: var(--bg-card);
+    border-bottom: 0.5px solid var(--border);
+    display: flex; overflow-x: auto;
+    max-width: 100%;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    padding: 12px 18px; font-size: 13px; font-weight: 500;
+    color: var(--text-muted); cursor: pointer; white-space: nowrap;
+    border-bottom: 2px solid transparent; transition: all 0.15s;
+  }
+  .tab.active { color: var(--gold-600); border-bottom-color: var(--gold-400); }
+  .tab:hover { color: var(--text-secondary); }
+
+  /* 탭 콘텐츠 */
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* 섹션 공통 */
+  .section { padding: 20px 24px; max-width: 640px; margin: 0 auto; }
+  .section-title {
+    font-size: 11px; font-weight: 600; color: var(--text-muted);
+    letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 14px;
+  }
+  .section-divider { border: none; border-top: 0.5px solid var(--border); margin: 4px 0; }
+
+  /* 리뷰 카드 */
+  .review-list { display: flex; flex-direction: column; gap: 10px; }
+  .review-card {
+    background: var(--bg-card); border: 0.5px solid var(--border);
+    border-radius: 12px; padding: 14px 16px; cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .review-card:hover { border-color: var(--gold-400); }
+  .review-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .review-emoji { font-size: 22px; }
+  .review-name { font-size: 14px; font-weight: 600; color: var(--text-primary); flex: 1; }
+  .review-rating { color: var(--gold-400); font-size: 13px; }
+  .review-body { font-size: 13px; color: var(--text-secondary); line-height: 1.55; margin-bottom: 8px; }
+  .review-meta { display: flex; align-items: center; gap: 10px; }
+  .review-tag {
+    font-size: 11px; color: var(--text-muted);
+    background: var(--bg); border: 0.5px solid var(--border);
+    padding: 2px 8px; border-radius: 99px;
+  }
+  .review-date { font-size: 11px; color: var(--text-muted); margin-left: auto; }
+
+  /* 알림 */
+  .notif-list { display: flex; flex-direction: column; gap: 8px; }
+  .notif-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    background: var(--bg-card); border: 0.5px solid var(--border);
+    border-radius: 10px; padding: 12px 14px;
+  }
+  .notif-item.unread { border-left: 3px solid var(--gold-400); }
+  .notif-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+  .notif-body { flex: 1; }
+  .notif-text { font-size: 13px; color: var(--text-primary); line-height: 1.5; margin-bottom: 3px; }
+  .notif-text strong { color: var(--gold-600); }
+  .notif-time { font-size: 11px; color: var(--text-muted); }
+  .notif-badge {
+    font-size: 10px; font-weight: 600; color: var(--bg-card);
+    background: var(--gold-400); padding: 2px 7px; border-radius: 99px;
+    align-self: center; flex-shrink: 0;
+  }
+
+  /* 즐겨찾기 */
+  .bookmark-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
+  .bookmark-card {
+    background: var(--bg-card); border: 0.5px solid var(--border);
+    border-radius: 10px; padding: 12px; cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .bookmark-card:hover { border-color: var(--gold-400); }
+  .bookmark-icon { font-size: 20px; margin-bottom: 6px; }
+  .bookmark-title { font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 2px; }
+  .bookmark-sub { font-size: 11px; color: var(--text-muted); }
+  .bookmark-type {
+    display: inline-block; font-size: 10px; margin-top: 6px;
+    color: var(--text-muted); background: var(--bg);
+    border: 0.5px solid var(--border); padding: 1px 7px; border-radius: 99px;
+  }
+
+  /* 친구 피드 */
+  .feed-list { display: flex; flex-direction: column; gap: 8px; }
+  .feed-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    background: var(--bg-card); border: 0.5px solid var(--border);
+    border-radius: 10px; padding: 12px 14px;
+  }
+  .feed-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0; border: 1px solid var(--border);
+  }
+  .feed-body { flex: 1; }
+  .feed-text { font-size: 13px; color: var(--text-primary); line-height: 1.5; margin-bottom: 3px; }
+  .feed-text strong { color: var(--gold-600); }
+  .feed-time { font-size: 11px; color: var(--text-muted); }
+
+  /* 쇼핑 */
+  .order-list { display: flex; flex-direction: column; gap: 10px; }
+  .order-card {
+    background: var(--bg-card); border: 0.5px solid var(--border);
+    border-radius: 12px; padding: 14px 16px;
+  }
+  .order-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .order-date { font-size: 12px; color: var(--text-muted); }
+  .order-status {
+    font-size: 11px; font-weight: 600; padding: 2px 8px;
+    border-radius: 99px;
+  }
+  .status-done { background: #E8F5E9; color: #2E7D32; }
+  .status-ready { background: #FFF3E0; color: #E65100; }
+  .order-item { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .order-emoji { font-size: 22px; }
+  .order-name { font-size: 14px; font-weight: 500; color: var(--text-primary); flex: 1; }
+  .order-price { font-size: 13px; font-weight: 600; color: var(--gold-600); }
+  .order-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding-top: 8px; border-top: 0.5px solid var(--border); }
+  .order-total { font-size: 13px; color: var(--text-secondary); }
+  .reorder-btn {
+    font-size: 12px; color: var(--gold-600);
+    background: var(--gold-50); border: 0.5px solid var(--gold-100);
+    border-radius: 6px; padding: 4px 10px; cursor: pointer;
+  }
+  .reorder-btn:hover { background: var(--gold-100); }
+
+  /* 장바구니 */
+  .cart-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+  .cart-item {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--bg-card); border: 0.5px solid var(--border);
+    border-radius: 10px; padding: 12px 14px;
+  }
+  .cart-emoji { font-size: 24px; }
+  .cart-body { flex: 1; }
+  .cart-name { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+  .cart-price { font-size: 13px; color: var(--text-muted); }
+  .cart-remove { font-size: 18px; color: var(--text-muted); cursor: pointer; padding: 4px; }
+  .cart-total {
+    background: var(--bg-card); border: 0.5px solid var(--border);
+    border-radius: 10px; padding: 14px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .cart-total-label { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+  .cart-total-price { font-size: 16px; font-weight: 700; color: var(--gold-600); }
+  .btn-checkout {
+    width: 100%; background: var(--gold-200); color: var(--gold-900);
+    border: none; border-radius: 10px; padding: 13px;
+    font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 10px;
+    transition: background 0.15s;
+  }
+  .btn-checkout:hover { background: var(--gold-400); }
+
+  /* 빈 상태 */
+  .empty { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+  .empty-icon { font-size: 36px; margin-bottom: 10px; }
+  .empty-text { font-size: 14px; }
+
+  /* 모바일 */
+  @media (max-width: 480px) {
+    nav { padding: 12px 16px; }
+    .hero { padding: 20px 16px 20px; }
+    .hero-inner { flex-direction: column; gap: 12px; }
+    .section { padding: 16px 16px; }
+    .bookmark-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-back" onclick="goBack()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>
+    마을로 돌아가기
+  </a>
+  <div class="nav-logo"><div class="nav-logo-dot"></div>술마을</div>
+  <div class="nav-spacer"></div>
+</nav>
+
+<!-- 히어로 -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="house-avatar">🏠</div>
+    <div style="flex:1;">
+      <div class="hero-tag">내 공간 · 마이하우스</div>
+      <h1 class="hero-title">술마을 주민 홍길동</h1>
+      <p class="hero-sub">Lv.8 소믈리에 견습 · 리뷰 23개 · 팔로워 12명</p>
+      <div class="stage-bar">
+        <span class="stage-label">🏕️ 3단계 천막</span>
+        <div class="stage-track"><div class="stage-fill" id="stageFill" style="width:46%"></div></div>
+        <span class="stage-next">부스까지 27개</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 탭 -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('reviews', this)">내 리뷰 <span style="font-size:11px;color:var(--text-muted);">23</span></div>
+  <div class="tab" onclick="switchTab('notifs', this)">알림 <span style="font-size:11px;color:#E8C840;font-weight:700;">3</span></div>
+  <div class="tab" onclick="switchTab('bookmarks', this)">즐겨찾기</div>
+  <div class="tab" onclick="switchTab('feed', this)">친구 피드</div>
+  <div class="tab" onclick="switchTab('orders', this)">쇼핑</div>
+</div>
+
+<!-- ── 내 리뷰 ── -->
+<div id="tab-reviews" class="tab-content active">
+  <div class="section">
+    <p class="section-title">최근 작성한 리뷰</p>
+    <div class="review-list">
+      <div class="review-card">
+        <div class="review-header">
+          <div class="review-emoji">🥃</div>
+          <div class="review-name">야마자키 12년</div>
+          <div class="review-rating">★★★★☆</div>
+        </div>
+        <div class="review-body">부드러운 바닐라 향과 살짝 스모키한 피니시. 가성비는 아쉽지만 특별한 날에 딱 맞는 위스키.</div>
+        <div class="review-meta">
+          <span class="review-tag">위스키</span>
+          <span class="review-tag">일본</span>
+          <span class="review-date">3일 전</span>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="review-header">
+          <div class="review-emoji">🍶</div>
+          <div class="review-name">화요 41</div>
+          <div class="review-rating">★★★★★</div>
+        </div>
+        <div class="review-body">깔끔하고 부드러운 목넘김. 전통 증류식 소주의 정석. 온더록스로 마시면 더욱 좋아요.</div>
+        <div class="review-meta">
+          <span class="review-tag">전통주</span>
+          <span class="review-tag">소주</span>
+          <span class="review-date">1주 전</span>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="review-header">
+          <div class="review-emoji">🍺</div>
+          <div class="review-name">크래프트 하이볼 — 유자</div>
+          <div class="review-rating">★★★☆☆</div>
+        </div>
+        <div class="review-body">유자 향이 인공적으로 느껴져서 조금 아쉬움. 가볍게 마시기엔 좋지만 재구매 의향은 낮음.</div>
+        <div class="review-meta">
+          <span class="review-tag">하이볼</span>
+          <span class="review-tag">크래프트</span>
+          <span class="review-date">2주 전</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 알림 ── -->
+<div id="tab-notifs" class="tab-content">
+  <div class="section">
+    <p class="section-title">새 알림 3개</p>
+    <div class="notif-list">
+      <div class="notif-item unread">
+        <div class="notif-icon">💬</div>
+        <div class="notif-body">
+          <div class="notif-text"><strong>위스키덕후</strong>님이 내 리뷰에 댓글을 남겼어요. "저도 야마자키 마셔봤는데 동의해요!"</div>
+          <div class="notif-time">방금 전</div>
+        </div>
+        <div class="notif-badge">NEW</div>
+      </div>
+      <div class="notif-item unread">
+        <div class="notif-icon">❤️</div>
+        <div class="notif-body">
+          <div class="notif-text"><strong>전통주러버</strong>님 외 4명이 내 화요 41 리뷰를 좋아해요.</div>
+          <div class="notif-time">1시간 전</div>
+        </div>
+        <div class="notif-badge">NEW</div>
+      </div>
+      <div class="notif-item unread">
+        <div class="notif-icon">🎉</div>
+        <div class="notif-body">
+          <div class="notif-text">리뷰 20개 달성! <strong>+50 XP</strong> 획득. 뱃지 '테이스터' 해금!</div>
+          <div class="notif-time">어제</div>
+        </div>
+        <div class="notif-badge">NEW</div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-icon">👥</div>
+        <div class="notif-body">
+          <div class="notif-text"><strong>막걸리마스터</strong>님이 팔로우를 시작했어요.</div>
+          <div class="notif-time">3일 전</div>
+        </div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-icon">🏆</div>
+        <div class="notif-body">
+          <div class="notif-text">이번 주 리뷰 랭킹 <strong>12위</strong>에 올랐어요!</div>
+          <div class="notif-time">5일 전</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 즐겨찾기 ── -->
+<div id="tab-bookmarks" class="tab-content">
+  <div class="section">
+    <p class="section-title">저장한 리뷰 & 게시글</p>
+    <div class="bookmark-grid">
+      <div class="bookmark-card">
+        <div class="bookmark-icon">🥃</div>
+        <div class="bookmark-title">글렌피딕 18년 완벽 가이드</div>
+        <div class="bookmark-sub">위스키덕후 작성</div>
+        <div class="bookmark-type">리뷰</div>
+      </div>
+      <div class="bookmark-card">
+        <div class="bookmark-icon">🍶</div>
+        <div class="bookmark-title">전통주 입문자를 위한 5선</div>
+        <div class="bookmark-sub">전통주러버 작성</div>
+        <div class="bookmark-type">게시글</div>
+      </div>
+      <div class="bookmark-card">
+        <div class="bookmark-icon">🍸</div>
+        <div class="bookmark-title">집에서 만드는 진토닉 레시피</div>
+        <div class="bookmark-sub">바텐더K 작성</div>
+        <div class="bookmark-type">게시글</div>
+      </div>
+      <div class="bookmark-card">
+        <div class="bookmark-icon">🍺</div>
+        <div class="bookmark-title">여름에 마시기 좋은 맥주 10선</div>
+        <div class="bookmark-sub">크래프트맥주 작성</div>
+        <div class="bookmark-type">리뷰</div>
+      </div>
+    </div>
+    <div style="margin-top:16px;">
+      <p class="section-title">술 위시리스트</p>
+      <div class="bookmark-grid">
+        <div class="bookmark-card">
+          <div class="bookmark-icon">🥃</div>
+          <div class="bookmark-title">맥캘란 더블 캐스크 12년</div>
+          <div class="bookmark-sub">₩89,000</div>
+          <div class="bookmark-type">위시리스트</div>
+        </div>
+        <div class="bookmark-card">
+          <div class="bookmark-icon">🍶</div>
+          <div class="bookmark-title">이강주 35도</div>
+          <div class="bookmark-sub">₩42,000</div>
+          <div class="bookmark-type">위시리스트</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 친구 피드 ── -->
+<div id="tab-feed" class="tab-content">
+  <div class="section">
+    <p class="section-title">친구들의 최근 활동</p>
+    <div class="feed-list">
+      <div class="feed-item">
+        <div class="feed-avatar" style="background:#FFF3E0;">🍶</div>
+        <div class="feed-body">
+          <div class="feed-text"><strong>전통주러버</strong>님이 막걸리순희 6도를 ★★★★★ 평가했어요.</div>
+          <div class="feed-time">10분 전</div>
+        </div>
+      </div>
+      <div class="feed-item">
+        <div class="feed-avatar" style="background:#F3E5F5;">🥃</div>
+        <div class="feed-body">
+          <div class="feed-text"><strong>위스키덕후</strong>님이 위스키 마니아 커뮤니티에 글을 올렸어요.</div>
+          <div class="feed-time">1시간 전</div>
+        </div>
+      </div>
+      <div class="feed-item">
+        <div class="feed-avatar" style="background:#E8F5E9;">🍸</div>
+        <div class="feed-body">
+          <div class="feed-text"><strong>바텐더K</strong>님이 레벨업! Lv.15 소믈리에 달성.</div>
+          <div class="feed-time">3시간 전</div>
+        </div>
+      </div>
+      <div class="feed-item">
+        <div class="feed-avatar" style="background:#FFF8E1;">🍺</div>
+        <div class="feed-body">
+          <div class="feed-text"><strong>크래프트맥주</strong>님이 월간 테이스팅 챌린지에 참여했어요.</div>
+          <div class="feed-time">어제</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 쇼핑 ── -->
+<div id="tab-orders" class="tab-content">
+  <div class="section">
+    <p class="section-title">장바구니</p>
+    <div class="cart-list">
+      <div class="cart-item">
+        <div class="cart-emoji">🥃</div>
+        <div class="cart-body">
+          <div class="cart-name">맥캘란 더블 캐스크 12년</div>
+          <div class="cart-price">₩89,000</div>
+        </div>
+        <div class="cart-remove" onclick="this.closest('.cart-item').remove(); updateCart();">✕</div>
+      </div>
+      <div class="cart-item">
+        <div class="cart-emoji">🍶</div>
+        <div class="cart-body">
+          <div class="cart-name">화요 41도 (375ml)</div>
+          <div class="cart-price">₩28,000</div>
+        </div>
+        <div class="cart-remove" onclick="this.closest('.cart-item').remove(); updateCart();">✕</div>
+      </div>
+    </div>
+    <div class="cart-total">
+      <span class="cart-total-label">합계</span>
+      <span class="cart-total-price" id="cartTotal">₩117,000</span>
+    </div>
+    <button class="btn-checkout" onclick="alert('스마트오더 기능은 준비 중이에요!')">스마트오더 결제</button>
+  </div>
+
+  <hr class="section-divider">
+
+  <div class="section">
+    <p class="section-title">구매 히스토리</p>
+    <div class="order-list">
+      <div class="order-card">
+        <div class="order-header">
+          <span class="order-date">2025.06.15</span>
+          <span class="order-status status-done">픽업 완료</span>
+        </div>
+        <div class="order-item">
+          <div class="order-emoji">🍶</div>
+          <div class="order-name">화요 25도 (750ml)</div>
+          <div class="order-price">₩38,000</div>
+        </div>
+        <div class="order-footer">
+          <span class="order-total">GS25 강남점 픽업</span>
+          <button class="reorder-btn" onclick="alert('장바구니에 담겼어요!')">다시 구매</button>
+        </div>
+      </div>
+      <div class="order-card">
+        <div class="order-header">
+          <span class="order-date">2025.06.02</span>
+          <span class="order-status status-done">픽업 완료</span>
+        </div>
+        <div class="order-item">
+          <div class="order-emoji">🥃</div>
+          <div class="order-name">글렌리벳 12년 (700ml)</div>
+          <div class="order-price">₩52,000</div>
+        </div>
+        <div class="order-footer">
+          <span class="order-total">CU 서초점 픽업</span>
+          <button class="reorder-btn" onclick="alert('장바구니에 담겼어요!')">다시 구매</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function switchTab(name, el) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    el.classList.add('active');
+  }
+
+  function updateCart() {
+    const prices = [...document.querySelectorAll('.cart-price')]
+      .map(el => parseInt(el.textContent.replace(/[^0-9]/g, '')));
+    const total = prices.reduce((a, b) => a + b, 0);
+    document.getElementById('cartTotal').textContent =
+      total > 0 ? '₩' + total.toLocaleString() : '₩0';
+  }
+
+  function goBack() {
+    if (document.referrer && document.referrer.includes(location.hostname)) {
+      history.back();
+    } else {
+      location.href = 'index.html';
+    }
+  }
+</script>
+
+</body>
+</html>

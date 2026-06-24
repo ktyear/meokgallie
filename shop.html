@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>주류 상점 — 술마을</title>
+<style>
+  :root{--green-50:#EEFAF2;--green-100:#B8EAC8;--green-200:#44CC66;--green-400:#22AA44;--green-600:#118833;--green-900:#063318;--bg:#EEF8F2;--bg-card:#fff;--text-primary:#041810;--text-secondary:#2a5a38;--text-muted:#68987a;--border:rgba(0,0,0,0.07);}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;}
+  nav{background:var(--bg-card);border-bottom:0.5px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+  .nav-back{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-secondary);text-decoration:none;cursor:pointer;}.nav-back:hover{color:var(--green-400);}.nav-back svg{width:16px;height:16px;}
+  .nav-logo{font-size:15px;font-weight:600;display:flex;align-items:center;gap:7px;}
+  .nav-logo-dot{width:8px;height:8px;border-radius:50%;background:var(--green-200);}
+  .nav-spacer{width:80px;}
+  .hero{background:linear-gradient(135deg,#063318 0%,#1A6A38 100%);padding:32px 24px 28px;}
+  .hero-inner{max-width:640px;margin:0 auto;}
+  .hero-tag{display:inline-block;font-size:11px;font-weight:600;color:#B8EAC8;background:rgba(255,255,255,0.1);padding:3px 10px;border-radius:99px;margin-bottom:10px;}
+  .hero-title{font-size:24px;font-weight:700;color:#fff;margin-bottom:6px;}
+  .hero-sub{font-size:14px;color:rgba(255,255,255,0.7);line-height:1.65;}
+  .section{padding:20px 24px;max-width:640px;margin:0 auto;}
+  .section-title{font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:14px;}
+  .tabs{background:var(--bg-card);border-bottom:0.5px solid var(--border);display:flex;overflow-x:auto;}.tabs::-webkit-scrollbar{display:none;}
+  .tab{padding:12px 18px;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.15s;}.tab.active{color:var(--green-400);border-bottom-color:var(--green-200);}
+  .tab-content{display:none;}.tab-content.active{display:block;}
+  .product-card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:border-color 0.15s;}.product-card:hover{border-color:var(--green-200);}
+  .product-icon{font-size:32px;flex-shrink:0;}
+  .product-name{font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:3px;}
+  .product-desc{font-size:12px;color:var(--text-secondary);margin-bottom:6px;}
+  .product-price{font-size:15px;font-weight:700;color:var(--green-600);}
+  .product-tag{font-size:10px;background:var(--green-50);color:var(--green-600);padding:2px 7px;border-radius:99px;margin-left:6px;font-weight:500;}
+  .cart-btn{margin-left:auto;background:var(--green-200);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;transition:background 0.15s;}.cart-btn:hover{background:var(--green-400);}
+  .notice{background:var(--green-50);border:0.5px solid var(--green-100);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:14px;}
+  @media(max-width:480px){nav{padding:12px 16px;}.hero{padding:20px 16px 20px;}.section{padding:16px;}}
+</style>
+</head>
+<body>
+<nav>
+  <a class="nav-back" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>마을로 돌아가기</a>
+  <div class="nav-logo"><div class="nav-logo-dot"></div>술마을</div>
+  <div class="nav-spacer"></div>
+</nav>
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-tag">주류 상점 · 쇼핑 & 스마트오더</div>
+    <h1 class="hero-title">🛒 주류 상점</h1>
+    <p class="hero-sub">스마트오더로 원하는 술을 픽업.<br>한정판 알림, 가격 비교, 맞춤 추천까지.</p>
+  </div>
+</div>
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('products',this)">상품</div>
+  <div class="tab" onclick="switchTab('limited',this)">한정판</div>
+  <div class="tab" onclick="switchTab('compare',this)">가격비교</div>
+</div>
+<div id="tab-products" class="tab-content active">
+  <div class="section">
+    <div class="notice">📦 스마트오더 — 주문 후 가까운 편의점·마트에서 픽업 (준비 중)</div>
+    <p class="section-title">추천 상품</p>
+    <div class="product-card"><div class="product-icon">🥃</div><div style="flex:1;"><div class="product-name">야마자키 12년 <span class="product-tag">인기</span></div><div class="product-desc">산토리 · 700ml · 43도</div><div class="product-price">₩89,000</div></div><button class="cart-btn" onclick="alert('장바구니 기능은 준비 중이에요!')">담기</button></div>
+    <div class="product-card"><div class="product-icon">🍶</div><div style="flex:1;"><div class="product-name">화요 41도 <span class="product-tag">베스트</span></div><div class="product-desc">화요 · 375ml · 41도</div><div class="product-price">₩28,000</div></div><button class="cart-btn" onclick="alert('장바구니 기능은 준비 중이에요!')">담기</button></div>
+    <div class="product-card"><div class="product-icon">🍷</div><div style="flex:1;"><div class="product-name">까시예로 델 디아블로 레드</div><div class="product-desc">콘차이토로 · 750ml · 13.5도</div><div class="product-price">₩18,000</div></div><button class="cart-btn" onclick="alert('장바구니 기능은 준비 중이에요!')">담기</button></div>
+    <div class="product-card"><div class="product-icon">🍺</div><div style="flex:1;"><div class="product-name">제주 위트에일</div><div class="product-desc">제주맥주 · 500ml · 5.3도</div><div class="product-price">₩3,800</div></div><button class="cart-btn" onclick="alert('장바구니 기능은 준비 중이에요!')">담기</button></div>
+  </div>
+</div>
+<div id="tab-limited" class="tab-content">
+  <div class="section">
+    <p class="section-title">한정판 & 특가</p>
+    <div class="product-card"><div class="product-icon">🥃</div><div style="flex:1;"><div class="product-name">글렌피딕 21년 <span class="product-tag" style="background:#FFF3E0;color:#E65100;">한정</span></div><div class="product-desc">윌리엄그랜트 · 700ml · 40도</div><div class="product-price">₩320,000</div></div><button class="cart-btn" onclick="alert('장바구니 기능은 준비 중이에요!')">담기</button></div>
+    <div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px;">한정판 입고 알림을 받으려면 알림 설정을 켜주세요.</div>
+  </div>
+</div>
+<div id="tab-compare" class="tab-content">
+  <div class="section">
+    <div style="background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:24px;text-align:center;">
+      <div style="font-size:36px;margin-bottom:12px;">📊</div>
+      <div style="font-size:14px;color:var(--text-secondary);line-height:1.6;">편의점·마트·면세점 가격을 한 번에 비교.<br>가격 비교 기능은 준비 중이에요.</div>
+    </div>
+  </div>
+</div>
+<script>
+  function switchTab(name,el){document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');el.classList.add('active');}
+  function goBack(){if(document.referrer&&document.referrer.includes(location.hostname)){history.back();}else{location.href='index.html';}}
+</script>
+</body>
+</html>

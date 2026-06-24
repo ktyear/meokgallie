@@ -13,7 +13,7 @@ const BuildingCommunity = (() => {
     desc: '취향 기반 소규모 커뮤니티. 기수별 Alumni 공간, 위스키 마니아, 전통주 덕후, 하이볼 클럽까지. 나와 같은 취향의 사람들을 만나보세요.',
     tags: ['커뮤니티', '소셜', 'Alumni', '취향'],
     pos:  [0, 0, -7.5],
-    url:  '#community',
+    url:  'community.html',
   };
 
   function makeCommunityExtras(group, { bodyW, bodyH, bodyD, signColor }) {

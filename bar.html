@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>술 바 — 술마을</title>
+<style>
+  :root {
+    --red-50:#FFF0EE;--red-100:#FFBCB0;--red-200:#E8522A;--red-400:#C03A18;
+    --red-600:#8A2210;--red-900:#3A0E04;
+    --bg:#FBF2EE;--bg-card:#fff;--text-primary:#1a0a04;
+    --text-secondary:#6b3a2e;--text-muted:#a07868;--border:rgba(0,0,0,0.07);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;}
+  nav{background:var(--bg-card);border-bottom:0.5px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+  .nav-back{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-secondary);text-decoration:none;cursor:pointer;}
+  .nav-back:hover{color:var(--red-400);}
+  .nav-back svg{width:16px;height:16px;}
+  .nav-logo{font-size:15px;font-weight:600;color:var(--text-primary);display:flex;align-items:center;gap:7px;}
+  .nav-logo-dot{width:8px;height:8px;border-radius:50%;background:var(--red-200);}
+  .nav-spacer{width:80px;}
+  .hero{background:linear-gradient(135deg,#2a0e04 0%,#5a1a0a 100%);padding:32px 24px 28px;border-bottom:0.5px solid var(--border);}
+  .hero-inner{max-width:640px;margin:0 auto;}
+  .hero-tag{display:inline-block;font-size:11px;font-weight:600;color:#FFBCB0;background:rgba(255,255,255,0.1);padding:3px 10px;border-radius:99px;margin-bottom:10px;}
+  .hero-title{font-size:24px;font-weight:700;color:#fff;margin-bottom:6px;}
+  .hero-sub{font-size:14px;color:rgba(255,255,255,0.7);line-height:1.65;}
+  .section{padding:20px 24px;max-width:640px;margin:0 auto;}
+  .section-title{font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:14px;}
+  .tabs{background:var(--bg-card);border-bottom:0.5px solid var(--border);display:flex;overflow-x:auto;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{padding:12px 18px;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.15s;}
+  .tab.active{color:var(--red-400);border-bottom-color:var(--red-200);}
+  .tab-content{display:none;}.tab-content.active{display:block;}
+  .review-card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:border-color 0.15s;}
+  .review-card:hover{border-color:var(--red-200);}
+  .review-header{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+  .review-emoji{font-size:22px;}
+  .review-name{font-size:14px;font-weight:600;flex:1;}
+  .review-rating{color:var(--red-200);font-size:13px;}
+  .review-body{font-size:13px;color:var(--text-secondary);line-height:1.55;margin-bottom:8px;}
+  .review-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .tag{font-size:11px;color:var(--text-muted);background:var(--bg);border:0.5px solid var(--border);padding:2px 8px;border-radius:99px;}
+  .review-date{font-size:11px;color:var(--text-muted);margin-left:auto;}
+  .drink-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+  .drink-card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:border-color 0.15s;}
+  .drink-card:hover{border-color:var(--red-200);}
+  .drink-icon{font-size:28px;margin-bottom:8px;}
+  .drink-name{font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:3px;}
+  .drink-desc{font-size:11px;color:var(--text-muted);line-height:1.4;}
+  .drink-rating{font-size:12px;color:var(--red-200);margin-top:6px;}
+  .write-btn{width:100%;background:var(--red-200);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;margin-top:10px;transition:background 0.15s;}
+  .write-btn:hover{background:var(--red-400);}
+  @media(max-width:480px){nav{padding:12px 16px;}.hero{padding:20px 16px 20px;}.section{padding:16px;}.drink-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<nav>
+  <a class="nav-back" onclick="goBack()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>
+    마을로 돌아가기
+  </a>
+  <div class="nav-logo"><div class="nav-logo-dot"></div>술마을</div>
+  <div class="nav-spacer"></div>
+</nav>
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-tag">술 바 · 리뷰 & 미디어</div>
+    <h1 class="hero-title">🍸 술 바</h1>
+    <p class="hero-sub">모든 주류의 리뷰와 테이스팅 노트.<br>전문 바텐더의 추천과 유저 평점을 한곳에서.</p>
+  </div>
+</div>
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('reviews',this)">최신 리뷰</div>
+  <div class="tab" onclick="switchTab('drinks',this)">주류 탐색</div>
+  <div class="tab" onclick="switchTab('write',this)">리뷰 작성</div>
+</div>
+<div id="tab-reviews" class="tab-content active">
+  <div class="section">
+    <p class="section-title">최신 리뷰</p>
+    <div class="review-card"><div class="review-header"><div class="review-emoji">🥃</div><div class="review-name">글렌피딕 18년</div><div class="review-rating">★★★★★</div></div><div class="review-body">풍부한 오크향과 달콤한 과일 노트. 18년의 숙성이 고스란히 느껴지는 위스키.</div><div class="review-meta"><span class="tag">위스키</span><span class="tag">스코틀랜드</span><span class="review-date">방금 전</span></div></div>
+    <div class="review-card"><div class="review-header"><div class="review-emoji">🍶</div><div class="review-name">안동소주 45도</div><div class="review-rating">★★★★☆</div></div><div class="review-body">깔끔하고 강렬한 증류식 소주. 전통의 맛이 살아있고 향이 오래 남는다.</div><div class="review-meta"><span class="tag">전통주</span><span class="tag">소주</span><span class="review-date">2시간 전</span></div></div>
+    <div class="review-card"><div class="review-header"><div class="review-emoji">🍸</div><div class="review-name">봄봄 막걸리</div><div class="review-rating">★★★★☆</div></div><div class="review-body">상큼한 산미와 은은한 단맛. 탄산감이 적당해 막걸리 입문자에게 추천.</div><div class="review-meta"><span class="tag">막걸리</span><span class="tag">전통주</span><span class="review-date">어제</span></div></div>
+  </div>
+</div>
+<div id="tab-drinks" class="tab-content">
+  <div class="section">
+    <p class="section-title">주류 탐색</p>
+    <div class="drink-grid">
+      <div class="drink-card"><div class="drink-icon">🥃</div><div class="drink-name">위스키</div><div class="drink-desc">스카치, 버번, 아이리시, 재패니즈</div><div class="drink-rating">리뷰 1,240개</div></div>
+      <div class="drink-card"><div class="drink-icon">🍶</div><div class="drink-name">전통주</div><div class="drink-desc">막걸리, 약주, 소주, 청주</div><div class="drink-rating">리뷰 890개</div></div>
+      <div class="drink-card"><div class="drink-icon">🍷</div><div class="drink-name">와인</div><div class="drink-desc">레드, 화이트, 스파클링, 로제</div><div class="drink-rating">리뷰 760개</div></div>
+      <div class="drink-card"><div class="drink-icon">🍺</div><div class="drink-name">맥주</div><div class="drink-desc">크래프트, 라거, 에일, 스타우트</div><div class="drink-rating">리뷰 2,100개</div></div>
+      <div class="drink-card"><div class="drink-icon">🍸</div><div class="drink-name">칵테일</div><div class="drink-desc">클래식, 시그니처, 목테일</div><div class="drink-rating">리뷰 420개</div></div>
+      <div class="drink-card"><div class="drink-icon">🥂</div><div class="drink-name">기타</div><div class="drink-desc">진, 럼, 보드카, 데킬라</div><div class="drink-rating">리뷰 580개</div></div>
+    </div>
+  </div>
+</div>
+<div id="tab-write" class="tab-content">
+  <div class="section">
+    <p class="section-title">리뷰 작성</p>
+    <div style="background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
+      <div style="font-size:36px;margin-bottom:12px;">✍️</div>
+      <div style="font-size:14px;color:var(--text-secondary);margin-bottom:16px;line-height:1.6;">오늘 마신 술을 기록해보세요.<br>리뷰 작성 시 <strong style="color:var(--red-400);">+50 XP</strong> 획득!</div>
+      <button class="write-btn" onclick="alert('리뷰 작성 기능은 준비 중이에요!')">리뷰 작성하기</button>
+    </div>
+  </div>
+</div>
+<script>
+  function switchTab(name,el){document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');el.classList.add('active');}
+  function goBack(){if(document.referrer&&document.referrer.includes(location.hostname)){history.back();}else{location.href='index.html';}}
+</script>
+</body>
+</html>

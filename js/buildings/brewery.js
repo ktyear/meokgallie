@@ -13,7 +13,7 @@ const BuildingBrewery = (() => {
     desc: '전통주 스토리텔링, 주조장 탐방 콘텐츠. 막걸리부터 증류식 소주, 약주까지. 우리 술의 역사와 장인의 이야기를 만나보세요.',
     tags: ['전통주', '막걸리', '스토리', '주조장'],
     pos:  [-7.0, 0, 0],
-    url:  '#brewery',
+    url:  'brewery.html',
   };
 
   function makeBreweryExtras(group, { bodyW, bodyH, bodyD }) {

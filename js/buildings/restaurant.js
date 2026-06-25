@@ -7,7 +7,7 @@ const BuildingRestaurant = (() => {
 
   const DATA = {
     id:   'restaurant',
-    name: '페어링 식당',
+    name: '마리아주',
     sub:  'FOOD PAIRING',
     emoji: '🍴',
     desc: '술과 음식의 완벽한 조합. 위스키와 어울리는 안주, 전통주에 맞는 한식, 와인 페어링 레시피까지. 술이 더 맛있어지는 방법.',

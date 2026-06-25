@@ -243,10 +243,8 @@ canvas {
 
 }
 
-/* 숏컷 블록만 남은 공간 채우고 스크롤 */
+/* 숏컷 블록 — 내용에 맞게 자동 높이 */
 #ui-shortcuts {
-  flex: 1;
-  min-height: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -256,10 +254,21 @@ canvas {
   flex-direction: column;
   gap: 3px;
   overflow-y: auto;
-  flex: 1;
+  max-height: calc(100vh - 280px); /* 날씨+가이드 블록 제외 */
   scrollbar-width: none;
 }
 #ui-shortcut-list::-webkit-scrollbar { display: none; }
+
+/* 토글 레이블 */
+.ui-block-toggle {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: all;
+  user-select: none;
+}
+.ui-block-toggle:hover { color: rgba(220, 210, 255, 0.95); }
 
 .ui-block {
   background: rgba(8, 6, 24, 0.35);
@@ -472,11 +481,42 @@ canvas {
 ══════════════════════════════════════════════ */
 @media (max-width: 480px) {
   #title-bar { top: 14px; }
-  #title-bar .logo { font-size: 20px; }
+  #title-bar .logo { font-size: 18px; }
 
-  #ui-zone { width: 150px; padding: 12px 10px 8px; height: 100vh; }
-  #chat-zone { bottom: 16px; left: 16px; right: 166px; height: 140px; border-radius: var(--radius-sm); }
-  .chat-tab { padding: 5px 10px; font-size: 10px; }
+  /* UI존 — 너비 줄이고 힌트박스 숨김 */
+  #ui-zone {
+    width: 110px;
+    padding: 56px 8px 8px; /* 상단 타이틀바 아래서 시작 */
+    gap: 6px;
+  }
+
+  /* UI 블록 패딩 줄이기 */
+  .ui-block { padding: 7px 8px; }
+  .ui-block-label { font-size: 8px; margin-bottom: 5px; }
+
+  /* 날씨 */
+  #ui-weather-icon { font-size: 14px; }
+  #ui-weather-text { font-size: 11px; }
+  #ui-location-text { font-size: 10px; }
+
+  /* 숏컷 버튼 컴팩트하게 */
+  .shortcut-btn { font-size: 10px; padding: 4px 6px; gap: 5px; }
+  .shortcut-btn span { font-size: 11px; }
+
+  /* 힌트박스 — 모바일에서 숨김 */
+  #ui-guide { display: none; }
+
+  /* 채팅창 — UI존 옆에 배치 */
+  #chat-zone {
+    bottom: 8px;
+    left: 8px;
+    right: 118px; /* UI존 110px + 여백 8px */
+    height: 110px;
+    border-radius: var(--radius-sm);
+  }
+  .chat-tab { padding: 4px 8px; font-size: 10px; }
+  #chat-input { font-size: 11px; }
+  #chat-send { font-size: 10px; padding: 4px 8px; }
 
   #popup-inner { padding: 16px 18px 14px; }
   #popup-name  { font-size: 14px; }
@@ -484,7 +524,9 @@ canvas {
 }
 
 @media (max-width: 360px) {
-  #ui-zone { display: none; }
+  #ui-zone { width: 100px; }
+  #chat-zone { right: 108px; }
+  .shortcut-btn { font-size: 9px; padding: 3px 5px; }
 }
 
 /* ══════════════════════════════════════════════

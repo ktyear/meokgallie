@@ -48,19 +48,21 @@
 
     <!-- 건물 숏컷 -->
     <div class="ui-block" id="ui-shortcuts">
-      <div class="ui-block-label">건물 바로가기</div>
+      <div class="ui-block-label ui-block-toggle" onclick="toggleShortcuts()">
+        건물 바로가기 <span id="shortcut-arrow">▾</span>
+      </div>
       <div id="ui-shortcut-list">
-        <button class="shortcut-btn" onclick="SoolControls.moveTo(-5.5, -3.5)"><span>🍸</span>술 바</button>
+        <button class="shortcut-btn" onclick="SoolControls.moveTo(-5.5, -3.5)"><span>🍸</span>술바</button>
         <button class="shortcut-btn" onclick="SoolControls.moveTo(5.5, -3.5)"><span>📚</span>도서관</button>
         <button class="shortcut-btn" onclick="SoolControls.moveTo(0, -7.5)"><span>🏛️</span>커뮤니티</button>
-        <button class="shortcut-btn" onclick="SoolControls.moveTo(7.0, 0)"><span>🛒</span>주류 상점</button>
+        <button class="shortcut-btn" onclick="SoolControls.moveTo(7.0, 0)"><span>🛒</span>주류상점</button>
         <button class="shortcut-btn" onclick="SoolControls.moveTo(-7.0, 0)"><span>🏺</span>양조장</button>
         <button class="shortcut-btn" onclick="SoolControls.moveTo(0, 5.5)"><span>🎬</span>영상관</button>
         <button class="shortcut-btn" onclick="SoolControls.moveTo(-2.5, -11.0)"><span>🗺️</span>안내소</button>
-        <button class="shortcut-btn" onclick="SoolControls.moveTo(-11.0, -5.0)"><span>🎪</span>팝업 광장</button>
-        <button class="shortcut-btn" onclick="SoolControls.moveTo(11.0, -5.0)"><span>🏠</span>내 공간</button>
-        <button class="shortcut-btn" onclick="SoolControls.moveTo(-11.0, 5.0)"><span>🌿</span>소버 카페</button>
-        <button class="shortcut-btn" onclick="SoolControls.moveTo(11.0, 5.0)"><span>🍽️</span>페어링 식당</button>
+        <button class="shortcut-btn" onclick="SoolControls.moveTo(-11.0, -5.0)"><span>🎪</span>팝업광장</button>
+        <button class="shortcut-btn" onclick="SoolControls.moveTo(11.0, -5.0)"><span>🏠</span>내공간</button>
+        <button class="shortcut-btn" onclick="SoolControls.moveTo(-11.0, 5.0)"><span>🌿</span>소버카페</button>
+        <button class="shortcut-btn" onclick="SoolControls.moveTo(11.0, 5.0)"><span>🍽️</span>마리아주</button>
       </div>
     </div>
 
@@ -112,6 +114,24 @@
 
   <!-- ── 인라인 스크립트 ── -->
   <script>
+    // 건물 숏컷 토글
+    const isMobile = window.innerWidth <= 480;
+    let shortcutsOpen = !isMobile; // 모바일: 기본 접힘, 데스크탑: 기본 펼침
+    function toggleShortcuts() {
+      shortcutsOpen = !shortcutsOpen;
+      const list  = document.getElementById('ui-shortcut-list');
+      const arrow = document.getElementById('shortcut-arrow');
+      list.style.display  = shortcutsOpen ? 'flex' : 'none';
+      arrow.textContent   = shortcutsOpen ? '▾' : '▸';
+    }
+    // 초기 상태 적용
+    document.addEventListener('DOMContentLoaded', () => {
+      if (isMobile) {
+        document.getElementById('ui-shortcut-list').style.display = 'none';
+        document.getElementById('shortcut-arrow').textContent = '▸';
+      }
+    });
+
     // 채팅 탭 전환
     function switchChat(type, el) {
       document.querySelectorAll('.chat-tab').forEach(t => t.classList.remove('active'));

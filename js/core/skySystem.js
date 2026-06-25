@@ -59,19 +59,19 @@ const SoolSky = (() => {
       fireflies:    false,
     },
     sunset: {
-      bgColor:      0xE8603A,  // 수평선 석양 — 진한 주황
-      fogColor:     0xCC5533,  // 바다 물드는 색
-      fogDensity:   0.022,
-      ambientColor: 0xFF7733,  // 붉은 노을빛
-      ambientInt:   0.85,
-      hemiSky:      0xFF6622,  // 하늘 주황
-      hemiGround:   0x331A00,  // 어두워지는 땅
-      hemiInt:      0.4,
-      moonInt:      0.2,       // 달 서서히 뜨기 시작
-      sunInt:       0.4,       // 수평선 너머 약한 태양
-      sunColor:     0xFF4400,  // 붉은 석양
-      stars:        true,      // 별 서서히 등장
-      fireflies:    true,      // 반딧불이 등장
+      bgColor:      0x8A5A3A,  // 50% 다운 — 어둑한 황혼
+      fogColor:     0x6A4028,  // 안개 어둡게
+      fogDensity:   0.014,     // 안개 더 옅게
+      ambientColor: 0xCC7733,  // 환경광 절반으로
+      ambientInt:   0.45,
+      hemiSky:      0x8A4A22,  // 하늘 많이 어둡게
+      hemiGround:   0x1A0C00,
+      hemiInt:      0.22,
+      moonInt:      0.25,      // 달빛 조금 더
+      sunInt:       0.18,      // 태양 많이 줄임
+      sunColor:     0xDD6611,
+      stars:        true,
+      fireflies:    true,
     },
     night: {
       bgColor:      0x060e1a,  // 섬 밤하늘 — 짙은 네이비 (scene.js와 통일)

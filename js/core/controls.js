@@ -1,29 +1,30 @@
 /* ═══════════════════════════════════════════════
-   술마을 — Controls
-   마우스 드래그 / 스크롤 줌 / 터치 드래그 / 핀치 줌
+   술마을 — Controls (쿼터뷰)
+   고정 45도 각도 / 맵 패닝 / 줌 / 90도 회전
    ═══════════════════════════════════════════════ */
 
 const SoolControls = (() => {
 
-  // ── 카메라 상태 ───────────────────────────────
+  // ── 쿼터뷰 카메라 상태 ────────────────────────
+  // theta: 0 / 90 / 180 / 270도 중 하나 (90도씩 회전)
+  // phi: 고정 (쿼터뷰 특성상 수직각 고정)
+  // pan: 맵 이동 (x, z)
   const state = {
-    theta:  0,       // 수평 회전각
-    phi:    0.52,    // 수직 각도
-    radius: 22,      // 카메라 거리 (맵 확장)
-    // 목표값 (lerp 대상)
-    tTheta:  0,
-    tPhi:    0.52,
-    tRadius: 22,
-    // 제한
-    phiMin:    0.08,
-    phiMax:    1.15,
-    radiusMin: 8,
-    radiusMax: 36,   // 맵 확장으로 최대 줌아웃 늘림
-    // 자동 회전
-    autoRotate:      true,
-    autoRotateSpeed: 0.0008,
-    autoRotatePaused: false,
-    autoResume:      null, // setTimeout 핸들
+    theta:    Math.PI * 0.25,  // 초기 각도 (45도 — 남동쪽에서 보기)
+    tTheta:   Math.PI * 0.25,
+    phi:      0.72,            // 쿼터뷰 수직각 고정 (약 41도)
+    radius:   20,              // 카메라 거리 (줌인)
+    tRadius:  20,
+    radiusMin: 10,
+    radiusMax: 44,
+    // 맵 패닝 (카메라 중심점 이동)
+    panX: 0, panZ: 0,
+    tPanX: 0, tPanZ: 0,
+    panLimit: 16,              // 맵 이동 한계 (섬 크기)
+    // 회전 애니메이션
+    rotating: false,
+    // 자동 회전 없음 (쿼터뷰에서는 불필요)
+    autoRotate: false,
   };
 
   // ── 드래그 상태 ──────────────────────────────
@@ -33,33 +34,43 @@ const SoolControls = (() => {
     prevY:  0,
     startX: 0,
     startY: 0,
-    moved:  false,   // 클릭 vs 드래그 판별
+    moved:  false,
   };
 
   // ── 터치 상태 ─────────────────────────────────
   const touch = {
-    points:    {},   // identifier → {x, y}
+    points:    {},
     pinchDist: null,
     tapStart:  null,
   };
 
-  let _camera   = null;
-  let _canvas   = null;
-  let _onTap    = null; // 탭/클릭 콜백 (clientX, clientY)
+  let _camera = null;
+  let _canvas = null;
+  let _onTap  = null;
 
-  // ── 자동 회전 일시정지 & 재개 ────────────────
-  function pauseAutoRotate(resumeMs = 3000) {
-    state.autoRotatePaused = true;
-    if (state.autoResume) clearTimeout(state.autoResume);
-    state.autoResume = setTimeout(() => {
-      state.autoRotatePaused = false;
-    }, resumeMs);
+  // ── 패닝 클램프 ──────────────────────────────
+  function clampPan() {
+    const L = state.panLimit;
+    state.tPanX = Math.max(-L, Math.min(L, state.tPanX));
+    state.tPanZ = Math.max(-L, Math.min(L, state.tPanZ));
   }
 
-  // ── 반경 클램프 ──────────────────────────────
-  function clampState() {
-    state.tPhi    = Math.max(state.phiMin,    Math.min(state.phiMax,    state.tPhi));
-    state.tRadius = Math.max(state.radiusMin, Math.min(state.radiusMax, state.tRadius));
+  // ── 드래그 → 월드 패닝 변환 ─────────────────
+  // 드래그한 방향으로 맵이 따라오는 직관적인 방식
+  function applyPan(dx, dy) {
+    const speed = 0.028 * (state.radius / 20); // 줌 레벨에 비례
+    const cos   = Math.cos(state.theta);
+    const sin   = Math.sin(state.theta);
+    // 화면 x 드래그 → 카메라 좌우 이동
+    // 화면 y 드래그 → 카메라 전후 이동 (쿼터뷰 각도 보정)
+    state.tPanX -= (dx * cos + dy * sin * 0.6) * speed;
+    state.tPanZ -= (-dx * sin + dy * cos * 0.6) * speed;
+    clampPan();
+  }
+
+  // ── 90도씩 회전 ──────────────────────────────
+  function rotateQuarter(dir) {
+    state.tTheta += dir * Math.PI * 0.5;
   }
 
   // ══════════════════════════════════════════════
@@ -73,7 +84,6 @@ const SoolControls = (() => {
     drag.startY = e.clientY;
     drag.moved  = false;
     _canvas.style.cursor = 'grabbing';
-    pauseAutoRotate();
   }
 
   function onMouseMove(e) {
@@ -86,10 +96,7 @@ const SoolControls = (() => {
       drag.moved = true;
     }
 
-    state.tTheta -= dx * 0.007;
-    state.tPhi   -= dy * 0.004;
-    clampState();
-
+    applyPan(dx, dy);
     drag.prevX = e.clientX;
     drag.prevY = e.clientY;
   }
@@ -98,8 +105,6 @@ const SoolControls = (() => {
     if (!drag.active) return;
     drag.active = false;
     _canvas.style.cursor = 'grab';
-
-    // 클릭 (드래그 아닌 경우)
     if (!drag.moved && _onTap) {
       _onTap(e.clientX, e.clientY);
     }
@@ -108,9 +113,8 @@ const SoolControls = (() => {
   function onWheel(e) {
     e.preventDefault();
     const delta = e.deltaMode === 1 ? e.deltaY * 20 : e.deltaY;
-    state.tRadius += delta * 0.012;
-    clampState();
-    pauseAutoRotate(2000);
+    state.tRadius += delta * 0.015;
+    state.tRadius = Math.max(state.radiusMin, Math.min(state.radiusMax, state.tRadius));
   }
 
   // ══════════════════════════════════════════════
@@ -121,7 +125,6 @@ const SoolControls = (() => {
     Array.from(e.changedTouches).forEach(t => {
       touch.points[t.identifier] = { x: t.clientX, y: t.clientY };
     });
-
     if (e.touches.length === 1) {
       drag.active = true;
       drag.startX = e.touches[0].clientX;
@@ -129,48 +132,37 @@ const SoolControls = (() => {
       drag.moved  = false;
       touch.tapStart = { x: e.touches[0].clientX, y: e.touches[0].clientY, t: Date.now() };
     }
-
     if (e.touches.length === 2) {
       const [a, b] = [e.touches[0], e.touches[1]];
       touch.pinchDist = Math.hypot(b.clientX - a.clientX, b.clientY - a.clientY);
-      touch.tapStart  = null; // 핀치 시작되면 탭 취소
+      touch.tapStart  = null;
     }
-
-    pauseAutoRotate();
   }
 
   function onTouchMove(e) {
     e.preventDefault();
-
     if (e.touches.length === 1) {
       const t    = e.touches[0];
       const prev = touch.points[t.identifier];
       if (prev) {
         const dx = t.clientX - prev.x;
         const dy = t.clientY - prev.y;
-
         if (Math.abs(t.clientX - drag.startX) > 8 ||
             Math.abs(t.clientY - drag.startY) > 8) {
           drag.moved = true;
         }
-
-        state.tTheta -= dx * 0.006;
-        state.tPhi   -= dy * 0.003;
-        clampState();
+        applyPan(dx, dy);
       }
       touch.points[t.identifier] = { x: t.clientX, y: t.clientY };
-
     } else if (e.touches.length === 2) {
-      // 핀치 줌
       const [a, b] = [e.touches[0], e.touches[1]];
       const dist   = Math.hypot(b.clientX - a.clientX, b.clientY - a.clientY);
       if (touch.pinchDist !== null) {
         const delta = touch.pinchDist - dist;
-        state.tRadius += delta * 0.04;
-        clampState();
+        state.tRadius += delta * 0.05;
+        state.tRadius = Math.max(state.radiusMin, Math.min(state.radiusMax, state.tRadius));
       }
       touch.pinchDist = dist;
-      // 두 손가락 이동으로 수평 Pan
       Array.from(e.touches).forEach(t => {
         touch.points[t.identifier] = { x: t.clientX, y: t.clientY };
       });
@@ -180,19 +172,15 @@ const SoolControls = (() => {
   function onTouchEnd(e) {
     e.preventDefault();
     Array.from(e.changedTouches).forEach(t => delete touch.points[t.identifier]);
-
     if (e.touches.length === 0) {
       drag.active     = false;
       touch.pinchDist = null;
-
-      // 탭 판별 (짧은 탭 = 건물 선택)
       if (touch.tapStart && !drag.moved) {
-        const ts  = touch.tapStart;
-        const ct  = e.changedTouches[0];
-        const dx  = Math.abs(ct.clientX - ts.x);
-        const dy  = Math.abs(ct.clientY - ts.y);
-        const dt  = Date.now() - ts.t;
-
+        const ts = touch.tapStart;
+        const ct = e.changedTouches[0];
+        const dx = Math.abs(ct.clientX - ts.x);
+        const dy = Math.abs(ct.clientY - ts.y);
+        const dt = Date.now() - ts.t;
         if (dx < 12 && dy < 12 && dt < 400 && _onTap) {
           _onTap(ct.clientX, ct.clientY);
         }
@@ -202,59 +190,73 @@ const SoolControls = (() => {
   }
 
   // ══════════════════════════════════════════════
-  // 키보드 컨트롤 (접근성 + 데스크탑 편의)
+  // 키보드 컨트롤
   // ══════════════════════════════════════════════
   function onKeyDown(e) {
-    const ROT  = 0.06;
-    const ZOOM = 1.2;
+    const PAN  = 1.5;
+    const ZOOM = 2.0;
     switch (e.key) {
-      case 'ArrowLeft':  state.tTheta -= ROT; pauseAutoRotate(); break;
-      case 'ArrowRight': state.tTheta += ROT; pauseAutoRotate(); break;
-      case 'ArrowUp':    state.tPhi   -= ROT * 0.5; clampState(); break;
-      case 'ArrowDown':  state.tPhi   += ROT * 0.5; clampState(); break;
-      case '+': case '=': state.tRadius -= ZOOM; clampState(); break;
-      case '-': case '_': state.tRadius += ZOOM; clampState(); break;
+      case 'ArrowLeft':  applyPan(-30, 0);  break;
+      case 'ArrowRight': applyPan( 30, 0);  break;
+      case 'ArrowUp':    applyPan(0, -30);  break;
+      case 'ArrowDown':  applyPan(0,  30);  break;
+      case '+': case '=':
+        state.tRadius -= ZOOM;
+        state.tRadius = Math.max(state.radiusMin, state.tRadius);
+        break;
+      case '-': case '_':
+        state.tRadius += ZOOM;
+        state.tRadius = Math.min(state.radiusMax, state.tRadius);
+        break;
+      case 'q': case 'Q':
+        rotateQuarter(-1); break;  // Q: 왼쪽 90도 회전
+      case 'e': case 'E':
+        rotateQuarter( 1); break;  // E: 오른쪽 90도 회전
       case 'r': case 'R':
         // 시점 리셋
-        state.tTheta  = 0;
-        state.tPhi    = 0.52;
-        state.tRadius = 22;
-        pauseAutoRotate(500);
-        break;
-      case ' ':
-        // 자동 회전 토글
-        state.autoRotate = !state.autoRotate;
-        e.preventDefault();
+        state.tTheta = Math.PI * 0.25;
+        state.tRadius = 28;
+        state.tPanX = 0;
+        state.tPanZ = 0;
         break;
     }
   }
 
   // ══════════════════════════════════════════════
-  // 카메라 업데이트 (매 프레임 호출)
+  // 카메라 업데이트 (매 프레임)
   // ══════════════════════════════════════════════
   function update() {
-    // 자동 회전
-    if (state.autoRotate && !state.autoRotatePaused && !drag.active) {
-      state.tTheta += state.autoRotateSpeed;
-    }
+    const LERP = 0.07;
 
-    // Lerp (부드러운 이동)
-    const LERP = 0.065;
+    // 각도 Lerp (부드러운 90도 회전)
     state.theta  += (state.tTheta  - state.theta)  * LERP;
-    state.phi    += (state.tPhi    - state.phi)    * LERP;
+    // 반경 Lerp
     state.radius += (state.tRadius - state.radius) * LERP;
+    // 패닝 Lerp
+    state.panX   += (state.tPanX   - state.panX)   * LERP;
+    state.panZ   += (state.tPanZ   - state.panZ)   * LERP;
 
-    // 카메라 위치 갱신
-    _camera.position.x = state.radius * Math.sin(state.theta) * Math.cos(state.phi);
-    _camera.position.y = state.radius * Math.sin(state.phi) + 1.5;
-    _camera.position.z = state.radius * Math.cos(state.theta) * Math.cos(state.phi);
-    _camera.lookAt(0, 1.5, 0);
+    // 카메라 위치 — 쿼터뷰 고정 수직각
+    const r   = state.radius;
+    const ph  = state.phi;
+    const th  = state.theta;
+    _camera.position.x = state.panX + r * Math.sin(th) * Math.cos(ph);
+    _camera.position.y = r * Math.sin(ph) + 1.5;
+    _camera.position.z = state.panZ + r * Math.cos(th) * Math.cos(ph);
+    _camera.lookAt(state.panX, 1.5, state.panZ);
   }
 
-  // ── 현재 theta 반환 (나침반용) ───────────────
+  // ── 건물 위치로 카메라 이동 ─────────────────
+  function moveTo(worldX, worldZ) {
+    state.tPanX = worldX;
+    state.tPanZ = worldZ;
+    state.tRadius = Math.min(state.tRadius, 18);
+  }
+
+  // ── getTheta (나침반용) ───────────────────────
   function getTheta() { return state.theta; }
 
-  // ── 드래그 중 여부 (레이캐스트 제어용) ───────
+  // ── isDragging ────────────────────────────────
   function isDragging() { return drag.active && drag.moved; }
 
   // ══════════════════════════════════════════════
@@ -267,22 +269,16 @@ const SoolControls = (() => {
 
     canvas.style.cursor = 'grab';
 
-    // 마우스
     canvas.addEventListener('mousedown',  onMouseDown);
     window.addEventListener('mousemove',  onMouseMove);
     window.addEventListener('mouseup',    onMouseUp);
     canvas.addEventListener('wheel',      onWheel, { passive: false });
-
-    // 터치
     canvas.addEventListener('touchstart', onTouchStart, { passive: false });
     canvas.addEventListener('touchmove',  onTouchMove,  { passive: false });
     canvas.addEventListener('touchend',   onTouchEnd,   { passive: false });
-
-    // 키보드
-    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keydown',    onKeyDown);
   }
 
-  // ── 정리 ──────────────────────────────────────
   function dispose() {
     if (!_canvas) return;
     _canvas.removeEventListener('mousedown',  onMouseDown);
@@ -293,9 +289,10 @@ const SoolControls = (() => {
     _canvas.removeEventListener('touchmove',  onTouchMove);
     _canvas.removeEventListener('touchend',   onTouchEnd);
     window.removeEventListener('keydown',     onKeyDown);
-    if (state.autoResume) clearTimeout(state.autoResume);
   }
 
-  return { init, update, getTheta, isDragging, dispose };
+  // rotateQuarter 외부 노출 (UI 버튼용)
+  return { init, update, getTheta, isDragging, dispose, rotateQuarter, moveTo };
 
 })();
+

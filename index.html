@@ -33,10 +33,68 @@
     <div class="logo">술마을</div>
   </div>
 
-  <!-- ── 미니맵 ── -->
-  <div id="minimap">
-    <canvas id="minimap-canvas" width="120" height="120"></canvas>
-    <div id="minimap-label">마을 지도</div>
+  <!-- ── 우측 UI 존 (오버레이) ── -->
+  <div id="ui-zone">
+
+    <!-- 날씨 & 접속 위치 통합 -->
+    <div class="ui-block" id="ui-weather">
+      <div class="ui-block-label">날씨 & 위치</div>
+      <div id="ui-weather-content">
+        <span id="ui-weather-icon">🌙</span>
+        <span id="ui-weather-text">밤 · --°C</span>
+      </div>
+      <div id="ui-location-text">위치 확인 중...</div>
+    </div>
+
+    <!-- 건물 숏컷 -->
+    <div class="ui-block" id="ui-shortcuts">
+      <div class="ui-block-label">건물 바로가기</div>
+      <div id="ui-shortcut-list">
+        <button class="shortcut-btn" onclick="SoolControls.moveTo(-5.5, -3.5)"><span>🍸</span>술 바</button>
+        <button class="shortcut-btn" onclick="SoolControls.moveTo(5.5, -3.5)"><span>📚</span>도서관</button>
+        <button class="shortcut-btn" onclick="SoolControls.moveTo(0, -7.5)"><span>🏛️</span>커뮤니티</button>
+        <button class="shortcut-btn" onclick="SoolControls.moveTo(7.0, 0)"><span>🛒</span>주류 상점</button>
+        <button class="shortcut-btn" onclick="SoolControls.moveTo(-7.0, 0)"><span>🏺</span>양조장</button>
+        <button class="shortcut-btn" onclick="SoolControls.moveTo(0, 5.5)"><span>🎬</span>영상관</button>
+        <button class="shortcut-btn" onclick="SoolControls.moveTo(-2.5, -11.0)"><span>🗺️</span>안내소</button>
+        <button class="shortcut-btn" onclick="SoolControls.moveTo(-11.0, -5.0)"><span>🎪</span>팝업 광장</button>
+        <button class="shortcut-btn" onclick="SoolControls.moveTo(11.0, -5.0)"><span>🏠</span>내 공간</button>
+        <button class="shortcut-btn" onclick="SoolControls.moveTo(-11.0, 5.0)"><span>🌿</span>소버 카페</button>
+        <button class="shortcut-btn" onclick="SoolControls.moveTo(11.0, 5.0)"><span>🍽️</span>페어링 식당</button>
+      </div>
+    </div>
+
+    <!-- 조작 가이드 -->
+    <div class="ui-block" id="ui-guide">
+      <div class="ui-block-label">조작 가이드</div>
+      <div class="hint-item"><span class="hint-key">드래그</span>지도 이동</div>
+      <div class="hint-item"><span class="hint-key">스크롤·핀치</span>줌</div>
+      <div class="hint-item"><span class="hint-key">Q / E</span>90도 회전</div>
+      <div class="hint-item"><span class="hint-key">R</span>시점 초기화</div>
+      <div class="hint-item"><span class="hint-key">클릭·탭</span>건물 보기</div>
+    </div>
+
+  </div>
+
+  <!-- ── 하단 채팅창 ── -->
+  <div id="chat-zone">
+    <div id="chat-tabs">
+      <button class="chat-tab active" onclick="switchChat('world',this)">🌏 월드</button>
+      <button class="chat-tab" onclick="switchChat('building',this)">🏠 건물</button>
+      <button class="chat-tab" onclick="switchChat('community',this)">👥 커뮤니티</button>
+      <button class="chat-tab" onclick="switchChat('dm',this)">💬 DM</button>
+    </div>
+    <div id="chat-messages">
+      <div class="chat-msg"><span class="chat-nick" style="color:#9966ff">바텐더K</span> 오늘 야마자키 12년 어때요? 🥃</div>
+      <div class="chat-msg"><span class="chat-nick" style="color:#44cc88">전통주러버</span> 저는 화요 41 강추합니다!</div>
+      <div class="chat-msg"><span class="chat-nick" style="color:#ff6699">위스키덕후</span> 날씨가 흐리니까 하이볼 생각나네요 ☁️</div>
+      <div class="chat-msg"><span class="chat-nick" style="color:#ffaa44">막걸리왕</span> 비 오는 날엔 막걸리+파전이죠 🌧️</div>
+      <div class="chat-msg system">🏘️ 지금 마을에 <strong>127명</strong>이 접속 중이에요</div>
+    </div>
+    <div id="chat-input-row">
+      <input id="chat-input" type="text" placeholder="마을 사람들과 대화해보세요..." maxlength="100" />
+      <button id="chat-send" onclick="sendChat()">전송</button>
+    </div>
   </div>
 
   <!-- ── 건물 정보 팝업 ── -->
@@ -52,18 +110,58 @@
     </div>
   </div>
 
-  <!-- ── 조작 힌트 ── -->
-  <div id="hint-bar">
-    <div class="hint-item"><span class="hint-key">드래그</span>돌아보기</div>
-    <div class="hint-item"><span class="hint-key">스크롤</span>줌</div>
-    <div class="hint-item"><span class="hint-key">핀치</span>줌</div>
-    <div class="hint-item"><span class="hint-key">탭·클릭</span>건물 보기</div>
-  </div>
+  <!-- ── 인라인 스크립트 ── -->
+  <script>
+    // 채팅 탭 전환
+    function switchChat(type, el) {
+      document.querySelectorAll('.chat-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      const msgs = document.getElementById('chat-messages');
+      const dummy = {
+        world:    [
+          { nick:'바텐더K', color:'#9966ff', msg:'오늘 야마자키 12년 어때요? 🥃' },
+          { nick:'전통주러버', color:'#44cc88', msg:'저는 화요 41 강추합니다!' },
+          { nick:'위스키덕후', color:'#ff6699', msg:'날씨가 흐리니까 하이볼 생각나네요 ☁️' },
+          { nick:'막걸리왕', color:'#ffaa44', msg:'비 오는 날엔 막걸리+파전이죠 🌧️' },
+          { type:'system', msg:'🏘️ 지금 마을에 <strong>127명</strong>이 접속 중이에요' },
+        ],
+        building: [
+          { nick:'소믈리에견습', color:'#44aaff', msg:'술 바에 새 리뷰 올라왔어요!' },
+          { nick:'바텐더K', color:'#9966ff', msg:'글렌피딕 18년 강추요 🥃' },
+          { type:'system', msg:'🍸 술 바에 <strong>23명</strong>이 있어요' },
+        ],
+        community:[
+          { nick:'위스키클럽장', color:'#ff9944', msg:'이번 주 위스키 모임 금요일이에요!' },
+          { nick:'전통주러버', color:'#44cc88', msg:'전통주 덕후 모임도 같이해요 🍶' },
+          { type:'system', msg:'👥 위스키 마니아 커뮤니티 · 2,840명' },
+        ],
+        dm:       [
+          { type:'system', msg:'💬 DM은 친구 추가 후 이용할 수 있어요' },
+        ],
+      };
+      msgs.innerHTML = (dummy[type]||[]).map(m =>
+        m.type === 'system'
+          ? `<div class="chat-msg system">${m.msg}</div>`
+          : `<div class="chat-msg"><span class="chat-nick" style="color:${m.color}">${m.nick}</span> ${m.msg}</div>`
+      ).join('');
+      msgs.scrollTop = msgs.scrollHeight;
+    }
 
-  <!-- ── 나침반 ── -->
-  <div id="compass">
-    <div id="compass-needle">N</div>
-  </div>
+    // 채팅 전송 (더미)
+    function sendChat() {
+      const input = document.getElementById('chat-input');
+      const val   = input.value.trim();
+      if (!val) return;
+      const msgs = document.getElementById('chat-messages');
+      msgs.innerHTML += `<div class="chat-msg"><span class="chat-nick" style="color:#ccaaff">나</span> ${val}</div>`;
+      msgs.scrollTop = msgs.scrollHeight;
+      input.value = '';
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      const inp = document.getElementById('chat-input');
+      if (inp) inp.addEventListener('keydown', e => { if(e.key==='Enter') sendChat(); });
+    });
+  </script>
 
   <!-- ── Three.js CDN ── -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>

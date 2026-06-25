@@ -51,16 +51,22 @@ const SoolScene = (() => {
     scene.fog = new THREE.FogExp2(0x0a1e2e, 0.022);
   }
 
-  // ── Camera 초기화 ───────────────────────────
+  // ── Camera 초기화 (쿼터뷰) ─────────────────────
   function initCamera() {
     camera = new THREE.PerspectiveCamera(
-      52,
+      45,                                    // 쿼터뷰는 화각을 좁게 — 원근감 최소화
       window.innerWidth / window.innerHeight,
       0.1,
-      200 // 섬 확장 — 바다 수평선까지 렌더링
+      200
     );
-    camera.position.set(0, 12, 20);
-    camera.lookAt(0, 0, 0);
+    // 쿼터뷰 초기 시점 — 남동쪽 45도 위에서 내려다보기
+    const r  = 20, ph = 0.72, th = Math.PI * 0.25;
+    camera.position.set(
+      r * Math.sin(th) * Math.cos(ph),
+      r * Math.sin(ph) + 1.5,
+      r * Math.cos(th) * Math.cos(ph)
+    );
+    camera.lookAt(0, 1.5, 0);
   }
 
   // ── 조명 설정 ───────────────────────────────

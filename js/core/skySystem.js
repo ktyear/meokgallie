@@ -340,18 +340,7 @@ const SoolSky = (() => {
     if (!el) {
       el = document.createElement('div');
       el.id = 'sky-info';
-      Object.assign(el.style, {
-        position:   'fixed',
-        top:        '20px',
-        left:       '20px',
-        color:      'rgba(180,220,255,0.55)',  // 바다빛 청색
-        fontSize:   '11px',
-        fontFamily: 'Arial, sans-serif',
-        letterSpacing: '0.06em',
-        pointerEvents: 'none',
-        zIndex:     '10',
-        lineHeight: '1.6',
-      });
+      // 스타일은 css/style.css #sky-info 에서 관리
       document.body.appendChild(el);
     }
 
@@ -366,6 +355,15 @@ const SoolSky = (() => {
     const tempText = state.temperature !== null ? ` · ${state.temperature}°C` : '';
     el.innerHTML =
       `${icons[state.weather]} ${slotKo[state.timeSlot]}${cityText}${tempText}`;
+
+    // ── UI존 날씨·위치 블록 연동 ────────────────
+    const uiIcon = document.getElementById('ui-weather-icon');
+    const uiText = document.getElementById('ui-weather-text');
+    const uiLoc  = document.getElementById('ui-location-text');
+    if (uiIcon) uiIcon.textContent = icons[state.weather];
+    if (uiText) uiText.textContent =
+      `${slotKo[state.timeSlot]} · ${state.temperature !== null ? state.temperature + '°C' : '--°C'}`;
+    if (uiLoc)  uiLoc.textContent  = state.city || '위치 확인 중...';
   }
 
   // ── 매 프레임 업데이트 ────────────────────────

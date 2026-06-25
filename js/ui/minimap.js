@@ -11,8 +11,8 @@ const SoolMinimap = (() => {
 
   // 미니맵 설정
   const MAP = {
-    size:   120,       // canvas px
-    worldR: 18,        // 월드 좌표 범위 (±18)
+    size:   152,       // canvas px (UI존 너비에 맞춤)
+    worldR: 20,        // 섬 기준 범위 확장
     padX:   10,
     padY:   10,
   };
@@ -34,10 +34,8 @@ const SoolMinimap = (() => {
     const ctx  = _ctx;
     const size = MAP.size;
 
-    // 배경
+    // 배경 제거 — UI존 블록 배경 그대로 비침
     ctx.clearRect(0, 0, size, size);
-    ctx.fillStyle = 'rgba(8,6,24,0.82)';
-    ctx.fillRect(0, 0, size, size);
 
     // 외곽 원형 클립
     ctx.save();
@@ -45,13 +43,33 @@ const SoolMinimap = (() => {
     ctx.arc(size / 2, size / 2, size / 2 - 1, 0, Math.PI * 2);
     ctx.clip();
 
-    // 도로 (가로/세로 십자)
-    ctx.strokeStyle = 'rgba(60,55,100,0.7)';
-    ctx.lineWidth = 3;
+    // 섬 레이어 — 바다
+    const scale = (MAP.size / 2 - MAP.padX) / MAP.worldR;
+    ctx.fillStyle = 'rgba(10, 42, 74, 0.85)';
     ctx.beginPath();
-    ctx.moveTo(0, size / 2); ctx.lineTo(size, size / 2);
-    ctx.moveTo(size / 2, 0); ctx.lineTo(size / 2, size);
-    ctx.stroke();
+    ctx.arc(size/2, size/2, size/2 - 1, 0, Math.PI*2);
+    ctx.fill();
+
+    // 모래사장
+    const sandR = 22 * scale;
+    ctx.fillStyle = 'rgba(200,168,106,0.7)';
+    ctx.beginPath();
+    ctx.arc(size/2, size/2, Math.min(sandR, size/2-2), 0, Math.PI*2);
+    ctx.fill();
+
+    // 잔디
+    const grassR = 17 * scale;
+    ctx.fillStyle = 'rgba(30,58,26,0.8)';
+    ctx.beginPath();
+    ctx.arc(size/2, size/2, Math.min(grassR, size/2-2), 0, Math.PI*2);
+    ctx.fill();
+
+    // 벽돌
+    const brickR = 14 * scale;
+    ctx.fillStyle = 'rgba(74,60,46,0.8)';
+    ctx.beginPath();
+    ctx.arc(size/2, size/2, Math.min(brickR, size/2-2), 0, Math.PI*2);
+    ctx.fill();
 
     // 중앙 광장
     const ctr = toMap(0, 0);
@@ -151,7 +169,6 @@ const SoolMinimap = (() => {
     _compass  = document.getElementById('compass-needle');
 
     if (_canvas) {
-      // ★ 최적화: 레티나 cap을 1로 낮춤 (미니맵은 해상도 덜 중요)
       const dpr = 1;
       _canvas.width  = MAP.size * dpr;
       _canvas.height = MAP.size * dpr;

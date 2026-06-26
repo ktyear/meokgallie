@@ -334,6 +334,15 @@ canvas {
   color: rgba(220, 210, 255, 0.95);
 }
 .shortcut-btn:active { background: rgba(153, 102, 255, 0.25); }
+.congestion-bar {
+  width: 3px;
+  height: 14px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.bar-green  { background: #4ade80; }
+.bar-yellow { background: #facc15; }
+.bar-red    { background: #f87171; }
 
 /* 조작 가이드 */
 #ui-guide {

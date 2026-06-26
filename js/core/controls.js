@@ -12,7 +12,7 @@ const SoolControls = (() => {
   const state = {
     theta:    Math.PI * 0.25,  // 초기 각도 (45도 — 남동쪽에서 보기)
     tTheta:   Math.PI * 0.25,
-    phi:      0.72,            // 쿼터뷰 수직각 고정 (약 41도)
+    phi:      0.32,            // 쿼터뷰 수직각 고정 (약 41도)
     radius:   20,              // 카메라 거리 (줌인)
     tRadius:  20,
     radiusMin: 10,

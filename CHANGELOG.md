@@ -97,6 +97,42 @@ js/ui/chatUI.js            ← 신규 추가 (채팅창 UI 컴포넌트)
 
 ---
 
+## [v1.5.2] — 2026-06-26 · 카메라·UI·건물 배치 개선
+
+### 변경 파일
+
+#### js/core/controls.js
+- 카메라 수직각(`phi`) 조정: `0.72` → `0.32`
+  - 카메라 높이를 낮춰 건물 정면 가시성 향상
+
+#### js/buildings/studio.js
+- 영상관 위치 변경: `[0, 0, 5.5]` → `[-2.0, 0, 5.5]`
+  - 안내소와 나란히 배치하기 위해 좌측으로 이동
+
+#### js/buildings/infoCenter.js
+- 안내소 위치 변경: `[-2.5, 0, -11.0]` → `[2.5, 0, 5.5]`
+  - 커뮤니티 건물에 가려지던 문제 해소
+  - 영상관 옆(나무 사이)으로 이동
+
+#### index.html
+- 안내소·영상관 숏컷 버튼 좌표 업데이트
+- 건물 숏컷에 혼잡도 세로 줄 표시 추가
+  - 각 건물 이모티콘 앞에 3px 세로 줄 표시
+  - 🟢 초록: 여유 / 🟡 노랑: 보통 / 🔴 빨강: 혼잡
+  - 현재 더미 데이터 하드코딩, 추후 실제 API 연결 예정
+
+#### css/style.css
+- 혼잡도 세로 줄 CSS 추가
+  - `.congestion-bar`, `.bar-green`, `.bar-yellow`, `.bar-red`
+
+#### 서비스 페이지 (html 9개)
+- 건물 탭 메뉴 가운데 정렬 작업
+  - `.tabs` CSS에 `justify-content: center` 추가
+  - 적용 파일: bar / library / community / shop / brewery / studio / myspace / cafe / restaurant
+  - infocenter · popupSquare는 탭 메뉴 없음 → 미적용
+
+--
+
 ## [v1.5.1] — 2025-06-25 · UI 세부 개선 & 버그 수정
 
 ### 변경 파일

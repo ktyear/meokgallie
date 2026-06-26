@@ -61,7 +61,7 @@ const SoolBuildings = (() => {
     for (let i = 0; i < count; i++) {
       const x = -buildingW / 2 + (i + 0.5) * (buildingW / count);
       const win = makeWindow(winW, winH, lightColor, intensity + (Math.random() - 0.5) * 0.2);
-      win.position.set(x, y, faceZ + 0.01);
+      win.position.set(x, y, faceZ + 0.01);      
       group.add(win);
     }
     // ★ 최적화: 창문 포인트 라이트 완전 제거
@@ -283,7 +283,7 @@ const SoolBuildings = (() => {
         buildingW: bodyW,
         lightColor: windowColor,
         intensity: 0.8 + Math.random() * 0.3,
-      });
+      });      
     }
 
     // 4. 간판 조명

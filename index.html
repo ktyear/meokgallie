@@ -36,6 +36,18 @@
   <!-- ── 우측 UI 존 (오버레이) ── -->
   <div id="ui-zone">
 
+    <!-- 유저 상태 -->
+    <div class="ui-block" id="ui-user">
+      <div id="ui-user-loggedin" style="display:none;">
+        <div id="ui-user-nickname"></div>
+        <div id="ui-user-level"></div>
+        <button id="ui-logout-btn" onclick="handleLogout()">로그아웃</button>
+      </div>
+      <div id="ui-user-guest">
+        <button id="ui-login-btn" onclick="location.href='auth.html'">🔐 로그인 / 가입</button>
+      </div>
+    </div>
+
     <!-- 날씨 & 접속 위치 통합 -->
     <div class="ui-block" id="ui-weather">
       <div class="ui-block-label">날씨 & 위치</div>
@@ -80,8 +92,8 @@
     <div class="ui-block" id="ui-rotate">
       <div class="ui-block-label">시점 회전</div>
       <div id="ui-rotate-btns">
-        <button class="rotate-btn" onclick="SoolControls.rotateQuarter(-1)">◀ 왼쪽</button>
-        <button class="rotate-btn" onclick="SoolControls.rotateQuarter(1)">오른쪽 ▶</button>
+        <button class="rotate-btn" onclick="SoolControls.rotateQuarter(-1)">◀ L</button>
+        <button class="rotate-btn" onclick="SoolControls.rotateQuarter(1)">R ▶</button>
       </div>
     </div>
 
@@ -190,7 +202,39 @@
       const inp = document.getElementById('chat-input');
       if (inp) inp.addEventListener('keydown', e => { if(e.key==='Enter') sendChat(); });
     });
+
+    // 로그인 상태 확인 및 유저 정보 표시
+    async function initUserState() {
+      const { data: { session } } = await soolClient.auth.getSession();
+      if (session) {
+        const { data: user } = await soolClient
+          .from('users')
+          .select('nickname, level')
+          .eq('id', session.user.id)
+          .single();
+        if (user) {
+          document.getElementById('ui-user-nickname').textContent = '🌿 ' + user.nickname;
+          document.getElementById('ui-user-level').textContent = 'Lv.' + user.level;
+          document.getElementById('ui-user-loggedin').style.display = 'block';
+          document.getElementById('ui-user-guest').style.display = 'none';
+        }
+      }
+    }
+
+    async function handleLogout() {
+      await soolClient.auth.signOut();
+      location.reload();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initUserState();
+    });
+
   </script>
+
+  <!-- ── Supabase CDN ── -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/core/supabase.js"></script>
 
   <!-- ── Three.js CDN ── -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>

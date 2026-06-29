@@ -344,6 +344,39 @@ canvas {
 .bar-yellow { background: #facc15; }
 .bar-red    { background: #f87171; }
 
+/* 유저 상태 블록 */
+#ui-user-nickname {
+  font-size: 12px;
+  color: rgba(245, 242, 255, 1.0);
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+#ui-user-level {
+  font-size: 10px;
+  color: var(--c-accent);
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+}
+#ui-logout-btn, #ui-login-btn {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--c-border);
+  border-radius: 6px;
+  color: rgba(215, 205, 255, 0.85);
+  font-size: 10px;
+  padding: 5px 8px;
+  cursor: pointer;
+  pointer-events: all;
+  font-family: inherit;
+  transition: background 0.15s;
+  text-align: center;
+}
+#ui-logout-btn:hover, #ui-login-btn:hover {
+  background: rgba(153, 102, 255, 0.15);
+  border-color: rgba(153, 102, 255, 0.3);
+  color: rgba(220, 210, 255, 0.95);
+}
+
 /* 조작 가이드 */
 #ui-guide {
   display: flex;

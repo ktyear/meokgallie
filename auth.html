@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>로그인 — 술향기마을</title>
+<style>
+  :root {
+    --c-bg:       #07071a;
+    --c-dark:     #0e0e26;
+    --c-accent:   #9966ff;
+    --c-accent-dim: rgba(153,102,255,0.25);
+    --c-border:   rgba(180,150,255,0.18);
+    --c-text:     rgba(245,242,255,1.0);
+    --c-muted:    rgba(215,205,255,0.85);
+    --c-glass:    rgba(8,6,24,0.88);
+    --radius-sm:  8px;
+    --radius-md:  12px;
+    --radius-lg:  18px;
+    --blur:       blur(18px);
+    --transition: 0.22s ease;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;
+    background: var(--c-bg);
+    color: var(--c-text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+  }
+
+  /* 로고 */
+  .auth-logo {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .auth-logo .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.36em;
+    color: var(--c-muted);
+    text-transform: uppercase;
+  }
+  .auth-logo .logo {
+    font-size: 26px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.06em;
+    margin-top: 4px;
+    text-shadow: 0 0 30px rgba(153,102,255,0.65);
+  }
+
+  /* 카드 */
+  .auth-card {
+    background: var(--c-glass);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-lg);
+    padding: 28px 28px 24px;
+    width: 100%;
+    max-width: 380px;
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.55);
+  }
+
+  /* 탭 */
+  .auth-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--c-border);
+    margin-bottom: 24px;
+  }
+  .auth-tab {
+    flex: 1;
+    padding: 8px 0;
+    font-size: 13px;
+    color: var(--c-muted);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: color var(--transition), border-color var(--transition);
+    font-family: inherit;
+  }
+  .auth-tab.active {
+    color: rgba(200,175,255,0.95);
+    border-bottom-color: var(--c-accent);
+  }
+
+  /* 폼 */
+  .auth-form { display: none; flex-direction: column; gap: 14px; }
+  .auth-form.active { display: flex; }
+
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-label {
+    font-size: 11px;
+    color: var(--c-muted);
+    letter-spacing: 0.06em;
+  }
+  .form-input {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-sm);
+    color: var(--c-text);
+    font-size: 13px;
+    padding: 10px 12px;
+    outline: none;
+    font-family: inherit;
+    transition: border-color var(--transition);
+  }
+  .form-input::placeholder { color: rgba(215,205,255,0.4); }
+  .form-input:focus { border-color: rgba(153,102,255,0.5); }
+
+  /* 버튼 */
+  .btn-main {
+    width: 100%;
+    background: var(--c-accent-dim);
+    border: 1px solid rgba(153,102,255,0.4);
+    border-radius: var(--radius-md);
+    color: rgba(210,190,255,0.95);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 11px 0;
+    cursor: pointer;
+    transition: background var(--transition), box-shadow var(--transition);
+    font-family: inherit;
+    letter-spacing: 0.06em;
+    margin-top: 4px;
+  }
+  .btn-main:hover {
+    background: rgba(153,102,255,0.35);
+    box-shadow: 0 0 16px rgba(153,102,255,0.25);
+  }
+  .btn-main:active { background: rgba(153,102,255,0.45); }
+
+  /* 메시지 */
+  .auth-msg {
+    font-size: 12px;
+    text-align: center;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    display: none;
+  }
+  .auth-msg.success {
+    display: block;
+    background: rgba(74,222,128,0.12);
+    border: 1px solid rgba(74,222,128,0.3);
+    color: #86efac;
+  }
+  .auth-msg.error {
+    display: block;
+    background: rgba(248,113,113,0.12);
+    border: 1px solid rgba(248,113,113,0.3);
+    color: #fca5a5;
+  }
+
+  /* 마을로 돌아가기 */
+  .auth-back {
+    margin-top: 20px;
+    font-size: 12px;
+    color: var(--c-muted);
+    text-align: center;
+  }
+  .auth-back a {
+    color: rgba(200,175,255,0.85);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .auth-back a:hover { color: #fff; }
+
+  @media (max-width: 400px) {
+    .auth-card { padding: 22px 18px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="auth-logo">
+  <div class="eyebrow">Soolhyang Village</div>
+  <div class="logo">술향기마을</div>
+</div>
+
+<div class="auth-card">
+  <!-- 탭 -->
+  <div class="auth-tabs">
+    <button class="auth-tab active" onclick="switchTab('login', this)">로그인</button>
+    <button class="auth-tab" onclick="switchTab('signup', this)">회원가입</button>
+  </div>
+
+  <!-- 로그인 폼 -->
+  <form class="auth-form active" id="form-login" onsubmit="handleLogin(event)">
+    <div class="form-group">
+      <label class="form-label">이메일</label>
+      <input class="form-input" type="email" id="login-email" placeholder="hello@example.com" required />
+    </div>
+    <div class="form-group">
+      <label class="form-label">비밀번호</label>
+      <input class="form-input" type="password" id="login-pw" placeholder="비밀번호 입력" required />
+    </div>
+    <div class="auth-msg" id="login-msg"></div>
+    <button class="btn-main" type="submit">마을 입장하기 →</button>
+  </form>
+
+  <!-- 회원가입 폼 -->
+  <form class="auth-form" id="form-signup" onsubmit="handleSignup(event)">
+    <div class="form-group">
+      <label class="form-label">닉네임</label>
+      <input class="form-input" type="text" id="signup-nick" placeholder="마을에서 불릴 이름" required maxlength="12" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">이메일</label>
+      <input class="form-input" type="email" id="signup-email" placeholder="hello@example.com" required />
+    </div>
+    <div class="form-group">
+      <label class="form-label">비밀번호</label>
+      <input class="form-input" type="password" id="signup-pw" placeholder="8자 이상 입력" required minlength="8" />
+    </div>
+    <div class="auth-msg" id="signup-msg"></div>
+    <button class="btn-main" type="submit">가입하고 입장하기 →</button>
+  </form>
+</div>
+
+<div class="auth-back">
+  <a onclick="location.href='index.html'">← 마을 먼저 둘러볼게요</a>
+</div>
+
+<!-- Supabase CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/core/supabase.js"></script>
+<script>
+  // 탭 전환
+  function switchTab(type, el) {
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('form-' + type).classList.add('active');
+  }
+
+  // 메시지 표시
+  function showMsg(id, type, text) {
+    const el = document.getElementById(id);
+    el.className = 'auth-msg ' + type;
+    el.textContent = text;
+  }
+
+  // 로그인
+  async function handleLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const pw    = document.getElementById('login-pw').value;
+
+    const { error } = await soolClient.auth.signInWithPassword({ email, password: pw });
+
+    if (error) {
+      showMsg('login-msg', 'error', '이메일 또는 비밀번호가 올바르지 않아요.');
+    } else {
+      showMsg('login-msg', 'success', '로그인 성공! 마을로 이동 중...');
+      setTimeout(() => location.href = 'index.html', 1000);
+    }
+  }
+
+  // 회원가입
+  async function handleSignup(e) {
+    e.preventDefault();
+    const nick  = document.getElementById('signup-nick').value;
+    const email = document.getElementById('signup-email').value;
+    const pw    = document.getElementById('signup-pw').value;
+
+    const { error } = await soolClient.auth.signUp({
+      email,
+      password: pw,
+      options: { data: { nickname: nick } }
+    });
+
+    if (error) {
+      showMsg('signup-msg', 'error', '가입 중 오류가 발생했어요: ' + error.message);
+    } else {
+      showMsg('signup-msg', 'success', '가입 완료! 이메일 인증 후 로그인해주세요 📧');
+    }
+  }
+
+  // 이미 로그인된 경우 바로 이동
+  soolClient.auth.getSession().then(({ data }) => {
+    if (data.session) location.href = 'index.html';
+  });
+</script>
+
+</body>
+</html>

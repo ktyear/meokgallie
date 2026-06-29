@@ -370,6 +370,27 @@ canvas {
   flex-shrink: 0;
 }
 
+/* 회전 버튼 (모바일 전용) */
+#ui-rotate { display: none; flex-shrink: 0; }
+#ui-rotate-btns {
+  display: flex;
+  gap: 4px;
+}
+.rotate-btn {
+  flex: 1;
+  background: rgba(153, 102, 255, 0.15);
+  border: 1px solid rgba(153, 102, 255, 0.3);
+  border-radius: 6px;
+  color: rgba(220, 210, 255, 0.95);
+  font-size: 10px;
+  padding: 5px 4px;
+  cursor: pointer;
+  pointer-events: all;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.rotate-btn:active { background: rgba(153, 102, 255, 0.35); }
+
 /* sky-info — skySystem.js가 생성하는 요소 (UI존 내 날씨로 대체) */
 #sky-info { display: none !important; }
 
@@ -523,6 +544,10 @@ canvas {
     height: 110px;
     border-radius: var(--radius-sm);
   }
+
+  /* 회전 버튼 — 모바일에서만 표시 */
+  #ui-rotate { display: flex; flex-direction: column; }
+  
   .chat-tab { padding: 4px 8px; font-size: 10px; }
   #chat-input { font-size: 11px; }
   #chat-send { font-size: 10px; padding: 4px 8px; }

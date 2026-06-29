@@ -78,21 +78,16 @@
 <div id="tab-reviews" class="tab-content active">
   <div class="section">
     <p class="section-title">최신 리뷰</p>
-    <div class="review-card"><div class="review-header"><div class="review-emoji">🥃</div><div class="review-name">글렌피딕 18년</div><div class="review-rating">★★★★★</div></div><div class="review-body">풍부한 오크향과 달콤한 과일 노트. 18년의 숙성이 고스란히 느껴지는 위스키.</div><div class="review-meta"><span class="tag">위스키</span><span class="tag">스코틀랜드</span><span class="review-date">방금 전</span></div></div>
-    <div class="review-card"><div class="review-header"><div class="review-emoji">🍶</div><div class="review-name">안동소주 45도</div><div class="review-rating">★★★★☆</div></div><div class="review-body">깔끔하고 강렬한 증류식 소주. 전통의 맛이 살아있고 향이 오래 남는다.</div><div class="review-meta"><span class="tag">전통주</span><span class="tag">소주</span><span class="review-date">2시간 전</span></div></div>
-    <div class="review-card"><div class="review-header"><div class="review-emoji">🍸</div><div class="review-name">봄봄 막걸리</div><div class="review-rating">★★★★☆</div></div><div class="review-body">상큼한 산미와 은은한 단맛. 탄산감이 적당해 막걸리 입문자에게 추천.</div><div class="review-meta"><span class="tag">막걸리</span><span class="tag">전통주</span><span class="review-date">어제</span></div></div>
+    <div id="reviews-list">
+      <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px;">불러오는 중...</div>
+    </div>
   </div>
 </div>
 <div id="tab-drinks" class="tab-content">
   <div class="section">
     <p class="section-title">주류 탐색</p>
-    <div class="drink-grid">
-      <div class="drink-card"><div class="drink-icon">🥃</div><div class="drink-name">위스키</div><div class="drink-desc">스카치, 버번, 아이리시, 재패니즈</div><div class="drink-rating">리뷰 1,240개</div></div>
-      <div class="drink-card"><div class="drink-icon">🍶</div><div class="drink-name">전통주</div><div class="drink-desc">막걸리, 약주, 소주, 청주</div><div class="drink-rating">리뷰 890개</div></div>
-      <div class="drink-card"><div class="drink-icon">🍷</div><div class="drink-name">와인</div><div class="drink-desc">레드, 화이트, 스파클링, 로제</div><div class="drink-rating">리뷰 760개</div></div>
-      <div class="drink-card"><div class="drink-icon">🍺</div><div class="drink-name">맥주</div><div class="drink-desc">크래프트, 라거, 에일, 스타우트</div><div class="drink-rating">리뷰 2,100개</div></div>
-      <div class="drink-card"><div class="drink-icon">🍸</div><div class="drink-name">칵테일</div><div class="drink-desc">클래식, 시그니처, 목테일</div><div class="drink-rating">리뷰 420개</div></div>
-      <div class="drink-card"><div class="drink-icon">🥂</div><div class="drink-name">기타</div><div class="drink-desc">진, 럼, 보드카, 데킬라</div><div class="drink-rating">리뷰 580개</div></div>
+    <div class="drink-grid" id="drinks-grid">
+      <div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--text-muted);font-size:13px;">불러오는 중...</div>
     </div>
   </div>
 </div>
@@ -106,9 +101,87 @@
     </div>
   </div>
 </div>
+<!-- Supabase CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/core/supabase.js"></script>
 <script>
-  function switchTab(name,el){document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');el.classList.add('active');}
+  function switchTab(name,el){
+    document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById('tab-'+name).classList.add('active');
+    el.classList.add('active');
+  }
   function goBack(){if(document.referrer&&document.referrer.includes(location.hostname)){history.back();}else{location.href='index.html';}}
+
+  // 카테고리별 이모지
+  const categoryEmoji = {
+    '위스키':'🥃','전통주':'🍶','와인':'🍷','맥주':'🍺','칵테일':'🍸','기타':'🥂'
+  };
+
+  // 날짜 포맷
+  function timeAgo(dateStr) {
+    const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+    if (diff < 60) return '방금 전';
+    if (diff < 3600) return Math.floor(diff/60) + '분 전';
+    if (diff < 86400) return Math.floor(diff/3600) + '시간 전';
+    return Math.floor(diff/86400) + '일 전';
+  }
+
+  // 주류 탐색 로드
+  async function loadDrinks() {
+    const { data, error } = await soolClient
+      .from('drinks')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    const grid = document.getElementById('drinks-grid');
+    if (error || !data || data.length === 0) {
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--text-muted);font-size:13px;">등록된 술이 없어요 🍶</div>`;
+      return;
+    }
+    grid.innerHTML = data.map(d => `
+      <div class="drink-card">
+        <div class="drink-icon">${categoryEmoji[d.category] || '🍾'}</div>
+        <div class="drink-name">${d.name}</div>
+        <div class="drink-desc">${d.description || (d.subcategory || d.category)}</div>
+        <div class="drink-rating">${d.avg_rating ? '★ ' + d.avg_rating : '리뷰 ' + d.review_count + '개'}${d.alcohol_degree ? ' · ' + d.alcohol_degree + '%' : ''}</div>
+      </div>
+    `).join('');
+  }
+
+  // 최신 리뷰 로드
+  async function loadReviews() {
+    const { data, error } = await soolClient
+      .from('reviews')
+      .select('*, users(nickname), drinks(name, category)')
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    const list = document.getElementById('reviews-list');
+    if (error || !data || data.length === 0) {
+      list.innerHTML = `<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px;">아직 리뷰가 없어요. 첫 리뷰를 작성해보세요! ✍️</div>`;
+      return;
+    }
+    list.innerHTML = data.map(r => `
+      <div class="review-card">
+        <div class="review-header">
+          <div class="review-emoji">${categoryEmoji[r.drinks?.category] || '🍾'}</div>
+          <div class="review-name">${r.drinks?.name || '—'}</div>
+          <div class="review-rating">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+        </div>
+        <div class="review-body">${r.content || ''}</div>
+        <div class="review-meta">
+          <span class="tag">${r.drinks?.category || '—'}</span>
+          <span class="tag">@${r.users?.nickname || '익명'}</span>
+          <span class="review-date">${timeAgo(r.created_at)}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // 초기 로드
+  loadDrinks();
+  loadReviews();
 </script>
 </body>
 </html>

@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>어드민 — 술향기마을</title>
+<style>
+  :root {
+    --c-bg:       #07071a;
+    --c-dark:     #0e0e26;
+    --c-accent:   #9966ff;
+    --c-accent-dim: rgba(153,102,255,0.25);
+    --c-border:   rgba(180,150,255,0.18);
+    --c-text:     rgba(245,242,255,1.0);
+    --c-muted:    rgba(215,205,255,0.85);
+    --c-glass:    rgba(8,6,24,0.88);
+    --radius-sm:  8px;
+    --radius-md:  12px;
+    --radius-lg:  18px;
+    --transition: 0.22s ease;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;
+    background: var(--c-bg);
+    color: var(--c-text);
+    min-height: 100vh;
+  }
+
+  /* 접근 차단 화면 */
+  #access-denied {
+    display: none;
+    position: fixed; inset: 0;
+    background: var(--c-bg);
+    align-items: center; justify-content: center;
+    flex-direction: column; gap: 16px;
+    z-index: 999;
+  }
+  #access-denied.show { display: flex; }
+  #access-denied .icon { font-size: 48px; }
+  #access-denied h2 { font-size: 18px; color: #fff; }
+  #access-denied p { font-size: 13px; color: var(--c-muted); }
+  #access-denied a {
+    margin-top: 8px;
+    font-size: 13px;
+    color: rgba(200,175,255,0.85);
+    text-decoration: none;
+  }
+
+  /* 로딩 */
+  #admin-loading {
+    position: fixed; inset: 0;
+    background: var(--c-bg);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+  }
+  #admin-loading.hide { display: none; }
+
+  /* 네비 */
+  nav {
+    background: rgba(8,6,24,0.95);
+    border-bottom: 1px solid var(--c-border);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .nav-logo {
+    font-size: 15px; font-weight: 700; color: #fff;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .nav-badge {
+    font-size: 10px; background: var(--c-accent-dim);
+    border: 1px solid rgba(153,102,255,0.4);
+    border-radius: 99px; padding: 2px 8px;
+    color: rgba(200,175,255,0.9);
+  }
+  .nav-right { display: flex; align-items: center; gap: 12px; }
+  .nav-user { font-size: 12px; color: var(--c-muted); }
+  .btn-sm {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-sm);
+    color: var(--c-muted);
+    font-size: 11px; padding: 5px 12px;
+    cursor: pointer; font-family: inherit;
+    transition: background var(--transition);
+  }
+  .btn-sm:hover { background: rgba(255,255,255,0.1); }
+
+  /* 탭 */
+  .admin-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--c-border);
+    padding: 0 24px;
+    background: rgba(8,6,24,0.6);
+  }
+  .admin-tab {
+    padding: 12px 20px;
+    font-size: 13px; color: var(--c-muted);
+    background: transparent; border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer; font-family: inherit;
+    letter-spacing: 0.04em;
+    transition: color var(--transition), border-color var(--transition);
+  }
+  .admin-tab.active {
+    color: rgba(200,175,255,0.95);
+    border-bottom-color: var(--c-accent);
+  }
+
+  /* 콘텐츠 영역 */
+  .admin-content { padding: 24px; max-width: 900px; margin: 0 auto; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* 섹션 헤더 */
+  .section-header {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-size: 14px; font-weight: 600; color: #fff;
+  }
+  .section-count {
+    font-size: 11px; color: var(--c-muted);
+  }
+
+  /* 버튼 */
+  .btn-primary {
+    background: var(--c-accent-dim);
+    border: 1px solid rgba(153,102,255,0.4);
+    border-radius: var(--radius-sm);
+    color: rgba(210,190,255,0.95);
+    font-size: 12px; font-weight: 600;
+    padding: 7px 16px; cursor: pointer;
+    font-family: inherit;
+    transition: background var(--transition);
+  }
+  .btn-primary:hover { background: rgba(153,102,255,0.35); }
+
+  .btn-danger {
+    background: rgba(248,113,113,0.12);
+    border: 1px solid rgba(248,113,113,0.3);
+    border-radius: var(--radius-sm);
+    color: #fca5a5;
+    font-size: 11px; padding: 4px 10px;
+    cursor: pointer; font-family: inherit;
+    transition: background var(--transition);
+  }
+  .btn-danger:hover { background: rgba(248,113,113,0.25); }
+
+  /* 테이블 */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .data-table th {
+    text-align: left;
+    padding: 8px 12px;
+    font-size: 10px; font-weight: 600;
+    color: var(--c-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--c-border);
+  }
+  .data-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(180,150,255,0.08);
+    color: var(--c-text);
+    vertical-align: middle;
+  }
+  .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* 폼 */
+  .form-card {
+    background: rgba(8,6,24,0.6);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .form-card h3 {
+    font-size: 13px; font-weight: 600;
+    color: #fff; margin-bottom: 16px;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-label { font-size: 10px; color: var(--c-muted); letter-spacing: 0.06em; }
+  .form-input, .form-select {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-sm);
+    color: var(--c-text);
+    font-size: 12px; padding: 8px 10px;
+    outline: none; font-family: inherit;
+    transition: border-color var(--transition);
+  }
+  .form-input::placeholder { color: rgba(215,205,255,0.3); }
+  .form-input:focus, .form-select:focus { border-color: rgba(153,102,255,0.5); }
+  .form-select option { background: #0e0e26; }
+  .form-actions { margin-top: 16px; display: flex; gap: 8px; }
+
+  /* 메시지 */
+  .msg {
+    font-size: 12px; padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 12px; display: none;
+  }
+  .msg.success {
+    display: block;
+    background: rgba(74,222,128,0.12);
+    border: 1px solid rgba(74,222,128,0.3);
+    color: #86efac;
+  }
+  .msg.error {
+    display: block;
+    background: rgba(248,113,113,0.12);
+    border: 1px solid rgba(248,113,113,0.3);
+    color: #fca5a5;
+  }
+
+  /* 배지 */
+  .badge {
+    display: inline-block;
+    font-size: 10px; padding: 2px 8px;
+    border-radius: 99px;
+  }
+  .badge-admin {
+    background: rgba(153,102,255,0.2);
+    border: 1px solid rgba(153,102,255,0.4);
+    color: rgba(200,175,255,0.9);
+  }
+  .badge-user {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--c-border);
+    color: var(--c-muted);
+  }
+
+  /* 빈 상태 */
+  .empty-state {
+    text-align: center; padding: 40px;
+    color: var(--c-muted); font-size: 13px;
+  }
+  .empty-state .icon { font-size: 32px; margin-bottom: 10px; }
+
+  @media (max-width: 600px) {
+    .admin-content { padding: 16px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .admin-tab { padding: 10px 12px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 접근 차단 -->
+<div id="access-denied">
+  <div class="icon">🔒</div>
+  <h2>접근 권한이 없어요</h2>
+  <p>어드민 계정으로 로그인해주세요.</p>
+  <a href="auth.html">← 로그인 페이지로</a>
+</div>
+
+<!-- 로딩 -->
+<div id="admin-loading">
+  <div style="font-size:13px;color:var(--c-muted);letter-spacing:0.2em;">LOADING...</div>
+</div>
+
+<!-- 네비 -->
+<nav>
+  <div class="nav-logo">
+    술향기마을 <span class="nav-badge">ADMIN</span>
+  </div>
+  <div class="nav-right">
+    <span class="nav-user" id="admin-nickname"></span>
+    <button class="btn-sm" onclick="location.href='index.html'">마을로</button>
+    <button class="btn-sm" onclick="handleLogout()">로그아웃</button>
+  </div>
+</nav>
+
+<!-- 탭 -->
+<div class="admin-tabs">
+  <button class="admin-tab active" onclick="switchTab('drinks', this)">🍶 술 DB</button>
+  <button class="admin-tab" onclick="switchTab('users', this)">👥 유저</button>
+  <button class="admin-tab" onclick="switchTab('reviews', this)">⭐ 리뷰</button>
+</div>
+
+<!-- 콘텐츠 -->
+<div class="admin-content">
+
+  <!-- 술 DB 탭 -->
+  <div class="tab-panel active" id="panel-drinks">
+
+    <!-- 등록 폼 -->
+    <div class="form-card">
+      <h3>🍶 새 술 등록</h3>
+      <div class="msg" id="drink-msg"></div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">술 이름 *</label>
+          <input class="form-input" id="d-name" placeholder="예) 글렌피딕 18년" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">카테고리 *</label>
+          <select class="form-select" id="d-category">
+            <option value="">선택</option>
+            <option value="위스키">위스키</option>
+            <option value="전통주">전통주</option>
+            <option value="와인">와인</option>
+            <option value="맥주">맥주</option>
+            <option value="칵테일">칵테일</option>
+            <option value="기타">기타</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">서브카테고리</label>
+          <input class="form-input" id="d-subcategory" placeholder="예) 스카치, 막걸리" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">브랜드</label>
+          <input class="form-input" id="d-brand" placeholder="예) Glenfiddich" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">원산지</label>
+          <input class="form-input" id="d-country" placeholder="예) 스코틀랜드" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">도수 (%)</label>
+          <input class="form-input" id="d-alcohol" type="number" step="0.1" placeholder="예) 40.0" />
+        </div>
+        <div class="form-group full">
+          <label class="form-label">설명</label>
+          <input class="form-input" id="d-desc" placeholder="간단한 설명을 입력하세요" />
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-primary" onclick="addDrink()">등록하기</button>
+        <button class="btn-sm" onclick="clearDrinkForm()">초기화</button>
+      </div>
+    </div>
+
+    <!-- 목록 -->
+    <div class="section-header">
+      <div class="section-title">등록된 술 목록</div>
+      <div class="section-count" id="drinks-count"></div>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>이름</th>
+          <th>카테고리</th>
+          <th>브랜드</th>
+          <th>도수</th>
+          <th>평점</th>
+          <th>리뷰</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="drinks-tbody">
+        <tr><td colspan="7"><div class="empty-state"><div class="icon">🍶</div>등록된 술이 없어요</div></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 유저 탭 -->
+  <div class="tab-panel" id="panel-users">
+    <div class="section-header">
+      <div class="section-title">가입 유저 목록</div>
+      <div class="section-count" id="users-count"></div>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>닉네임</th>
+          <th>이메일</th>
+          <th>레벨</th>
+          <th>XP</th>
+          <th>권한</th>
+          <th>가입일</th>
+        </tr>
+      </thead>
+      <tbody id="users-tbody">
+        <tr><td colspan="6"><div class="empty-state"><div class="icon">👥</div>유저 데이터 로딩 중...</div></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 리뷰 탭 -->
+  <div class="tab-panel" id="panel-reviews">
+    <div class="section-header">
+      <div class="section-title">리뷰 목록</div>
+      <div class="section-count" id="reviews-count"></div>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>술</th>
+          <th>작성자</th>
+          <th>평점</th>
+          <th>내용</th>
+          <th>작성일</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="reviews-tbody">
+        <tr><td colspan="6"><div class="empty-state"><div class="icon">⭐</div>리뷰 데이터 로딩 중...</div></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- Supabase CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/core/supabase.js"></script>
+<script>
+
+  // ── 초기화 ──────────────────────────────────
+  async function init() {
+    const { data: { session } } = await soolClient.auth.getSession();
+    if (!session) {
+      showAccessDenied(); return;
+    }
+    const { data: user } = await soolClient
+      .from('users')
+      .select('nickname, is_admin')
+      .eq('id', session.user.id)
+      .single();
+
+    if (!user || !user.is_admin) {
+      showAccessDenied(); return;
+    }
+
+    document.getElementById('admin-nickname').textContent = user.nickname;
+    document.getElementById('admin-loading').classList.add('hide');
+
+    loadDrinks();
+    loadUsers();
+    loadReviews();
+  }
+
+  function showAccessDenied() {
+    document.getElementById('admin-loading').classList.add('hide');
+    document.getElementById('access-denied').classList.add('show');
+  }
+
+  async function handleLogout() {
+    await soolClient.auth.signOut();
+    location.href = 'auth.html';
+  }
+
+  // ── 탭 전환 ─────────────────────────────────
+  function switchTab(name, el) {
+    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('panel-' + name).classList.add('active');
+  }
+
+  // ── 술 DB ────────────────────────────────────
+  async function loadDrinks() {
+    const { data, error } = await soolClient
+      .from('drinks')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error || !data) return;
+
+    document.getElementById('drinks-count').textContent = `총 ${data.length}개`;
+    const tbody = document.getElementById('drinks-tbody');
+
+    if (data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="icon">🍶</div>등록된 술이 없어요</div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = data.map(d => `
+      <tr>
+        <td>${d.name}</td>
+        <td>${d.category}</td>
+        <td>${d.brand || '—'}</td>
+        <td>${d.alcohol_degree ? d.alcohol_degree + '%' : '—'}</td>
+        <td>${d.avg_rating ? '★ ' + d.avg_rating : '—'}</td>
+        <td>${d.review_count}</td>
+        <td><button class="btn-danger" onclick="deleteDrink('${d.id}')">삭제</button></td>
+      </tr>
+    `).join('');
+  }
+
+  async function addDrink() {
+    const name     = document.getElementById('d-name').value.trim();
+    const category = document.getElementById('d-category').value;
+    if (!name || !category) {
+      showMsg('drink-msg', 'error', '이름과 카테고리는 필수예요!'); return;
+    }
+    const { error } = await soolClient.from('drinks').insert({
+      name,
+      category,
+      subcategory:    document.getElementById('d-subcategory').value.trim() || null,
+      brand:          document.getElementById('d-brand').value.trim() || null,
+      country:        document.getElementById('d-country').value.trim() || null,
+      alcohol_degree: document.getElementById('d-alcohol').value || null,
+      description:    document.getElementById('d-desc').value.trim() || null,
+    });
+
+    if (error) {
+      showMsg('drink-msg', 'error', '등록 실패: ' + error.message);
+    } else {
+      showMsg('drink-msg', 'success', '등록 완료!');
+      clearDrinkForm();
+      loadDrinks();
+    }
+  }
+
+  async function deleteDrink(id) {
+    if (!confirm('정말 삭제할까요?')) return;
+    await soolClient.from('drinks').delete().eq('id', id);
+    loadDrinks();
+  }
+
+  function clearDrinkForm() {
+    ['d-name','d-subcategory','d-brand','d-country','d-alcohol','d-desc']
+      .forEach(id => document.getElementById(id).value = '');
+    document.getElementById('d-category').value = '';
+  }
+
+  // ── 유저 ─────────────────────────────────────
+  async function loadUsers() {
+    const { data, error } = await soolClient
+      .from('users')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error || !data) return;
+
+    document.getElementById('users-count').textContent = `총 ${data.length}명`;
+    const tbody = document.getElementById('users-tbody');
+
+    if (data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="icon">👥</div>가입된 유저가 없어요</div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = data.map(u => `
+      <tr>
+        <td>${u.nickname}</td>
+        <td>${u.email}</td>
+        <td>Lv.${u.level}</td>
+        <td>${u.xp} XP</td>
+        <td><span class="badge ${u.is_admin ? 'badge-admin' : 'badge-user'}">${u.is_admin ? 'ADMIN' : 'USER'}</span></td>
+        <td>${new Date(u.created_at).toLocaleDateString('ko-KR')}</td>
+      </tr>
+    `).join('');
+  }
+
+  // ── 리뷰 ─────────────────────────────────────
+  async function loadReviews() {
+    const { data, error } = await soolClient
+      .from('reviews')
+      .select('*, users(nickname), drinks(name)')
+      .order('created_at', { ascending: false });
+
+    if (error || !data) return;
+
+    document.getElementById('reviews-count').textContent = `총 ${data.length}개`;
+    const tbody = document.getElementById('reviews-tbody');
+
+    if (data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="icon">⭐</div>작성된 리뷰가 없어요</div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = data.map(r => `
+      <tr>
+        <td>${r.drinks?.name || '—'}</td>
+        <td>${r.users?.nickname || '—'}</td>
+        <td>${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</td>
+        <td>${r.content ? r.content.slice(0, 30) + (r.content.length > 30 ? '...' : '') : '—'}</td>
+        <td>${new Date(r.created_at).toLocaleDateString('ko-KR')}</td>
+        <td><button class="btn-danger" onclick="deleteReview('${r.id}')">삭제</button></td>
+      </tr>
+    `).join('');
+  }
+
+  async function deleteReview(id) {
+    if (!confirm('리뷰를 삭제할까요?')) return;
+    await soolClient.from('reviews').delete().eq('id', id);
+    loadReviews();
+  }
+
+  // ── 메시지 표시 ──────────────────────────────
+  function showMsg(id, type, text) {
+    const el = document.getElementById(id);
+    el.className = 'msg ' + type;
+    el.textContent = text;
+    setTimeout(() => { el.className = 'msg'; }, 3000);
+  }
+
+  // 시작
+  init();
+</script>
+</body>
+</html>

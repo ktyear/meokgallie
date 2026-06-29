@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>술 상세 — 술향기마을</title>
+<style>
+  :root {
+    --red-50:#FFF0EE;--red-100:#FFBCB0;--red-200:#E8522A;--red-400:#C03A18;
+    --red-600:#8A2210;--red-900:#3A0E04;
+    --bg:#FBF2EE;--bg-card:#fff;--text-primary:#1a0a04;
+    --text-secondary:#6b3a2e;--text-muted:#a07868;--border:rgba(0,0,0,0.07);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; }
+
+  /* 네비 */
+  nav { background: var(--bg-card); border-bottom: 0.5px solid var(--border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+  .nav-back { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary); cursor: pointer; }
+  .nav-back:hover { color: var(--red-400); }
+  .nav-back svg { width: 16px; height: 16px; }
+  .nav-logo { font-size: 15px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 7px; }
+  .nav-logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red-200); }
+  .nav-spacer { width: 80px; }
+
+  /* 히어로 */
+  .hero { background: linear-gradient(135deg, #2a0e04 0%, #5a1a0a 100%); padding: 28px 24px; }
+  .hero-inner { max-width: 640px; margin: 0 auto; }
+  .hero-category { font-size: 11px; font-weight: 600; color: #FFBCB0; background: rgba(255,255,255,0.1); padding: 3px 10px; border-radius: 99px; display: inline-block; margin-bottom: 10px; }
+  .hero-name { font-size: 26px; font-weight: 700; color: #fff; margin-bottom: 4px; line-height: 1.3; }
+  .hero-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+  .hero-brand { font-size: 13px; color: rgba(255,255,255,0.7); }
+  .hero-abv { font-size: 13px; color: #FFBCB0; font-weight: 600; }
+  .hero-origin { font-size: 13px; color: rgba(255,255,255,0.6); }
+  .hero-rating { display: flex; align-items: center; gap: 8px; }
+  .rating-stars { color: #FFD700; font-size: 18px; }
+  .rating-num { font-size: 22px; font-weight: 700; color: #fff; }
+  .rating-count { font-size: 12px; color: rgba(255,255,255,0.6); }
+
+  /* 콘텐츠 */
+  .content { max-width: 640px; margin: 0 auto; padding: 0 24px 40px; }
+
+  /* 섹션 */
+  .section { margin-top: 20px; background: var(--bg-card); border: 0.5px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+  .section-title { font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 12px; }
+
+  /* 기본 정보 */
+  .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .info-item { display: flex; flex-direction: column; gap: 3px; }
+  .info-label { font-size: 10px; color: var(--text-muted); letter-spacing: 0.06em; }
+  .info-value { font-size: 13px; color: var(--text-primary); font-weight: 500; }
+
+  /* 테이스팅 노트 */
+  .tasting-item { margin-bottom: 10px; }
+  .tasting-item:last-child { margin-bottom: 0; }
+  .tasting-label { font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
+  .tasting-value { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+  /* 설명 */
+  .desc-text { font-size: 13px; color: var(--text-secondary); line-height: 1.7; }
+
+  /* 태그 */
+  .tag-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { font-size: 11px; color: var(--text-muted); background: var(--bg); border: 0.5px solid var(--border); padding: 3px 10px; border-radius: 99px; }
+
+  /* 리뷰 작성 */
+  .review-form { display: flex; flex-direction: column; gap: 12px; }
+  .star-input { display: flex; gap: 6px; }
+  .star-btn { font-size: 24px; cursor: pointer; color: var(--border); transition: color 0.1s; background: none; border: none; padding: 0; }
+  .star-btn.active { color: #FFD700; }
+  .review-textarea { width: 100%; background: var(--bg); border: 0.5px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--text-primary); font-family: inherit; resize: none; height: 80px; outline: none; transition: border-color 0.15s; }
+  .review-textarea:focus { border-color: var(--red-200); }
+  .review-textarea::placeholder { color: var(--text-muted); }
+
+  /* 향미 태그 선택 */
+  .taste-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .taste-tag { font-size: 11px; color: var(--text-muted); background: var(--bg); border: 0.5px solid var(--border); padding: 4px 10px; border-radius: 99px; cursor: pointer; transition: all 0.15s; user-select: none; }
+  .taste-tag.selected { background: var(--red-50); border-color: var(--red-200); color: var(--red-400); }
+
+  /* 제출 버튼 */
+  .submit-btn { width: 100%; background: var(--red-200); color: #fff; border: none; border-radius: 10px; padding: 11px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s; font-family: inherit; }
+  .submit-btn:hover { background: var(--red-400); }
+  .form-msg { font-size: 12px; text-align: center; padding: 6px; border-radius: 8px; display: none; }
+  .form-msg.success { display: block; background: rgba(74,222,128,0.1); color: #16a34a; }
+  .form-msg.error { display: block; background: rgba(239,68,68,0.1); color: #dc2626; }
+
+  /* 리뷰 목록 */
+  .review-card { border-bottom: 0.5px solid var(--border); padding: 14px 0; }
+  .review-card:last-child { border-bottom: none; }
+  .review-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .review-nick { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+  .review-stars { color: #FFD700; font-size: 12px; }
+  .review-date { font-size: 11px; color: var(--text-muted); margin-left: auto; }
+  .review-body { font-size: 13px; color: var(--text-secondary); line-height: 1.55; margin-bottom: 8px; }
+  .review-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+  .review-tag { font-size: 10px; color: var(--text-muted); background: var(--bg); border: 0.5px solid var(--border); padding: 2px 7px; border-radius: 99px; }
+  .review-reactions { display: flex; gap: 8px; }
+  .reaction-btn { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted); background: none; border: 0.5px solid var(--border); border-radius: 99px; padding: 3px 10px; cursor: pointer; transition: all 0.15s; font-family: inherit; }
+  .reaction-btn:hover { border-color: var(--red-200); color: var(--red-400); }
+  .reaction-btn.liked { border-color: var(--red-200); color: var(--red-400); background: var(--red-50); }
+  .reaction-btn.disliked { border-color: #6b7280; color: #6b7280; background: #f3f4f6; }
+
+  /* 빈 상태 */
+  .empty { text-align: center; padding: 24px; color: var(--text-muted); font-size: 13px; }
+
+  /* 로딩 */
+  #page-loading { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 100; }
+  #page-loading.hide { display: none; }
+
+  @media (max-width: 480px) {
+    nav { padding: 12px 16px; }
+    .hero { padding: 20px 16px; }
+    .content { padding: 0 16px 32px; }
+    .info-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div id="page-loading">
+  <div style="font-size:13px;color:var(--text-muted);letter-spacing:0.1em;">불러오는 중...</div>
+</div>
+
+<nav>
+  <a class="nav-back" onclick="history.back()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>
+    뒤로가기
+  </a>
+  <div class="nav-logo"><div class="nav-logo-dot"></div>술향기마을</div>
+  <div class="nav-spacer"></div>
+</nav>
+
+<!-- 히어로 -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-category" id="d-category">—</div>
+    <div class="hero-name" id="d-name">—</div>
+    <div class="hero-meta">
+      <span class="hero-brand" id="d-brand"></span>
+      <span class="hero-abv" id="d-abv"></span>
+      <span class="hero-origin" id="d-origin"></span>
+    </div>
+    <div class="hero-rating">
+      <span class="rating-stars" id="d-stars">☆☆☆☆☆</span>
+      <span class="rating-num" id="d-rating">—</span>
+      <span class="rating-count" id="d-review-count"></span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- 기본 정보 -->
+  <div class="section" id="section-info">
+    <div class="section-title">기본 정보</div>
+    <div class="info-grid">
+      <div class="info-item"><div class="info-label">카테고리</div><div class="info-value" id="i-category">—</div></div>
+      <div class="info-item"><div class="info-label">서브카테고리</div><div class="info-value" id="i-subcategory">—</div></div>
+      <div class="info-item"><div class="info-label">브랜드</div><div class="info-value" id="i-brand">—</div></div>
+      <div class="info-item"><div class="info-label">도수</div><div class="info-value" id="i-abv">—</div></div>
+      <div class="info-item"><div class="info-label">원산지</div><div class="info-value" id="i-country">—</div></div>
+      <div class="info-item"><div class="info-label">지역</div><div class="info-value" id="i-region">—</div></div>
+      <div class="info-item"><div class="info-label">가격대</div><div class="info-value" id="i-price">—</div></div>
+      <div class="info-item"><div class="info-label">음용 방법</div><div class="info-value" id="i-serve">—</div></div>
+    </div>
+  </div>
+
+  <!-- 설명 -->
+  <div class="section" id="section-desc" style="display:none;">
+    <div class="section-title">소개</div>
+    <div class="desc-text" id="d-desc"></div>
+  </div>
+
+  <!-- 테이스팅 노트 -->
+  <div class="section" id="section-tasting" style="display:none;">
+    <div class="section-title">테이스팅 노트</div>
+    <div id="tasting-nose" class="tasting-item" style="display:none;">
+      <div class="tasting-label">🌸 향 (Nose)</div>
+      <div class="tasting-value" id="t-nose"></div>
+    </div>
+    <div id="tasting-palate" class="tasting-item" style="display:none;">
+      <div class="tasting-label">👅 맛 (Palate)</div>
+      <div class="tasting-value" id="t-palate"></div>
+    </div>
+    <div id="tasting-finish" class="tasting-item" style="display:none;">
+      <div class="tasting-label">✨ 피니시 (Finish)</div>
+      <div class="tasting-value" id="t-finish"></div>
+    </div>
+  </div>
+
+  <!-- 페어링 -->
+  <div class="section" id="section-pairing" style="display:none;">
+    <div class="section-title">🍽️ 어울리는 음식</div>
+    <div class="tag-wrap" id="d-pairing"></div>
+  </div>
+
+  <!-- 리뷰 작성 -->
+  <div class="section">
+    <div class="section-title">리뷰 작성</div>
+    <div id="review-form-wrap">
+      <div class="review-form">
+        <div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">별점</div>
+          <div class="star-input" id="star-input">
+            <button class="star-btn" data-star="1" onclick="setStar(1)">★</button>
+            <button class="star-btn" data-star="2" onclick="setStar(2)">★</button>
+            <button class="star-btn" data-star="3" onclick="setStar(3)">★</button>
+            <button class="star-btn" data-star="4" onclick="setStar(4)">★</button>
+            <button class="star-btn" data-star="5" onclick="setStar(5)">★</button>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">향미 태그 (복수 선택)</div>
+          <div class="taste-tags" id="taste-tags">
+            <span class="taste-tag" onclick="toggleTag(this)">달콤함</span>
+            <span class="taste-tag" onclick="toggleTag(this)">쓴맛</span>
+            <span class="taste-tag" onclick="toggleTag(this)">산미</span>
+            <span class="taste-tag" onclick="toggleTag(this)">과일향</span>
+            <span class="taste-tag" onclick="toggleTag(this)">꽃향기</span>
+            <span class="taste-tag" onclick="toggleTag(this)">오크향</span>
+            <span class="taste-tag" onclick="toggleTag(this)">스모키</span>
+            <span class="taste-tag" onclick="toggleTag(this)">바닐라</span>
+            <span class="taste-tag" onclick="toggleTag(this)">허브</span>
+            <span class="taste-tag" onclick="toggleTag(this)">견과류</span>
+            <span class="taste-tag" onclick="toggleTag(this)">초콜릿</span>
+            <span class="taste-tag" onclick="toggleTag(this)">커피</span>
+            <span class="taste-tag" onclick="toggleTag(this)">스파이시</span>
+            <span class="taste-tag" onclick="toggleTag(this)">미네랄</span>
+            <span class="taste-tag" onclick="toggleTag(this)">부드러움</span>
+            <span class="taste-tag" onclick="toggleTag(this)">깔끔함</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">한줄 리뷰</div>
+          <textarea class="review-textarea" id="review-content" placeholder="이 술에 대한 솔직한 한줄 평을 남겨주세요..."></textarea>
+        </div>
+        <div class="form-msg" id="form-msg"></div>
+        <button class="submit-btn" onclick="submitReview()">리뷰 등록하기 +50 XP</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 리뷰 목록 -->
+  <div class="section">
+    <div class="section-title">유저 리뷰 <span id="review-total" style="color:var(--red-200);"></span></div>
+    <div id="reviews-list">
+      <div class="empty">불러오는 중...</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Supabase CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/core/supabase.js"></script>
+<script>
+  // URL에서 drink id 가져오기
+  const params = new URLSearchParams(location.search);
+  const drinkId = params.get('id');
+
+  let currentUser = null;
+  let selectedStar = 0;
+  let selectedTags = [];
+  let drinkData = null;
+
+  // ── 초기화 ──────────────────────────────────
+  async function init() {
+    if (!drinkId) { location.href = 'bar.html'; return; }
+
+    // 로그인 확인
+    const { data: { session } } = await soolClient.auth.getSession();
+    if (session) {
+      const { data: user } = await soolClient
+        .from('users').select('id, nickname').eq('id', session.user.id).single();
+      currentUser = user;
+    }
+
+    await loadDrink();
+    await loadReviews();
+    document.getElementById('page-loading').classList.add('hide');
+  }
+
+  // ── 술 정보 로드 ─────────────────────────────
+  async function loadDrink() {
+    const { data, error } = await soolClient
+      .from('drinks').select('*').eq('id', drinkId).single();
+    if (error || !data) { location.href = 'bar.html'; return; }
+    drinkData = data;
+
+    // 히어로
+    document.title = data.name + ' — 술향기마을';
+    document.getElementById('d-category').textContent = data.category + (data.subcategory ? ' · ' + data.subcategory : '');
+    document.getElementById('d-name').textContent = data.name;
+    document.getElementById('d-brand').textContent = data.brand || '';
+    document.getElementById('d-abv').textContent = data.alcohol_degree ? data.alcohol_degree + '%' : '';
+    document.getElementById('d-origin').textContent = data.country ? '📍 ' + data.country : '';
+
+    const rating = data.avg_rating;
+    document.getElementById('d-rating').textContent = rating ? rating.toFixed(1) : '—';
+    document.getElementById('d-stars').textContent = rating ? '★'.repeat(Math.round(rating)) + '☆'.repeat(5 - Math.round(rating)) : '☆☆☆☆☆';
+    document.getElementById('d-review-count').textContent = data.review_count ? `(${data.review_count}개)` : '';
+
+    // 기본 정보
+    document.getElementById('i-category').textContent = data.category || '—';
+    document.getElementById('i-subcategory').textContent = data.subcategory || '—';
+    document.getElementById('i-brand').textContent = data.brand || '—';
+    document.getElementById('i-abv').textContent = data.alcohol_degree ? data.alcohol_degree + '%' : '—';
+    document.getElementById('i-country').textContent = data.country || '—';
+    document.getElementById('i-region').textContent = data.region || '—';
+    document.getElementById('i-price').textContent = data.price_range || '—';
+    document.getElementById('i-serve').textContent = data.serve_method || '—';
+
+    // 설명
+    if (data.description) {
+      document.getElementById('d-desc').textContent = data.description;
+      document.getElementById('section-desc').style.display = 'block';
+    }
+
+    // 테이스팅 노트
+    let hasTasting = false;
+    if (data.nose) { document.getElementById('t-nose').textContent = data.nose; document.getElementById('tasting-nose').style.display = 'block'; hasTasting = true; }
+    if (data.palate) { document.getElementById('t-palate').textContent = data.palate; document.getElementById('tasting-palate').style.display = 'block'; hasTasting = true; }
+    if (data.finish) { document.getElementById('t-finish').textContent = data.finish; document.getElementById('tasting-finish').style.display = 'block'; hasTasting = true; }
+    if (hasTasting) document.getElementById('section-tasting').style.display = 'block';
+
+    // 페어링
+    if (data.pairing) {
+      const tags = data.pairing.split(',').map(t => t.trim());
+      document.getElementById('d-pairing').innerHTML = tags.map(t => `<span class="tag">${t}</span>`).join('');
+      document.getElementById('section-pairing').style.display = 'block';
+    }
+
+    // 비로그인 시 리뷰 폼 숨김
+    if (!currentUser) {
+      document.getElementById('review-form-wrap').innerHTML = `<div class="empty"><a href="auth.html" style="color:var(--red-400);text-decoration:none;">로그인</a> 후 리뷰를 작성할 수 있어요</div>`;
+    }
+  }
+
+  // ── 리뷰 로드 ────────────────────────────────
+  async function loadReviews() {
+    const { data, error } = await soolClient
+      .from('reviews')
+      .select('*, users(nickname), review_reactions(user_id, reaction)')
+      .eq('drink_id', drinkId)
+      .order('created_at', { ascending: false });
+
+    const list = document.getElementById('reviews-list');
+    if (error || !data || data.length === 0) {
+      list.innerHTML = `<div class="empty">아직 리뷰가 없어요. 첫 리뷰를 작성해보세요! ✍️</div>`;
+      document.getElementById('review-total').textContent = '';
+      return;
+    }
+
+    document.getElementById('review-total').textContent = data.length + '개';
+    list.innerHTML = data.map(r => {
+      const likes = r.review_reactions?.filter(rx => rx.reaction === 'like').length || 0;
+      const dislikes = r.review_reactions?.filter(rx => rx.reaction === 'dislike').length || 0;
+      const myReaction = currentUser ? r.review_reactions?.find(rx => rx.user_id === currentUser.id)?.reaction : null;
+      const tags = r.taste_tags ? r.taste_tags.map(t => `<span class="review-tag">${t}</span>`).join('') : '';
+      return `
+        <div class="review-card">
+          <div class="review-top">
+            <span class="review-nick">${r.users?.nickname || '익명'}</span>
+            <span class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
+            <span class="review-date">${timeAgo(r.created_at)}</span>
+          </div>
+          ${r.content ? `<div class="review-body">${r.content}</div>` : ''}
+          ${tags ? `<div class="review-tags">${tags}</div>` : ''}
+          <div class="review-reactions">
+            <button class="reaction-btn ${myReaction === 'like' ? 'liked' : ''}" onclick="react('${r.id}', 'like', this)">👍 ${likes}</button>
+            <button class="reaction-btn ${myReaction === 'dislike' ? 'disliked' : ''}" onclick="react('${r.id}', 'dislike', this)">👎 ${dislikes}</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ── 별점 선택 ────────────────────────────────
+  function setStar(n) {
+    selectedStar = n;
+    document.querySelectorAll('.star-btn').forEach((btn, i) => {
+      btn.classList.toggle('active', i < n);
+    });
+  }
+
+  // ── 태그 선택 ────────────────────────────────
+  function toggleTag(el) {
+    el.classList.toggle('selected');
+    const tag = el.textContent;
+    if (el.classList.contains('selected')) {
+      selectedTags.push(tag);
+    } else {
+      selectedTags = selectedTags.filter(t => t !== tag);
+    }
+  }
+
+  // ── 리뷰 제출 ────────────────────────────────
+  async function submitReview() {
+    if (!currentUser) { location.href = 'auth.html'; return; }
+    if (!selectedStar) { showMsg('error', '별점을 선택해주세요!'); return; }
+
+    const content = document.getElementById('review-content').value.trim();
+    const { error } = await soolClient.from('reviews').insert({
+      user_id: currentUser.id,
+      drink_id: drinkId,
+      rating: selectedStar,
+      content: content || null,
+      taste_tags: selectedTags.length > 0 ? selectedTags : null,
+    });
+
+    if (error) {
+      showMsg('error', '리뷰 등록 중 오류가 발생했어요.');
+    } else {
+      showMsg('success', '리뷰가 등록됐어요! +50 XP 🎉');
+      // 평균 평점 업데이트
+      await updateDrinkRating();
+      setTimeout(() => { loadReviews(); resetForm(); }, 1000);
+    }
+  }
+
+  // ── 평균 평점 업데이트 ───────────────────────
+  async function updateDrinkRating() {
+    const { data } = await soolClient
+      .from('reviews').select('rating').eq('drink_id', drinkId);
+    if (!data || data.length === 0) return;
+    const avg = data.reduce((s, r) => s + r.rating, 0) / data.length;
+    await soolClient.from('drinks').update({
+      avg_rating: Math.round(avg * 100) / 100,
+      review_count: data.length,
+    }).eq('id', drinkId);
+  }
+
+  // ── 리액션 ───────────────────────────────────
+  async function react(reviewId, reaction, btn) {
+    if (!currentUser) { location.href = 'auth.html'; return; }
+
+    const { data: existing } = await soolClient
+      .from('review_reactions')
+      .select('*').eq('review_id', reviewId).eq('user_id', currentUser.id).single();
+
+    if (existing) {
+      if (existing.reaction === reaction) {
+        // 같은 리액션 → 취소
+        await soolClient.from('review_reactions').delete().eq('id', existing.id);
+      } else {
+        // 다른 리액션 → 변경
+        await soolClient.from('review_reactions').update({ reaction }).eq('id', existing.id);
+      }
+    } else {
+      // 새 리액션
+      await soolClient.from('review_reactions').insert({ review_id: reviewId, user_id: currentUser.id, reaction });
+    }
+    loadReviews();
+  }
+
+  // ── 폼 초기화 ────────────────────────────────
+  function resetForm() {
+    selectedStar = 0;
+    selectedTags = [];
+    document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.taste-tag').forEach(t => t.classList.remove('selected'));
+    document.getElementById('review-content').value = '';
+  }
+
+  // ── 메시지 ───────────────────────────────────
+  function showMsg(type, text) {
+    const el = document.getElementById('form-msg');
+    el.className = 'form-msg ' + type;
+    el.textContent = text;
+    setTimeout(() => { el.className = 'form-msg'; }, 3000);
+  }
+
+  // ── 날짜 포맷 ────────────────────────────────
+  function timeAgo(dateStr) {
+    const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+    if (diff < 60) return '방금 전';
+    if (diff < 3600) return Math.floor(diff/60) + '분 전';
+    if (diff < 86400) return Math.floor(diff/3600) + '시간 전';
+    return Math.floor(diff/86400) + '일 전';
+  }
+
+  init();
+</script>
+</body>
+</html>

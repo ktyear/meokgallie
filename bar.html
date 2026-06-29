@@ -143,7 +143,7 @@
       return;
     }
     grid.innerHTML = data.map(d => `
-      <div class="drink-card">
+      <div class="drink-card" onclick="location.href='drink-detail.html?id=${d.id}'">
         <div class="drink-icon">${categoryEmoji[d.category] || '🍾'}</div>
         <div class="drink-name-row">
           <span class="drink-name">${d.name}</span>
@@ -170,7 +170,7 @@
       return;
     }
     list.innerHTML = data.map(r => `
-      <div class="review-card">
+      <div class="review-card" onclick="location.href='drink-detail.html?id=${r.drink_id}'">
         <div class="review-header">
           <div class="review-emoji">${categoryEmoji[r.drinks?.category] || '🍾'}</div>
           <div class="review-name">${r.drinks?.name || '—'}</div>

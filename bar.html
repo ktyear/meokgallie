@@ -46,7 +46,10 @@
   .drink-card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:border-color 0.15s;}
   .drink-card:hover{border-color:var(--red-200);}
   .drink-icon{font-size:28px;margin-bottom:8px;}
-  .drink-name{font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:3px;}
+  .drink-name-row{display:flex;align-items:center;gap:6px;margin-bottom:2px;}
+  .drink-name{font-size:13px;font-weight:600;color:var(--text-primary);}
+  .drink-abv{font-size:11px;color:var(--red-400);font-weight:500;white-space:nowrap;}
+  .drink-category{font-size:11px;color:var(--red-200);font-weight:500;margin-bottom:4px;}
   .drink-desc{font-size:11px;color:var(--text-muted);line-height:1.4;}
   .drink-rating{font-size:12px;color:var(--red-200);margin-top:6px;}
   .write-btn{width:100%;background:var(--red-200);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;margin-top:10px;transition:background 0.15s;}
@@ -142,9 +145,13 @@
     grid.innerHTML = data.map(d => `
       <div class="drink-card">
         <div class="drink-icon">${categoryEmoji[d.category] || '🍾'}</div>
-        <div class="drink-name">${d.name}</div>
-        <div class="drink-desc">${d.description || (d.subcategory || d.category)}</div>
-        <div class="drink-rating">${d.avg_rating ? '★ ' + d.avg_rating : '리뷰 ' + d.review_count + '개'}${d.alcohol_degree ? ' · ' + d.alcohol_degree + '%' : ''}</div>
+        <div class="drink-name-row">
+          <span class="drink-name">${d.name}</span>
+          ${d.alcohol_degree ? `<span class="drink-abv">${d.alcohol_degree}%</span>` : ''}
+        </div>
+        <div class="drink-category">${d.category}${d.subcategory ? ' · ' + d.subcategory : ''}</div>
+        <div class="drink-desc">${d.description || ''}</div>
+        <div class="drink-rating">${d.avg_rating ? '★ ' + d.avg_rating + ' · ' : ''}리뷰 ${d.review_count}개</div>
       </div>
     `).join('');
   }

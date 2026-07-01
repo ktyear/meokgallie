@@ -39,8 +39,22 @@
   .post-footer{display:flex;gap:12px;margin-top:10px;}
   .post-stat{font-size:12px;color:var(--text-muted);}
   .write-btn{width:100%;background:var(--purple-200);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px;transition:background 0.15s;}.write-btn:hover{background:var(--purple-400);}
+  .post-card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:border-color 0.15s;}.post-card:hover{border-color:var(--purple-200);}
+  .post-cat{font-size:10px;background:var(--purple-50);color:var(--purple-600);padding:2px 7px;border-radius:99px;font-weight:500;}
+  .write-form{display:flex;flex-direction:column;gap:12px;}
+  .write-label{font-size:11px;color:var(--text-muted);letter-spacing:0.06em;margin-bottom:4px;}
+  .write-select,.write-input,.write-textarea{width:100%;background:var(--bg);border:0.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text-primary);font-family:inherit;outline:none;transition:border-color 0.15s;}
+  .write-select:focus,.write-input:focus,.write-textarea:focus{border-color:var(--purple-200);}
+  .write-textarea{resize:none;height:120px;}
+  .write-select option{background:#fff;}
+  .form-msg{font-size:12px;text-align:center;padding:6px;border-radius:8px;display:none;}
+  .form-msg.success{display:block;background:rgba(74,222,128,0.1);color:#16a34a;}
+  .form-msg.error{display:block;background:rgba(239,68,68,0.1);color:#dc2626;}
+  .empty{text-align:center;padding:32px;color:var(--text-muted);font-size:13px;}
   @media(max-width:480px){nav{padding:12px 16px;}.hero{padding:20px 16px 20px;}.section{padding:16px;}}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/core/supabase.js"></script>
 </head>
 <body>
 <nav>
@@ -62,28 +76,46 @@
 </div>
 <div id="tab-communities" class="tab-content active">
   <div class="section">
-    <p class="section-title">인기 커뮤니티</p>
-    <div class="community-card"><div class="community-icon">🥃</div><div><div class="community-name">위스키 마니아</div><div class="community-desc">싱글몰트부터 블렌디드까지</div><div class="community-members">회원 2,840명</div></div></div>
-    <div class="community-card"><div class="community-icon">🍶</div><div><div class="community-name">전통주 덕후</div><div class="community-desc">막걸리·약주·전통 소주 탐구</div><div class="community-members">회원 1,920명</div></div></div>
-    <div class="community-card"><div class="community-icon">🍸</div><div><div class="community-name">하이볼 클럽</div><div class="community-desc">다양한 하이볼 레시피 공유</div><div class="community-members">회원 3,140명</div></div></div>
-    <div class="community-card"><div class="community-icon">🌿</div><div><div class="community-name">소버라이프</div><div class="community-desc">무알코올·절주 라이프스타일</div><div class="community-members">회원 980명</div></div></div>
-    <div class="community-card"><div class="community-icon">🎓</div><div><div class="community-name">조주기능사 스터디</div><div class="community-desc">시험 준비생 정보 공유</div><div class="community-members">회원 1,560명</div></div></div>
+    <p class="section-title">커뮤니티</p>
+    <div id="communities-list"><div class="empty">불러오는 중...</div></div>
   </div>
 </div>
 <div id="tab-posts" class="tab-content">
   <div class="section">
     <p class="section-title">최신 게시글</p>
-    <div class="post-card"><div class="post-header"><div class="post-avatar">🥃</div><div class="post-author">위스키덕후</div><div class="post-time">10분 전</div></div><div class="post-title">입문자에게 추천하는 위스키 5선</div><div class="post-body">처음 위스키를 접하는 분들께 부담 없이 시작할 수 있는 위스키를 추천해드려요...</div><div class="post-footer"><span class="post-stat">👍 42</span><span class="post-stat">💬 18</span><span class="post-stat">👁️ 320</span></div></div>
-    <div class="post-card"><div class="post-header"><div class="post-avatar">🍶</div><div class="post-author">전통주러버</div><div class="post-time">1시간 전</div></div><div class="post-title">이번 주말 전통주 페어 다녀왔어요</div><div class="post-body">서울 코엑스에서 열린 전통주 박람회 후기. 정말 다양한 술들을 만날 수 있었어요...</div><div class="post-footer"><span class="post-stat">👍 28</span><span class="post-stat">💬 12</span><span class="post-stat">👁️ 180</span></div></div>
-    <div class="post-card"><div class="post-header"><div class="post-avatar">🍸</div><div class="post-author">바텐더K</div><div class="post-time">3시간 전</div></div><div class="post-title">집에서 만드는 완벽한 하이볼 레시피</div><div class="post-body">탄산수 비율, 얼음 양, 위스키 종류별 하이볼 황금 비율을 공유합니다...</div><div class="post-footer"><span class="post-stat">👍 96</span><span class="post-stat">💬 34</span><span class="post-stat">👁️ 840</span></div></div>
+    <div id="posts-list"><div class="empty">불러오는 중...</div></div>
   </div>
 </div>
 <div id="tab-write" class="tab-content">
   <div class="section">
-    <div style="background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
-      <div style="font-size:36px;margin-bottom:12px;">✍️</div>
-      <div style="font-size:14px;color:var(--text-secondary);margin-bottom:16px;line-height:1.6;">커뮤니티에 글을 남겨보세요.<br>댓글 작성 시 <strong style="color:var(--purple-400);">+10 XP</strong>, 게시글 작성 시 <strong style="color:var(--purple-400);">+30 XP</strong></div>
-      <button class="write-btn" onclick="alert('글쓰기 기능은 준비 중이에요!')">게시글 작성하기</button>
+    <p class="section-title">게시글 작성</p>
+    <div id="write-wrap">
+      <div class="write-form">
+        <div>
+          <div class="write-label">커뮤니티 *</div>
+          <select class="write-select" id="post-community">
+            <option value="">선택하세요</option>
+          </select>
+        </div>
+        <div>
+          <div class="write-label">제목 *</div>
+          <input class="write-input" id="post-title" placeholder="게시글 제목을 입력하세요" maxlength="100" />
+        </div>
+        <div>
+          <div class="write-label">내용 *</div>
+          <textarea class="write-textarea" id="post-content" placeholder="내용을 입력하세요..."></textarea>
+        </div>
+        <div>
+          <div class="write-label">이미지 URL (선택)</div>
+          <input class="write-input" id="post-image" placeholder="https://... 이미지 주소를 입력하세요" />
+        </div>
+        <div>
+          <div class="write-label">유튜브 / 외부 링크 (선택)</div>
+          <input class="write-input" id="post-embed" placeholder="https://youtube.com/... 링크를 입력하세요" />
+        </div>
+        <div class="form-msg" id="write-msg"></div>
+        <button class="write-btn" onclick="submitPost()">게시글 등록 +30 XP</button>
+      </div>
     </div>
   </div>
 </div>
@@ -95,10 +127,7 @@
     el.classList.add('active');
     sessionStorage.setItem('community_tab', name);
   }
-  function goBack() {
-    if (document.referrer && document.referrer.includes(location.hostname)) { history.back(); }
-    else { location.href = 'index.html'; }
-  }
+  function goBack() { location.href = 'index.html'; }
   // 복귀 시 탭 복원
   document.addEventListener('DOMContentLoaded', () => {
     const savedTab = sessionStorage.getItem('community_tab');
@@ -107,6 +136,152 @@
       const tabEl = document.querySelector(`.tab:nth-child(${tabMap[savedTab]})`);
       if (tabEl) switchTab(savedTab, tabEl);
     }
+  });
+
+  let communitiesData = [];
+
+  function timeAgo(dateStr) {
+    const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+    if (diff < 60) return '방금 전';
+    if (diff < 3600) return Math.floor(diff/60) + '분 전';
+    if (diff < 86400) return Math.floor(diff/3600) + '시간 전';
+    return Math.floor(diff/86400) + '일 전';
+  }
+
+  // 유튜브 URL → 임베드 ID 추출
+  function getYoutubeId(url) {
+    try {
+      const u = new URL(url);
+      if (u.hostname.includes("youtube.com")) return u.searchParams.get("v");
+      if (u.hostname === "youtu.be") return u.pathname.slice(1);
+    } catch(e) {}
+    return null;
+  }
+
+  // 커뮤니티 목록 로드
+  async function loadCommunities() {
+    const { data, error } = await soolClient
+      .from('communities')
+      .select('*')
+      .order('sort_order', { ascending: true });
+
+    if (error || !data) return;
+    communitiesData = data;
+
+    // 커뮤니티 탭 목록 표시
+    const list = document.getElementById('communities-list');
+    list.innerHTML = data.map(c => `
+      <div class="community-card" onclick="location.href='community-posts.html?id=${c.id}&name=${encodeURIComponent(c.name)}&icon=${encodeURIComponent(c.icon)}'">
+        <div class="community-icon">${c.icon}</div>
+        <div>
+          <div class="community-name">${c.name}</div>
+          <div class="community-desc">${c.description || ''}</div>
+        </div>
+      </div>
+    `).join('');
+
+    // 글쓰기 커뮤니티 선택 옵션 채우기
+    const select = document.getElementById('post-community');
+    if (select) {
+      data.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.icon + ' ' + c.name;
+        select.appendChild(opt);
+      });
+    }
+  }
+
+  // 자유게시판 게시글 로드
+  async function loadPosts() {
+    const { data, error } = await soolClient
+      .from('posts')
+      .select('*, users(nickname), communities(name, icon)')
+      .order('created_at', { ascending: false })
+      .limit(30);
+
+    const list = document.getElementById('posts-list');
+    if (error || !data || data.length === 0) {
+      list.innerHTML = '<div class="empty">아직 게시글이 없어요. 첫 글을 작성해보세요! ✍️</div>';
+      return;
+    }
+    list.innerHTML = data.map(p => `
+      <div class="post-card" onclick="location.href='post-detail.html?id=${p.id}&from=community.html'">
+        <div class="post-header">
+          <div class="post-avatar">${p.communities?.icon || '💬'}</div>
+          <div class="post-author">${p.users?.nickname || '익명'}</div>
+          <span class="post-cat">${p.communities?.name || '—'}</span>
+          <div class="post-time">${timeAgo(p.created_at)}</div>
+        </div>
+        <div class="post-title">${p.title}</div>
+        <div class="post-body">${p.content.slice(0, 80)}${p.content.length > 80 ? '...' : ''}</div>
+        ${p.image_url ? `<img src="${p.image_url}" style="width:100%;border-radius:8px;margin-top:8px;max-height:160px;object-fit:cover;" onerror="this.style.display='none'" />` : ''}
+        <div class="post-footer">
+          <span class="post-stat">👍 ${p.like_count}</span>
+          <span class="post-stat">💬 ${p.comment_count}</span>
+          <span class="post-stat">👁️ ${p.view_count}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function submitPost() {
+    const { data: { session } } = await soolClient.auth.getSession();
+    if (!session) { location.href = 'auth.html'; return; }
+
+    const communityId = document.getElementById('post-community').value;
+    const title = document.getElementById('post-title').value.trim();
+    const content = document.getElementById('post-content').value.trim();
+    const imageUrl = document.getElementById('post-image').value.trim();
+    const embedUrl = document.getElementById('post-embed').value.trim();
+
+    if (!communityId) { showMsg('커뮤니티를 선택해주세요!', 'error'); return; }
+    if (!title) { showMsg('제목을 입력해주세요!', 'error'); return; }
+    if (!content) { showMsg('내용을 입력해주세요!', 'error'); return; }
+
+    const { error } = await soolClient.from('posts').insert({
+      user_id: session.user.id,
+      community_id: communityId,
+      title, content,
+      image_url: imageUrl || null,
+      embed_url: embedUrl || null,
+      category: communitiesData.find(c => c.id === communityId)?.name || ''
+    });
+
+    if (error) { showMsg('등록 중 오류가 발생했어요.', 'error'); }
+    else {
+      showMsg('게시글이 등록됐어요! +30 XP 🎉', 'success');
+      ['post-community','post-title','post-content','post-image','post-embed'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      setTimeout(() => {
+        loadPosts();
+        const postTab = document.querySelector('.tab:nth-child(2)');
+        if (postTab) switchTab('posts', postTab);
+      }, 1500);
+    }
+  }
+
+  function showMsg(text, type) {
+    const el = document.getElementById('write-msg');
+    el.className = 'form-msg ' + type;
+    el.textContent = text;
+    setTimeout(() => { el.className = 'form-msg'; }, 3000);
+  }
+
+  async function initWriteTab() {
+    const { data: { session } } = await soolClient.auth.getSession();
+    if (!session) {
+      document.getElementById('write-wrap').innerHTML = `
+        <div class="empty"><a href="auth.html" style="color:var(--purple-400);text-decoration:none;">로그인</a> 후 글을 작성할 수 있어요</div>`;
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadCommunities();
+    loadPosts();
+    initWriteTab();
   });
 </script>
 </body>

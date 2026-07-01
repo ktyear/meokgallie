@@ -291,6 +291,7 @@
   <button class="admin-tab active" onclick="switchTab('drinks', this)">🍶 술 DB</button>
   <button class="admin-tab" onclick="switchTab('users', this)">👥 유저</button>
   <button class="admin-tab" onclick="switchTab('reviews', this)">⭐ 리뷰</button>
+  <button class="admin-tab" onclick="switchTab('posts', this)">💬 게시글</button>
 </div>
 
 <!-- 콘텐츠 -->
@@ -416,6 +417,30 @@
     </table>
   </div>
 
+  <!-- 게시글 탭 -->
+  <div class="tab-panel" id="panel-posts">
+    <div class="section-header">
+      <div class="section-title">게시글 목록</div>
+      <div class="section-count" id="posts-count"></div>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>카테고리</th>
+          <th>제목</th>
+          <th>작성자</th>
+          <th>👍</th>
+          <th>💬</th>
+          <th>작성일</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="posts-tbody">
+        <tr><td colspan="7"><div class="empty-state"><div class="icon">💬</div>게시글 로딩 중...</div></td></tr>
+      </tbody>
+    </table>
+  </div>
+
 </div>
 
 <!-- Supabase CDN -->
@@ -445,6 +470,7 @@
     loadDrinks();
     loadUsers();
     loadReviews();
+    loadPosts();
   }
 
   function showAccessDenied() {
@@ -594,6 +620,40 @@
     if (!confirm('리뷰를 삭제할까요?')) return;
     await soolClient.from('reviews').delete().eq('id', id);
     loadReviews();
+  }
+
+  // ── 게시글 ───────────────────────────────────
+  async function loadPosts() {
+    const { data, error } = await soolClient
+      .from('posts')
+      .select('*, users(nickname)')
+      .order('created_at', { ascending: false });
+
+    if (error || !data) return;
+    document.getElementById('posts-count').textContent = `총 ${data.length}개`;
+    const tbody = document.getElementById('posts-tbody');
+
+    if (data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="icon">💬</div>게시글이 없어요</div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = data.map(p => `
+      <tr>
+        <td>${p.category}</td>
+        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.title}</td>
+        <td>${p.users?.nickname || '—'}</td>
+        <td>${p.like_count}</td>
+        <td>${p.comment_count}</td>
+        <td>${new Date(p.created_at).toLocaleDateString('ko-KR')}</td>
+        <td><button class="btn-danger" onclick="deletePost('${p.id}')">삭제</button></td>
+      </tr>
+    `).join('');
+  }
+
+  async function deletePost(id) {
+    if (!confirm('게시글을 삭제할까요?')) return;
+    await soolClient.from('posts').delete().eq('id', id);
+    loadPosts();
   }
 
   // ── 메시지 표시 ──────────────────────────────

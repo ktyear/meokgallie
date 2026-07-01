@@ -90,6 +90,67 @@ Unity 전환 이후 간단한 도트 수준의 존재 표시만 검토.
 
 ---
 
+## [v1.6.4] — 2026-07-01 · 커뮤니티 센터 구현
+
+### Supabase DB 변경
+
+#### posts 테이블 컬럼 추가
+- `community_id` (FK → communities)
+- `image_url` — 이미지 URL
+- `embed_url` — 유튜브 / 외부 링크
+
+#### comments 테이블 신규 생성
+- id / post_id (FK) / user_id (FK) / content / like_count / created_at
+
+#### post_likes 테이블 신규 생성
+- id / post_id (FK) / user_id (FK) / created_at
+- UNIQUE(post_id, user_id)
+
+#### communities 테이블 신규 생성
+- id / name / description / icon / sort_order / created_at
+- 기본 커뮤니티 11개 삽입:
+  위스키 마니아 / 전통주 덕후 / 와인 러버 / 맥주 덕후 / 칵테일 바 /
+  기타 주류 / 하이볼 클럽 / 소버라이프 / 자격증 스터디 / 정보&뉴스 / 질문&답변
+
+### 신규 파일
+
+#### post-detail.html
+- 게시글 상세 페이지
+- 조회수 자동 증가
+- 👍 좋아요 토글 (post_likes 테이블)
+- 댓글 작성·조회 (comments 테이블)
+- 본인 글일 때 🗑️ 삭제 버튼 표시
+
+#### community-posts.html
+- 커뮤니티별 게시글 목록 페이지
+- 이미지 URL → 썸네일 표시
+- 유튜브 링크 → 임베드 플레이어 표시
+- 기타 외부 링크 → 링크 표시
+- 우하단 ✏️ 글쓰기 FAB 버튼 → 모달 팝업
+- 비로그인 시 글쓰기 버튼 숨김
+
+### 변경 파일
+
+#### community.html
+- 커뮤니티 탭 → Supabase 실데이터 로딩
+- 커뮤니티 카드 클릭 → community-posts.html 이동
+- 자유게시판 탭 → 실데이터 로딩 (전체 게시글)
+- 글쓰기 탭 → 커뮤니티 선택 + 이미지URL + 임베드URL 입력
+- Supabase CDN을 head로 이동 (switchTab 오류 수정)
+- getYoutubeId → URL API 방식으로 교체 (정규식 오류 수정)
+- 마을로 돌아가기 → index.html 고정
+
+#### admin.html
+- 💬 게시글 탭 추가
+  - 게시글 목록 (카테고리·제목·작성자·좋아요·댓글·작성일)
+  - 게시글 삭제 기능
+
+#### post-detail.html
+- 본인 글 삭제 버튼 추가 (🗑️)
+- 삭제 후 이전 페이지로 복귀
+
+---
+
 ## [v1.6.3] — 2026-07-01 · 술 상세 위키화 & 리뷰 작성 탭 구현
 
 ### Supabase DB 변경

@@ -152,6 +152,13 @@ const SoolPopup = (() => {
     renderer.domElement.addEventListener('mousemove', onMouseMove);
   }
 
-  return { init, onTap, hide, unlock, cast };
+  // ── 숏컷에서 직접 팝업 표시 ─────────────────
+  function showByData(data) {
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+    lock(data, cx, cy);
+  }
+
+  return { init, onTap, hide, unlock, cast, showByData };
 
 })();

@@ -67,17 +67,17 @@
         건물 바로가기 <span id="shortcut-arrow">▾</span>
       </div>
       <div id="ui-shortcut-list">
-        <button class="shortcut-btn" onclick="SoolControls.moveTo(-5.5, -3.5)"><span class="congestion-bar bar-green"></span><span>🍸</span>술바</button>
-        <button class="shortcut-btn" onclick="SoolControls.moveTo(5.5, -3.5)"><span class="congestion-bar bar-yellow"></span><span>📚</span>도서관</button>
-        <button class="shortcut-btn" onclick="SoolControls.moveTo(0, -7.5)"><span class="congestion-bar bar-red"></span><span>🏛️</span>커뮤니티</button>
-        <button class="shortcut-btn" onclick="SoolControls.moveTo(7.0, 0)"><span class="congestion-bar bar-green"></span><span>🛒</span>주류상점</button>
-        <button class="shortcut-btn" onclick="SoolControls.moveTo(-7.0, 0)"><span class="congestion-bar bar-yellow"></span><span>🏺</span>양조장</button>
-        <button class="shortcut-btn" onclick="SoolControls.moveTo(-2.0, 5.5)"><span class="congestion-bar bar-green"></span><span>🎬</span>영상관</button>
-        <button class="shortcut-btn" onclick="SoolControls.moveTo(2.5, 5.5)"><span class="congestion-bar bar-green"></span><span>🗺️</span>안내소</button>
-        <button class="shortcut-btn" onclick="SoolControls.moveTo(-11.0, -5.0)"><span class="congestion-bar bar-yellow"></span><span>🎪</span>팝업광장</button>
-        <button class="shortcut-btn" onclick="SoolControls.moveTo(11.0, -5.0)"><span class="congestion-bar bar-green"></span><span>🏠</span>내공간</button>
-        <button class="shortcut-btn" onclick="SoolControls.moveTo(-11.0, 5.0)"><span class="congestion-bar bar-green"></span><span>🌿</span>소버카페</button>
-        <button class="shortcut-btn" onclick="SoolControls.moveTo(11.0, 5.0)"><span class="congestion-bar bar-red"></span><span>🍽️</span>마리아주</button>
+        <button class="shortcut-btn" onclick="moveToBuilding(-5.5,-3.5,'bar')"><span class="congestion-bar bar-green"></span><span>🍸</span>술바</button>
+        <button class="shortcut-btn" onclick="moveToBuilding(5.5,-3.5,'library')"><span class="congestion-bar bar-yellow"></span><span>📚</span>도서관</button>
+        <button class="shortcut-btn" onclick="moveToBuilding(0,-7.5,'community')"><span class="congestion-bar bar-red"></span><span>🏛️</span>커뮤니티</button>
+        <button class="shortcut-btn" onclick="moveToBuilding(7.0,0,'shop')"><span class="congestion-bar bar-green"></span><span>🛒</span>주류상점</button>
+        <button class="shortcut-btn" onclick="moveToBuilding(-7.0,0,'brewery')"><span class="congestion-bar bar-yellow"></span><span>🏺</span>양조장</button>
+        <button class="shortcut-btn" onclick="moveToBuilding(-2.0,5.5,'studio')"><span class="congestion-bar bar-green"></span><span>🎬</span>영상관</button>
+        <button class="shortcut-btn" onclick="moveToBuilding(2.5,5.5,'infoCenter')"><span class="congestion-bar bar-green"></span><span>🗺️</span>안내소</button>
+        <button class="shortcut-btn" onclick="moveToBuilding(-11.0,-5.0,'popupSquare')"><span class="congestion-bar bar-yellow"></span><span>🎪</span>팝업광장</button>
+        <button class="shortcut-btn" onclick="moveToBuilding(11.0,-5.0,'myspace')"><span class="congestion-bar bar-green"></span><span>🏠</span>내공간</button>
+        <button class="shortcut-btn" onclick="moveToBuilding(-11.0,5.0,'cafe')"><span class="congestion-bar bar-green"></span><span>🌿</span>소버카페</button>
+        <button class="shortcut-btn" onclick="moveToBuilding(11.0,5.0,'restaurant')"><span class="congestion-bar bar-red"></span><span>🍽️</span>마리아주</button>
       </div>
     </div>
 
@@ -228,6 +228,19 @@
     async function handleLogout() {
       await soolClient.auth.signOut();
       location.reload();
+    }
+
+    // 숏컷 → 카메라 이동 + 팝업 표시
+    function moveToBuilding(x, z, buildingId) {
+      SoolControls.moveTo(x, z);
+      // 카메라 이동 후 팝업 표시 (이동 애니메이션 후)
+      setTimeout(() => {
+        const registry = SoolBuildings.getRegistry();
+        const entry = registry.find(r => r.data.id === buildingId);
+        if (entry && SoolPopup) {
+          SoolPopup.showByData(entry.data);
+        }
+      }, 600);
     }
 
     document.addEventListener('DOMContentLoaded', () => {

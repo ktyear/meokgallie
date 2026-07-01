@@ -191,8 +191,7 @@
     sessionStorage.setItem('bar_tab', name);
   }
   function goBack() {
-    if (document.referrer && document.referrer.includes(location.hostname)) { history.back(); }
-    else { location.href = 'index.html'; }
+    location.href = 'index.html';
   }
   // 복귀 시 탭 복원
   document.addEventListener('DOMContentLoaded', () => {

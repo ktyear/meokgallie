@@ -54,6 +54,32 @@
   .drink-rating{font-size:12px;color:var(--red-200);margin-top:6px;}
   .write-btn{width:100%;background:var(--red-200);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;margin-top:10px;transition:background 0.15s;}
   .write-btn:hover{background:var(--red-400);}
+  .write-form{display:flex;flex-direction:column;gap:14px;}
+  .write-label{font-size:11px;color:var(--text-muted);letter-spacing:0.06em;margin-bottom:6px;}
+  .drink-search{width:100%;background:var(--bg);border:0.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text-primary);font-family:inherit;outline:none;transition:border-color 0.15s;}
+  .drink-search:focus{border-color:var(--red-200);}
+  .drink-search::placeholder{color:var(--text-muted);}
+  .search-results{background:var(--bg-card);border:0.5px solid var(--border);border-radius:8px;overflow:hidden;display:none;}
+  .search-item{padding:10px 12px;font-size:13px;cursor:pointer;border-bottom:0.5px solid var(--border);transition:background 0.15s;}
+  .search-item:last-child{border-bottom:none;}
+  .search-item:hover{background:var(--bg);}
+  .search-item-name{font-weight:600;color:var(--text-primary);}
+  .search-item-sub{font-size:11px;color:var(--text-muted);margin-top:2px;}
+  .selected-drink{background:var(--red-50);border:0.5px solid var(--red-100);border-radius:8px;padding:10px 12px;display:none;align-items:center;justify-content:space-between;}
+  .selected-drink-name{font-size:13px;font-weight:600;color:var(--red-400);}
+  .selected-drink-clear{font-size:12px;color:var(--text-muted);cursor:pointer;background:none;border:none;font-family:inherit;}
+  .star-row{display:flex;gap:8px;}
+  .star-btn-lg{font-size:32px;cursor:pointer;color:var(--border);transition:color 0.1s;background:none;border:none;padding:0;}
+  .star-btn-lg.active{color:#FFD700;}
+  .taste-tags{display:flex;flex-wrap:wrap;gap:6px;}
+  .taste-tag{font-size:11px;color:var(--text-muted);background:var(--bg);border:0.5px solid var(--border);padding:4px 10px;border-radius:99px;cursor:pointer;transition:all 0.15s;user-select:none;}
+  .taste-tag.selected{background:var(--red-50);border-color:var(--red-200);color:var(--red-400);}
+  .review-input{width:100%;background:var(--bg);border:0.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text-primary);font-family:inherit;resize:none;height:80px;outline:none;transition:border-color 0.15s;}
+  .review-input:focus{border-color:var(--red-200);}
+  .review-input::placeholder{color:var(--text-muted);}
+  .form-msg{font-size:12px;text-align:center;padding:6px;border-radius:8px;display:none;}
+  .form-msg.success{display:block;background:rgba(74,222,128,0.1);color:#16a34a;}
+  .form-msg.error{display:block;background:rgba(239,68,68,0.1);color:#dc2626;}
   @media(max-width:480px){nav{padding:12px 16px;}.hero{padding:20px 16px 20px;}.section{padding:16px;}.drink-grid{grid-template-columns:1fr;}}
 </style>
 </head>
@@ -97,10 +123,59 @@
 <div id="tab-write" class="tab-content">
   <div class="section">
     <p class="section-title">리뷰 작성</p>
-    <div style="background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
-      <div style="font-size:36px;margin-bottom:12px;">✍️</div>
-      <div style="font-size:14px;color:var(--text-secondary);margin-bottom:16px;line-height:1.6;">오늘 마신 술을 기록해보세요.<br>리뷰 작성 시 <strong style="color:var(--red-400);">+50 XP</strong> 획득!</div>
-      <button class="write-btn" onclick="alert('리뷰 작성 기능은 준비 중이에요!')">리뷰 작성하기</button>
+    <div id="write-form-wrap">
+      <div class="write-form">
+        <!-- 1. 술 검색 -->
+        <div>
+          <div class="write-label">술 선택 *</div>
+          <input class="drink-search" id="drink-search-input" placeholder="술 이름을 검색하세요..." oninput="searchDrinks(this.value)" autocomplete="off" />
+          <div class="search-results" id="search-results"></div>
+          <div class="selected-drink" id="selected-drink">
+            <span class="selected-drink-name" id="selected-drink-name"></span>
+            <button class="selected-drink-clear" onclick="clearDrinkSelect()">✕ 다시 선택</button>
+          </div>
+        </div>
+        <!-- 2. 별점 -->
+        <div>
+          <div class="write-label">별점 *</div>
+          <div class="star-row" id="write-stars">
+            <button class="star-btn-lg" onclick="setWriteStar(1)">★</button>
+            <button class="star-btn-lg" onclick="setWriteStar(2)">★</button>
+            <button class="star-btn-lg" onclick="setWriteStar(3)">★</button>
+            <button class="star-btn-lg" onclick="setWriteStar(4)">★</button>
+            <button class="star-btn-lg" onclick="setWriteStar(5)">★</button>
+          </div>
+        </div>
+        <!-- 3. 향미 태그 -->
+        <div>
+          <div class="write-label">향미 태그 (복수 선택)</div>
+          <div class="taste-tags" id="write-tags">
+            <span class="taste-tag" onclick="toggleWriteTag(this)">달콤함</span>
+            <span class="taste-tag" onclick="toggleWriteTag(this)">쓴맛</span>
+            <span class="taste-tag" onclick="toggleWriteTag(this)">산미</span>
+            <span class="taste-tag" onclick="toggleWriteTag(this)">과일향</span>
+            <span class="taste-tag" onclick="toggleWriteTag(this)">꽃향기</span>
+            <span class="taste-tag" onclick="toggleWriteTag(this)">오크향</span>
+            <span class="taste-tag" onclick="toggleWriteTag(this)">스모키</span>
+            <span class="taste-tag" onclick="toggleWriteTag(this)">바닐라</span>
+            <span class="taste-tag" onclick="toggleWriteTag(this)">허브</span>
+            <span class="taste-tag" onclick="toggleWriteTag(this)">견과류</span>
+            <span class="taste-tag" onclick="toggleWriteTag(this)">초콜릿</span>
+            <span class="taste-tag" onclick="toggleWriteTag(this)">커피</span>
+            <span class="taste-tag" onclick="toggleWriteTag(this)">스파이시</span>
+            <span class="taste-tag" onclick="toggleWriteTag(this)">미네랄</span>
+            <span class="taste-tag" onclick="toggleWriteTag(this)">부드러움</span>
+            <span class="taste-tag" onclick="toggleWriteTag(this)">깔끔함</span>
+          </div>
+        </div>
+        <!-- 4. 한줄 리뷰 -->
+        <div>
+          <div class="write-label">한줄 리뷰</div>
+          <textarea class="review-input" id="write-content" placeholder="이 술에 대한 솔직한 한줄 평을 남겨주세요..."></textarea>
+        </div>
+        <div class="form-msg" id="write-msg"></div>
+        <button class="write-btn" onclick="submitWriteReview()">리뷰 등록하기 +50 XP</button>
+      </div>
     </div>
   </div>
 </div>
@@ -199,9 +274,118 @@
     `).join('');
   }
 
+  // 리뷰 작성 탭 변수
+  let writeStar = 0;
+  let writeTags = [];
+  let selectedDrinkId = null;
+  let searchTimer = null;
+
+  // 술 검색
+  async function searchDrinks(query) {
+    clearTimeout(searchTimer);
+    const results = document.getElementById('search-results');
+    if (!query || query.length < 1) { results.style.display = 'none'; return; }
+    searchTimer = setTimeout(async () => {
+      const { data } = await soolClient.from('drinks').select('id, name, category, subcategory, alcohol_degree')
+        .ilike('name', `%${query}%`).limit(8);
+      if (!data || data.length === 0) { results.style.display = 'none'; return; }
+      results.style.display = 'block';
+      results.innerHTML = data.map(d => `
+        <div class="search-item" onclick="selectDrink('${d.id}', '${d.name.replace(/'/g, "\'")}', '${d.category}', '${d.alcohol_degree || ''}')">
+          <div class="search-item-name">${d.name}</div>
+          <div class="search-item-sub">${d.category}${d.subcategory ? ' · ' + d.subcategory : ''}${d.alcohol_degree ? ' · ' + d.alcohol_degree + '%' : ''}</div>
+        </div>
+      `).join('');
+    }, 300);
+  }
+
+  function selectDrink(id, name, category, abv) {
+    selectedDrinkId = id;
+    document.getElementById('drink-search-input').style.display = 'none';
+    document.getElementById('search-results').style.display = 'none';
+    const sel = document.getElementById('selected-drink');
+    sel.style.display = 'flex';
+    document.getElementById('selected-drink-name').textContent = `${name} (${category}${abv ? ' · ' + abv + '%' : ''})`;
+  }
+
+  function clearDrinkSelect() {
+    selectedDrinkId = null;
+    document.getElementById('drink-search-input').style.display = 'block';
+    document.getElementById('drink-search-input').value = '';
+    document.getElementById('selected-drink').style.display = 'none';
+  }
+
+  function setWriteStar(n) {
+    writeStar = n;
+    document.querySelectorAll('#write-stars .star-btn-lg').forEach((btn, i) => btn.classList.toggle('active', i < n));
+  }
+
+  function toggleWriteTag(el) {
+    el.classList.toggle('selected');
+    const tag = el.textContent;
+    if (el.classList.contains('selected')) writeTags.push(tag);
+    else writeTags = writeTags.filter(t => t !== tag);
+  }
+
+  async function submitWriteReview() {
+    const { data: { session } } = await soolClient.auth.getSession();
+    if (!session) { location.href = 'auth.html'; return; }
+    if (!selectedDrinkId) { showWriteMsg('error', '술을 선택해주세요!'); return; }
+    if (!writeStar) { showWriteMsg('error', '별점을 선택해주세요!'); return; }
+
+    const content = document.getElementById('write-content').value.trim();
+    const { error } = await soolClient.from('reviews').insert({
+      user_id: session.user.id,
+      drink_id: selectedDrinkId,
+      rating: writeStar,
+      content: content || null,
+      taste_tags: writeTags.length > 0 ? writeTags : null,
+    });
+
+    if (error) {
+      showWriteMsg('error', '등록 중 오류가 발생했어요.');
+    } else {
+      // 평균 평점 업데이트
+      const { data: reviews } = await soolClient.from('reviews').select('rating').eq('drink_id', selectedDrinkId);
+      if (reviews && reviews.length > 0) {
+        const avg = reviews.reduce((s, r) => s + r.rating, 0) / reviews.length;
+        await soolClient.from('drinks').update({ avg_rating: Math.round(avg * 100) / 100, review_count: reviews.length }).eq('id', selectedDrinkId);
+      }
+      showWriteMsg('success', '리뷰가 등록됐어요! +50 XP 🎉');
+      // 폼 초기화
+      setTimeout(() => {
+        writeStar = 0; writeTags = []; selectedDrinkId = null;
+        clearDrinkSelect();
+        document.querySelectorAll('#write-stars .star-btn-lg').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('#write-tags .taste-tag').forEach(t => t.classList.remove('selected'));
+        document.getElementById('write-content').value = '';
+        loadReviews();
+      }, 1500);
+    }
+  }
+
+  function showWriteMsg(type, text) {
+    const el = document.getElementById('write-msg');
+    el.className = 'form-msg ' + type;
+    el.textContent = text;
+    setTimeout(() => { el.className = 'form-msg'; }, 3000);
+  }
+
+  // 로그인 체크 후 폼 표시
+  async function initWriteTab() {
+    const { data: { session } } = await soolClient.auth.getSession();
+    if (!session) {
+      document.getElementById('write-form-wrap').innerHTML = `
+        <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px;">
+          <a href="auth.html" style="color:var(--red-400);text-decoration:none;">로그인</a> 후 리뷰를 작성할 수 있어요
+        </div>`;
+    }
+  }
+
   // 초기 로드
   loadDrinks();
   loadReviews();
+  initWriteTab();
 </script>
 </body>
 </html>

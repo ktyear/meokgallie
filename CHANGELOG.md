@@ -90,6 +90,52 @@ Unity 전환 이후 간단한 도트 수준의 존재 표시만 검토.
 
 ---
 
+## [v1.6.3] — 2026-07-01 · 술 상세 위키화 & 리뷰 작성 탭 구현
+
+### Supabase DB 변경
+
+#### drink_contributions 테이블 신규 생성
+- id (UUID, PK)
+- drink_id (FK → drinks)
+- user_id (FK → users)
+- type TEXT — intro / price / serve / nose / palate / finish
+- content TEXT
+- like_count INTEGER (기본값 0)
+- created_at
+- UNIQUE(drink_id, user_id, type)
+
+### 변경 파일
+
+#### drink-detail.html — 위키 스타일로 전면 개편
+- **기본 정보** (관리자 제공): 카테고리·브랜드·도수·원산지·지역
+- **소개** (유저 기여): 유저 한줄 소개 작성 + 👍 투표
+- **가격대** (유저 기여): 유저 가격 정보 작성 + 👍 투표
+- **음용 방법** (유저 투표): 태그 클릭으로 투표 (스트레이트·온더락·하이볼 등)
+- **테이스팅 노트** (유저 투표): 향/맛/피니시 태그 투표 + 새 태그 추가
+- 섹션별 '관리자 제공' / '유저 기여' / '유저 투표' 배지 표시
+- 리뷰·좋아요/싫어요 기존 유지
+
+#### bar.html — 리뷰 작성 탭 실제 기능 구현
+- 술 이름 실시간 검색 (300ms 디바운스)
+- 검색 결과 드롭다운 → 선택 후 고정 표시
+- 별점 선택 (1~5)
+- 향미 태그 복수 선택 (16종)
+- 한줄 리뷰 텍스트 입력
+- 등록 시 drinks 테이블 avg_rating·review_count 자동 업데이트
+- 등록 완료 후 폼 초기화 + 최신 리뷰 탭 갱신
+- 비로그인 시 로그인 유도
+
+#### popup.js
+- `showByData(data)` 함수 추가
+  - 숏컷 버튼 클릭 시 화면 중앙에 팝업 자동 표시
+
+#### index.html
+- 숏컷 버튼 `SoolControls.moveTo()` → `moveToBuilding()` 함수로 변경
+  - 카메라 이동 + 0.6초 후 해당 건물 팝업 자동 표시
+  - `SoolBuildings.getRegistry()`에서 건물 데이터 조회
+
+---
+
 ## [v1.6.2] — 2026-06-30 · 술 상세 페이지 & 탭 복원 패턴
 
 ### 신규 파일

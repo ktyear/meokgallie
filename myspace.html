@@ -546,7 +546,18 @@
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.getElementById('tab-' + name).classList.add('active');
     el.classList.add('active');
+    sessionStorage.setItem('myspace_tab', name);
   }
+
+  // 복귀 시 탭 복원
+  document.addEventListener('DOMContentLoaded', () => {
+    const savedTab = sessionStorage.getItem('myspace_tab');
+    if (savedTab && savedTab !== 'reviews') {
+      const tabMap = {"reviews": 1, "notifs": 2, "bookmarks": 3, "feed": 4, "orders": 5};
+      const tabEl = document.querySelector(`.tab:nth-child(${tabMap[savedTab]})`);
+      if (tabEl) switchTab(savedTab, tabEl);
+    }
+  });
 
   function updateCart() {
     const prices = [...document.querySelectorAll('.cart-price')]

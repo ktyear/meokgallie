@@ -99,7 +99,7 @@
     const savedTab = sessionStorage.getItem('brewery_tab');
     if (savedTab && savedTab !== 'stories') {
       const tabMap = {"stories": 1, "breweries": 2, "types": 3};
-      const tabEl = document.querySelector(`.tab:nth-child(${tabMap[savedTab]}) `);
+      const tabEl = document.querySelector(`.tab:nth-child(${tabMap[savedTab]})`);
       if (tabEl) switchTab(savedTab, tabEl);
     }
   });

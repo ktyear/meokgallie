@@ -111,7 +111,7 @@
     const savedTab = sessionStorage.getItem('restaurant_tab');
     if (savedTab && savedTab !== 'pairings') {
       const tabMap = {"pairings": 1, "recipes": 2, "search": 3};
-      const tabEl = document.querySelector(`.tab:nth-child(${tabMap[savedTab]}) `);
+      const tabEl = document.querySelector(`.tab:nth-child(${tabMap[savedTab]})`);
       if (tabEl) switchTab(savedTab, tabEl);
     }
   });

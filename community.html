@@ -104,7 +104,7 @@
     const savedTab = sessionStorage.getItem('community_tab');
     if (savedTab && savedTab !== 'communities') {
       const tabMap = {"communities": 1, "posts": 2, "write": 3};
-      const tabEl = document.querySelector(`.tab:nth-child(${tabMap[savedTab]}) `);
+      const tabEl = document.querySelector(`.tab:nth-child(${tabMap[savedTab]})`);
       if (tabEl) switchTab(savedTab, tabEl);
     }
   });

@@ -97,7 +97,7 @@
     const savedTab = sessionStorage.getItem('library_tab');
     if (savedTab && savedTab !== 'courses') {
       const tabMap = {"courses": 1, "my": 2, "cert": 3};
-      const tabEl = document.querySelector(`.tab:nth-child(${tabMap[savedTab]}) `);
+      const tabEl = document.querySelector(`.tab:nth-child(${tabMap[savedTab]})`);
       if (tabEl) switchTab(savedTab, tabEl);
     }
   });

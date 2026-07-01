@@ -95,7 +95,7 @@
     const savedTab = sessionStorage.getItem('shop_tab');
     if (savedTab && savedTab !== 'products') {
       const tabMap = {"products": 1, "limited": 2, "compare": 3};
-      const tabEl = document.querySelector(`.tab:nth-child(${tabMap[savedTab]}) `);
+      const tabEl = document.querySelector(`.tab:nth-child(${tabMap[savedTab]})`);
       if (tabEl) switchTab(savedTab, tabEl);
     }
   });

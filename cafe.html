@@ -115,7 +115,7 @@
     const savedTab = sessionStorage.getItem('cafe_tab');
     if (savedTab && savedTab !== 'nolo') {
       const tabMap = {"nolo": 1, "challenge": 2, "today": 3};
-      const tabEl = document.querySelector(`.tab:nth-child(${tabMap[savedTab]}) `);
+      const tabEl = document.querySelector(`.tab:nth-child(${tabMap[savedTab]})`);
       if (tabEl) switchTab(savedTab, tabEl);
     }
   });

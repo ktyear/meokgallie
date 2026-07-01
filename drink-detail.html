@@ -325,7 +325,7 @@
   function goBack() {
     const from = params.get('from');
     if (from) location.href = from;
-    else history.back();
+    else location.href = 'bar.html';
   }
 
   async function init() {

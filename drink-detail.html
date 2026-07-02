@@ -49,6 +49,26 @@
   .info-label { font-size: 10px; color: var(--text-muted); letter-spacing: 0.06em; }
   .info-value { font-size: 13px; color: var(--text-primary); font-weight: 500; }
 
+  /* 수정 버튼 */
+  #edit-btn { display:none; background:rgba(232,82,42,0.15); border:1px solid rgba(232,82,42,0.3); border-radius:6px; color:var(--red-200); font-size:12px; padding:5px 12px; cursor:pointer; font-family:inherit; }
+  /* 수정 모달 */
+  .edit-modal-bg { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; display:none; align-items:flex-end; }
+  .edit-modal-bg.show { display:flex; }
+  .edit-modal { background:var(--bg-card); border-radius:20px 20px 0 0; padding:24px; width:100%; max-height:85vh; overflow-y:auto; }
+  .edit-modal-title { font-size:16px; font-weight:700; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; }
+  .edit-modal-close { font-size:18px; cursor:pointer; color:var(--text-muted); background:none; border:none; }
+  .edit-form { display:flex; flex-direction:column; gap:12px; }
+  .edit-label { font-size:11px; color:var(--text-muted); letter-spacing:0.06em; margin-bottom:4px; }
+  .edit-input, .edit-select, .edit-textarea { width:100%; background:var(--bg); border:0.5px solid var(--border); border-radius:8px; padding:10px 12px; font-size:13px; color:var(--text-primary); font-family:inherit; outline:none; transition:border-color 0.15s; }
+  .edit-input:focus, .edit-select:focus, .edit-textarea:focus { border-color:var(--red-200); }
+  .edit-textarea { resize:none; height:80px; }
+  .edit-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; }
+  .edit-full { grid-column:1/-1; }
+  .edit-btn { width:100%; background:var(--red-200); color:#fff; border:none; border-radius:10px; padding:12px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; margin-top:4px; }
+  .edit-btn:hover { background:var(--red-400); }
+  .edit-msg { font-size:12px; text-align:center; padding:6px; border-radius:8px; display:none; }
+  .edit-msg.success { display:block; background:rgba(74,222,128,0.1); color:#16a34a; }
+  .edit-msg.error { display:block; background:rgba(239,68,68,0.1); color:#dc2626; }
   /* 위키 기여 섹션 */
   .contrib-list { display: flex; flex-direction: column; gap: 8px; }
   .contrib-item { background: var(--bg); border: 0.5px solid var(--border); border-radius: 8px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px; }
@@ -120,6 +140,25 @@
   .reaction-btn.disliked { border-color: #6b7280; color: #6b7280; background: #f3f4f6; }
 
   .empty { text-align: center; padding: 20px; color: var(--text-muted); font-size: 13px; }
+  /* 수정 폼 */
+  .edit-modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: flex-end; }
+  .edit-modal-bg.show { display: flex; }
+  .edit-modal { background: var(--bg-card); border-radius: 20px 20px 0 0; padding: 24px; width: 100%; max-height: 85vh; overflow-y: auto; }
+  .edit-modal-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+  .edit-modal-close { font-size: 18px; cursor: pointer; color: var(--text-muted); background: none; border: none; }
+  .edit-form { display: flex; flex-direction: column; gap: 12px; }
+  .edit-label { font-size: 11px; color: var(--text-muted); letter-spacing: 0.06em; margin-bottom: 4px; }
+  .edit-input, .edit-select, .edit-textarea { width: 100%; background: var(--bg); border: 0.5px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--text-primary); font-family: inherit; outline: none; transition: border-color 0.15s; }
+  .edit-input:focus, .edit-select:focus, .edit-textarea:focus { border-color: var(--red-200); }
+  .edit-textarea { resize: none; height: 80px; }
+  .edit-input::placeholder, .edit-textarea::placeholder { color: var(--text-muted); }
+  .edit-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .edit-full { grid-column: 1 / -1; }
+  .edit-btn { width: 100%; background: var(--red-200); color: #fff; border: none; border-radius: 10px; padding: 12px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: background 0.15s; margin-top: 4px; }
+  .edit-btn:hover { background: var(--red-400); }
+  .edit-msg { font-size: 12px; text-align: center; padding: 6px; border-radius: 8px; display: none; }
+  .edit-msg.success { display: block; background: rgba(74,222,128,0.1); color: #16a34a; }
+  .edit-msg.error { display: block; background: rgba(239,68,68,0.1); color: #dc2626; }
   #page-loading { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 100; }
   #page-loading.hide { display: none; }
 
@@ -143,7 +182,7 @@
     뒤로가기
   </a>
   <div class="nav-logo"><div class="nav-logo-dot"></div>술향기마을</div>
-  <div class="nav-spacer"></div>
+  <button id="edit-btn" onclick="openEditModal()" style="display:none;background:rgba(232,82,42,0.15);border:1px solid rgba(232,82,42,0.3);border-radius:6px;color:var(--red-200);font-size:12px;padding:5px 12px;cursor:pointer;font-family:inherit;">✏️ 수정</button>
 </nav>
 
 <div class="hero">
@@ -181,17 +220,26 @@
     </div>
   </div>
 
-  <!-- 소개 (유저 기여) -->
+  <!-- 공식 설명 (어드민) -->
+  <div class="section" id="section-desc" style="display:none;">
+    <div class="section-header">
+      <div class="section-title">공식 설명</div>
+      <span class="section-badge">관리자 제공</span>
+    </div>
+    <div class="desc-text" id="d-desc"></div>
+  </div>
+
+  <!-- 유저 한줄 소개 (유저 기여) -->
   <div class="section">
     <div class="section-header">
-      <div class="section-title">소개</div>
+      <div class="section-title">유저 한줄 소개</div>
       <span class="wiki-badge">유저 기여</span>
     </div>
     <div class="contrib-list" id="intro-list">
-      <div class="empty">아직 소개글이 없어요. 첫 번째로 작성해보세요!</div>
+      <div class="empty">아직 한줄 소개가 없어요. 첫 번째로 작성해보세요!</div>
     </div>
     <div class="contrib-add" id="intro-add" style="display:none;">
-      <input class="contrib-input" id="intro-input" placeholder="이 술에 대한 소개를 한 줄로 작성해주세요..." maxlength="100" />
+      <input class="contrib-input" id="intro-input" placeholder="이 술에 대한 한줄 소개를 작성해주세요..." maxlength="100" />
       <button class="contrib-submit" onclick="submitContrib('intro')">등록</button>
     </div>
   </div>
@@ -308,6 +356,119 @@
 
 </div>
 
+<!-- 수정 모달 -->
+<div class="edit-modal-bg" id="edit-modal-bg" onclick="closeEditModalBg(event)">
+  <div class="edit-modal">
+    <div class="edit-modal-title">
+      <span>술 정보 수정</span>
+      <button class="edit-modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <div class="edit-form">
+      <div class="edit-grid">
+        <div>
+          <div class="edit-label">술 이름 *</div>
+          <input class="edit-input" id="e-name" />
+        </div>
+        <div>
+          <div class="edit-label">카테고리 *</div>
+          <select class="edit-select" id="e-category">
+            <option value="위스키">🥃 위스키</option>
+            <option value="전통주">🍶 전통주</option>
+            <option value="와인">🍷 와인</option>
+            <option value="맥주">🍺 맥주</option>
+            <option value="칵테일">🍸 칵테일</option>
+            <option value="기타">🥂 기타</option>
+          </select>
+        </div>
+        <div>
+          <div class="edit-label">서브카테고리</div>
+          <input class="edit-input" id="e-subcategory" placeholder="예) 스카치, 막걸리" />
+        </div>
+        <div>
+          <div class="edit-label">브랜드</div>
+          <input class="edit-input" id="e-brand" />
+        </div>
+        <div>
+          <div class="edit-label">원산지</div>
+          <input class="edit-input" id="e-country" />
+        </div>
+        <div>
+          <div class="edit-label">지역</div>
+          <input class="edit-input" id="e-region" />
+        </div>
+        <div>
+          <div class="edit-label">도수 (%)</div>
+          <input class="edit-input" id="e-alcohol" type="number" step="0.1" />
+        </div>
+        <div>
+          <div class="edit-label">가격대</div>
+          <input class="edit-input" id="e-price" placeholder="예) 3만원대" />
+        </div>
+        <div>
+          <div class="edit-label">음용 방법</div>
+          <input class="edit-input" id="e-serve" placeholder="예) 스트레이트, 온더락" />
+        </div>
+        <div class="edit-full">
+          <div class="edit-label">설명</div>
+          <textarea class="edit-textarea" id="e-desc"></textarea>
+        </div>
+        <div class="edit-full">
+          <div class="edit-label">향 (Nose)</div>
+          <input class="edit-input" id="e-nose" placeholder="예) 바닐라, 오크" />
+        </div>
+        <div class="edit-full">
+          <div class="edit-label">맛 (Palate)</div>
+          <input class="edit-input" id="e-palate" placeholder="예) 달콤함, 스파이시" />
+        </div>
+        <div class="edit-full">
+          <div class="edit-label">피니시 (Finish)</div>
+          <input class="edit-input" id="e-finish" placeholder="예) 길고 따뜻함" />
+        </div>
+        <div class="edit-full">
+          <div class="edit-label">페어링 (콤마로 구분)</div>
+          <input class="edit-input" id="e-pairing" placeholder="예) 치즈, 다크초콜릿" />
+        </div>
+      </div>
+      <div class="edit-msg" id="edit-msg"></div>
+      <button class="edit-btn" onclick="saveEdit()">저장하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 수정 모달 -->
+<div class="edit-modal-bg" id="edit-modal-bg" onclick="closeEditModalBg(event)">
+  <div class="edit-modal">
+    <div class="edit-modal-title">
+      <span>술 정보 수정</span>
+      <button class="edit-modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <div class="edit-form">
+      <div class="edit-grid">
+        <div><div class="edit-label">술 이름 *</div><input class="edit-input" id="e-name" /></div>
+        <div>
+          <div class="edit-label">카테고리 *</div>
+          <select class="edit-select" id="e-category">
+            <option value="위스키">🥃 위스키</option>
+            <option value="전통주">🍶 전통주</option>
+            <option value="와인">🍷 와인</option>
+            <option value="맥주">🍺 맥주</option>
+            <option value="칵테일">🍸 칵테일</option>
+            <option value="기타">🥂 기타</option>
+          </select>
+        </div>
+        <div><div class="edit-label">서브카테고리</div><input class="edit-input" id="e-subcategory" /></div>
+        <div><div class="edit-label">브랜드</div><input class="edit-input" id="e-brand" /></div>
+        <div><div class="edit-label">원산지</div><input class="edit-input" id="e-country" /></div>
+        <div><div class="edit-label">지역</div><input class="edit-input" id="e-region" /></div>
+        <div><div class="edit-label">도수 (%)</div><input class="edit-input" id="e-alcohol" type="number" step="0.1" /></div>
+        <div class="edit-full"><div class="edit-label">공식 설명</div><textarea class="edit-textarea" id="e-desc"></textarea></div>
+      </div>
+      <div class="edit-msg" id="edit-msg"></div>
+      <button class="edit-btn" onclick="saveEdit()">저장하기</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/core/supabase.js"></script>
 <script>
@@ -332,7 +493,7 @@
     if (!drinkId) { location.href = 'bar.html'; return; }
     const { data: { session } } = await soolClient.auth.getSession();
     if (session) {
-      const { data: user } = await soolClient.from('users').select('id, nickname').eq('id', session.user.id).single();
+      const { data: user } = await soolClient.from('users').select('id, nickname, is_admin').eq('id', session.user.id).single();
       currentUser = user;
     }
     await loadDrink();
@@ -365,6 +526,17 @@
     document.getElementById('i-country').textContent = data.country || '—';
     document.getElementById('i-region').textContent = data.region || '—';
 
+    // 공식 설명 표시
+    if (data.description) {
+      document.getElementById('d-desc').textContent = data.description;
+      document.getElementById('section-desc').style.display = 'block';
+    }
+
+    // 어드민이면 수정 버튼 표시
+    if (currentUser?.is_admin) {
+      document.getElementById('edit-btn').style.display = 'block';
+    }
+
     if (currentUser) {
       document.getElementById('intro-add').style.display = 'block';
       document.getElementById('price-add').style.display = 'block';
@@ -389,7 +561,7 @@
       const items = (data || []).filter(d => d.type === type);
       const el = document.getElementById(type + '-list');
       if (items.length === 0) {
-        el.innerHTML = `<div class="empty">${type === 'intro' ? '아직 소개글이 없어요.' : '아직 가격 정보가 없어요.'}</div>`;
+        el.innerHTML = `<div class="empty">${type === 'intro' ? '아직 한줄 소개가 없어요.' : '아직 가격 정보가 없어요.'}</div>`;
         return;
       }
       el.innerHTML = items.map(item => `
@@ -401,6 +573,7 @@
           <button class="contrib-vote ${isMyContrib(item) ? 'voted' : ''}" onclick="voteContrib('${item.id}', this)">
             👍 ${item.like_count}
           </button>
+          ${currentUser?.is_admin ? `<button onclick="deleteContrib('${item.id}')" style="background:none;border:none;color:#dc2626;font-size:12px;cursor:pointer;padding:0 4px;flex-shrink:0;">✕</button>` : ''}
         </div>
       `).join('');
     });
@@ -408,6 +581,12 @@
 
   function isMyContrib(item) {
     return currentUser && item.user_id === currentUser.id;
+  }
+
+  async function deleteContrib(id) {
+    if (!confirm('이 기여 내용을 삭제할까요?')) return;
+    await soolClient.from('drink_contributions').delete().eq('id', id);
+    loadContribs();
   }
 
   async function submitContrib(type) {
@@ -493,8 +672,11 @@
       el.innerHTML = Object.entries(votes)
         .sort((a, b) => b[1] - a[1])
         .map(([tag, count]) => `
-          <span class="tasting-tag ${myVotes.includes(tag) ? 'voted' : ''}" onclick="voteTasting('${type}', '${tag}', this)">
-            ${tag} <span class="tasting-tag-count">${count}</span>
+          <span style="display:inline-flex;align-items:center;gap:2px;">
+            <span class="tasting-tag ${myVotes.includes(tag) ? 'voted' : ''}" onclick="voteTasting('${type}', '${tag}', this)">
+              ${tag} <span class="tasting-tag-count">${count}</span>
+            </span>
+            ${currentUser?.is_admin ? `<button onclick="deleteTastingTag('${type}', '${tag}')" style="background:none;border:none;color:#dc2626;font-size:10px;cursor:pointer;padding:0;">✕</button>` : ''}
           </span>
         `).join('');
     });
@@ -511,6 +693,13 @@
         drink_id: drinkId, user_id: currentUser.id, type, content: tag
       });
     }
+    loadTastings();
+  }
+
+  async function deleteTastingTag(type, tag) {
+    if (!confirm(`'${tag}' 태그를 삭제할까요?`)) return;
+    await soolClient.from('drink_contributions').delete()
+      .eq('drink_id', drinkId).eq('type', type).eq('content', tag);
     loadTastings();
   }
 
@@ -561,6 +750,70 @@
           </div>
         </div>`;
     }).join('');
+  }
+
+  // ── 수정 모달 ────────────────────────────────
+  function openEditModal() {
+    if (!drinkData) return;
+    // 현재 데이터로 폼 채우기
+    document.getElementById('e-name').value = drinkData.name || '';
+    document.getElementById('e-category').value = drinkData.category || '';
+    document.getElementById('e-subcategory').value = drinkData.subcategory || '';
+    document.getElementById('e-brand').value = drinkData.brand || '';
+    document.getElementById('e-country').value = drinkData.country || '';
+    document.getElementById('e-region').value = drinkData.region || '';
+    document.getElementById('e-alcohol').value = drinkData.alcohol_degree || '';
+    document.getElementById('e-price').value = drinkData.price_range || '';
+    document.getElementById('e-serve').value = drinkData.serve_method || '';
+    document.getElementById('e-desc').value = drinkData.description || '';
+    document.getElementById('e-nose').value = drinkData.nose || '';
+    document.getElementById('e-palate').value = drinkData.palate || '';
+    document.getElementById('e-finish').value = drinkData.finish || '';
+    document.getElementById('e-pairing').value = drinkData.pairing || '';
+    document.getElementById('edit-modal-bg').classList.add('show');
+  }
+
+  function closeEditModal() {
+    document.getElementById('edit-modal-bg').classList.remove('show');
+  }
+
+  function closeEditModalBg(e) {
+    if (e.target === document.getElementById('edit-modal-bg')) closeEditModal();
+  }
+
+  async function saveEdit() {
+    const name = document.getElementById('e-name').value.trim();
+    const category = document.getElementById('e-category').value;
+    if (!name || !category) {
+      const el = document.getElementById('edit-msg');
+      el.className = 'edit-msg error'; el.textContent = '이름과 카테고리는 필수예요!';
+      return;
+    }
+
+    const { error } = await soolClient.from('drinks').update({
+      name,
+      category,
+      subcategory: document.getElementById('e-subcategory').value.trim() || null,
+      brand: document.getElementById('e-brand').value.trim() || null,
+      country: document.getElementById('e-country').value.trim() || null,
+      region: document.getElementById('e-region').value.trim() || null,
+      alcohol_degree: parseFloat(document.getElementById('e-alcohol').value) || null,
+      price_range: document.getElementById('e-price').value.trim() || null,
+      serve_method: document.getElementById('e-serve').value.trim() || null,
+      description: document.getElementById('e-desc').value.trim() || null,
+      nose: document.getElementById('e-nose').value.trim() || null,
+      palate: document.getElementById('e-palate').value.trim() || null,
+      finish: document.getElementById('e-finish').value.trim() || null,
+      pairing: document.getElementById('e-pairing').value.trim() || null,
+    }).eq('id', drinkId);
+
+    const el = document.getElementById('edit-msg');
+    if (error) {
+      el.className = 'edit-msg error'; el.textContent = '저장 중 오류가 발생했어요.';
+    } else {
+      el.className = 'edit-msg success'; el.textContent = '저장됐어요! ✅';
+      setTimeout(() => { closeEditModal(); loadDrink(); }, 1000);
+    }
   }
 
   function setStar(n) {
@@ -631,6 +884,45 @@
     if (diff < 3600) return Math.floor(diff/60) + '분 전';
     if (diff < 86400) return Math.floor(diff/3600) + '시간 전';
     return Math.floor(diff/86400) + '일 전';
+  }
+
+  // ── 수정 모달 ────────────────────────────────
+  function openEditModal() {
+    if (!drinkData) return;
+    document.getElementById('e-name').value = drinkData.name || '';
+    document.getElementById('e-category').value = drinkData.category || '';
+    document.getElementById('e-subcategory').value = drinkData.subcategory || '';
+    document.getElementById('e-brand').value = drinkData.brand || '';
+    document.getElementById('e-country').value = drinkData.country || '';
+    document.getElementById('e-region').value = drinkData.region || '';
+    document.getElementById('e-alcohol').value = drinkData.alcohol_degree || '';
+    document.getElementById('e-desc').value = drinkData.description || '';
+    document.getElementById('edit-modal-bg').classList.add('show');
+  }
+
+  function closeEditModal() { document.getElementById('edit-modal-bg').classList.remove('show'); }
+  function closeEditModalBg(e) { if (e.target === document.getElementById('edit-modal-bg')) closeEditModal(); }
+
+  async function saveEdit() {
+    const name = document.getElementById('e-name').value.trim();
+    const category = document.getElementById('e-category').value;
+    if (!name || !category) {
+      const el = document.getElementById('edit-msg');
+      el.className = 'edit-msg error'; el.textContent = '이름과 카테고리는 필수예요!'; return;
+    }
+    const { error } = await soolClient.from('drinks').update({
+      name, category,
+      subcategory: document.getElementById('e-subcategory').value.trim() || null,
+      brand: document.getElementById('e-brand').value.trim() || null,
+      country: document.getElementById('e-country').value.trim() || null,
+      region: document.getElementById('e-region').value.trim() || null,
+      alcohol_degree: parseFloat(document.getElementById('e-alcohol').value) || null,
+      description: document.getElementById('e-desc').value.trim() || null,
+    }).eq('id', drinkId);
+
+    const el = document.getElementById('edit-msg');
+    if (error) { el.className = 'edit-msg error'; el.textContent = '저장 중 오류가 발생했어요.'; }
+    else { el.className = 'edit-msg success'; el.textContent = '저장됐어요! ✅'; setTimeout(() => { closeEditModal(); loadDrink(); }, 1000); }
   }
 
   init();

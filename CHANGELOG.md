@@ -90,6 +90,76 @@ Unity 전환 이후 간단한 도트 수준의 존재 표시만 검토.
 
 ---
 
+## [v1.6.5] — 2026-07-02 · 도서관 & 강의 시스템 구현
+
+### Supabase DB 변경
+
+#### users 테이블 컬럼 추가
+- `is_instructor` (BOOLEAN, 기본값 false) — 강사 인증 여부
+
+#### courses 테이블 신규 생성
+- id / instructor_id (FK → users) / title / description / category
+- type (text / video / audio / live)
+- content_text / content_url / live_at
+- duration_min / is_free / required_level / thumbnail_url
+- is_published (기본값 false) — 어드민 승인 후 공개
+
+#### course_enrollments 테이블 신규 생성
+- id / user_id (FK) / course_id (FK)
+- progress / completed / completed_at / created_at
+- UNIQUE(user_id, course_id)
+
+### 신규 파일
+
+#### course-detail.html
+- 강의 상세 페이지
+- 텍스트·동영상(유튜브 임베드)·음성·실시간 강의 모두 지원
+- 수강 신청 버튼
+- 수료 완료 버튼 (+200 XP 자동 지급)
+- 어드민/강사에게만 ✏️ 수정 버튼 표시
+- 수정 모달: 제목·유형·카테고리·설명·URL·텍스트·소요시간·레벨·무료여부·실시간일시 수정 가능
+
+### 변경 파일
+
+#### library.html
+- 강의 목록 탭 → Supabase 실데이터 연결
+  - 강의 유형별 이모지 표시 (📝🎬🎙️🔴)
+  - 무료/유료·레벨·강사 정보 표시
+  - 카드 클릭 → course-detail.html 이동
+- 커뮤니티 자료 섹션 추가
+  - 자격증 스터디·정보&뉴스 커뮤니티 게시글 최신 5개 표시
+  - 게시글 클릭 → post-detail.html 이동
+- 내 강의실 탭 → 수강 중인 강의 실데이터 (진행률 표시)
+- 수료증 탭 → 완료한 강의 수료증 카드 표시
+- Supabase CDN head로 이동 (탭 오류 수정)
+- 마을로 돌아가기 → index.html 고정
+
+#### admin.html
+- 📚 강의 탭 추가
+  - 강의 등록 폼 (제목·유형·카테고리 선택·설명·URL·텍스트·소요시간·레벨·무료여부·실시간일시)
+  - 카테고리 input → select로 변경 (위스키/전통주/와인/맥주/칵테일/기타/자격증/소믈리에/공통)
+  - 공개 강의 목록 (수정·삭제 버튼)
+  - 승인 대기 강의 목록 (승인·거절 버튼)
+  - 강사 인증 부여/취소 (이메일로 검색)
+  - 인증된 강사 목록 (닉네임·이메일·등록강의수·인증취소 버튼)
+- 유저 탭 권한 배지 개선
+  - ADMIN / USER 배지 유지
+  - 강사 인증된 유저에게 🟡 강사 배지 추가
+- 술 DB·리뷰·게시글·강의 행 클릭 → 해당 상세 페이지 이동
+  - 삭제 버튼은 event.stopPropagation()으로 분리
+
+#### drink-detail.html
+- 공식 설명 섹션 추가 (관리자 제공 배지) — drinks.description 표시
+- 유저 소개 섹션 → '유저 한줄 소개'로 명칭 변경
+- 어드민 수정 모달 간소화
+  - 수정 가능: 이름·카테고리·서브카테고리·브랜드·원산지·지역·도수·공식설명
+  - 제거: 향/맛/피니시/페어링/가격대 (유저 기여 항목)
+- 유저 기여 항목에 어드민 ✕ 삭제 버튼 추가
+  - 유저 한줄 소개·가격대 항목 삭제
+  - 테이스팅 노트 태그 삭제
+
+---
+
 ## [v1.6.4] — 2026-07-01 · 커뮤니티 센터 구현
 
 ### Supabase DB 변경

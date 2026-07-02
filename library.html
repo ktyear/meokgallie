@@ -34,8 +34,19 @@
   .badge-lv{background:#FFF3E0;color:#E65100;}
   .progress-bar{height:5px;background:var(--blue-50);border-radius:99px;overflow:hidden;margin-top:8px;}
   .progress-fill{height:100%;background:var(--blue-200);border-radius:99px;}
+  .community-post-card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color 0.15s;}
+  .community-post-card:hover{border-color:var(--blue-200);}
+  .community-post-title{font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:4px;}
+  .community-post-meta{font-size:11px;color:var(--text-muted);}
+  .cert-card{background:linear-gradient(135deg,#0A1E4A 0%,#1A3A8A 100%);border-radius:12px;padding:20px;margin-bottom:10px;color:#fff;}
+  .cert-title{font-size:15px;font-weight:700;margin-bottom:4px;}
+  .cert-date{font-size:11px;color:rgba(255,255,255,0.7);}
+  .cert-badge{font-size:32px;margin-bottom:8px;}
+  .empty{text-align:center;padding:24px;color:var(--text-muted);font-size:13px;}
   @media(max-width:480px){nav{padding:12px 16px;}.hero{padding:20px 16px 20px;}.section{padding:16px;}}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/core/supabase.js"></script>
 </head>
 <body>
 <nav>
@@ -57,27 +68,25 @@
 </div>
 <div id="tab-courses" class="tab-content active">
   <div class="section">
-    <p class="section-title">추천 강의</p>
-    <div class="course-card"><div class="course-icon">🍸</div><div style="flex:1;"><div class="course-title">조주기능사 완벽 준비</div><div class="course-desc">실기부터 필기까지. 합격률 92% 강의. 총 24강, 12시간.</div><div class="course-meta"><span class="badge badge-free">무료</span><span style="font-size:11px;color:var(--text-muted);">수강생 1,240명</span></div></div></div>
-    <div class="course-card"><div class="course-icon">🥃</div><div style="flex:1;"><div class="course-title">위스키 입문 — 싱글몰트의 세계</div><div class="course-desc">스코틀랜드 6대 산지별 특징과 추천 위스키. 총 12강.</div><div class="course-meta"><span class="badge badge-lv">Lv.3 이상</span><span style="font-size:11px;color:var(--text-muted);">수강생 890명</span></div></div></div>
-    <div class="course-card"><div class="course-icon">🍶</div><div style="flex:1;"><div class="course-title">전통주 바이블</div><div class="course-desc">막걸리·청주·약주·소주의 역사와 제조 과정. 총 8강.</div><div class="course-meta"><span class="badge badge-free">무료</span><span style="font-size:11px;color:var(--text-muted);">수강생 2,100명</span></div></div></div>
-    <div class="course-card"><div class="course-icon">🍷</div><div style="flex:1;"><div class="course-title">와인 소믈리에 기초</div><div class="course-desc">품종, 산지, 빈티지 읽는 법. 테이스팅 노트 작성법. 총 16강.</div><div class="course-meta"><span class="badge badge-lv">Lv.5 이상</span><span style="font-size:11px;color:var(--text-muted);">수강생 640명</span></div></div></div>
+    <p class="section-title">강의 목록</p>
+    <div id="courses-list"><div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px;">불러오는 중...</div></div>
+  </div>
+  <div class="section">
+    <p class="section-title">커뮤니티 자료</p>
+    <div id="community-posts-list"><div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px;">불러오는 중...</div></div>
   </div>
 </div>
 <div id="tab-my" class="tab-content">
   <div class="section">
     <p class="section-title">수강 중인 강의</p>
-    <div class="course-card"><div class="course-icon">🍸</div><div style="flex:1;"><div class="course-title">조주기능사 완벽 준비</div><div class="course-desc">8강 / 24강 수강 완료</div><div class="progress-bar"><div class="progress-fill" style="width:33%"></div></div></div></div>
-    <div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px;">더 많은 강의를 수강해보세요! 강의 수료 시 <strong style="color:var(--blue-400);">+200 XP</strong></div>
+    <div id="my-courses-list"><div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px;">불러오는 중...</div></div>
+    <div style="text-align:center;padding:12px;color:var(--text-muted);font-size:12px;">강의 수료 시 <strong style="color:var(--blue-400);">+200 XP</strong> 획득!</div>
   </div>
 </div>
 <div id="tab-cert" class="tab-content">
   <div class="section">
     <p class="section-title">획득한 수료증</p>
-    <div style="background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:24px;text-align:center;">
-      <div style="font-size:40px;margin-bottom:12px;">🎓</div>
-      <div style="font-size:14px;color:var(--text-secondary);line-height:1.6;">강의를 수료하면 수료증이 발급돼요.<br>수료증은 프로필에 표시됩니다.</div>
-    </div>
+    <div id="certs-list"><div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px;">불러오는 중...</div></div>
   </div>
 </div>
 <script>
@@ -88,10 +97,7 @@
     el.classList.add('active');
     sessionStorage.setItem('library_tab', name);
   }
-  function goBack() {
-    if (document.referrer && document.referrer.includes(location.hostname)) { history.back(); }
-    else { location.href = 'index.html'; }
-  }
+  function goBack() { location.href = 'index.html'; }
   // 복귀 시 탭 복원
   document.addEventListener('DOMContentLoaded', () => {
     const savedTab = sessionStorage.getItem('library_tab');
@@ -100,7 +106,145 @@
       const tabEl = document.querySelector(`.tab:nth-child(${tabMap[savedTab]})`);
       if (tabEl) switchTab(savedTab, tabEl);
     }
+    init();
   });
+
+  const typeIcon = { text: '📝', video: '🎬', audio: '🎙️', live: '🔴' };
+  const typeLabel = { text: '텍스트', video: '동영상', audio: '음성', live: '실시간' };
+
+  function timeAgo(dateStr) {
+    const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+    if (diff < 60) return '방금 전';
+    if (diff < 3600) return Math.floor(diff/60) + '분 전';
+    if (diff < 86400) return Math.floor(diff/3600) + '시간 전';
+    return Math.floor(diff/86400) + '일 전';
+  }
+
+  async function init() {
+    await loadCourses();
+    await loadCommunityPosts();
+    const { data: { session } } = await soolClient.auth.getSession();
+    if (session) {
+      await loadMyCourses(session.user.id);
+      await loadCerts(session.user.id);
+    } else {
+      document.getElementById('my-courses-list').innerHTML = '<div class="empty"><a href="auth.html" style="color:var(--blue-400);text-decoration:none;">로그인</a> 후 수강 내역을 확인할 수 있어요</div>';
+      document.getElementById('certs-list').innerHTML = '<div class="empty"><a href="auth.html" style="color:var(--blue-400);text-decoration:none;">로그인</a> 후 수료증을 확인할 수 있어요</div>';
+    }
+  }
+
+  // 강의 목록
+  async function loadCourses() {
+    const { data } = await soolClient
+      .from('courses')
+      .select('*, users(nickname)')
+      .eq('is_published', true)
+      .order('created_at', { ascending: false });
+
+    const list = document.getElementById('courses-list');
+    if (!data || data.length === 0) {
+      list.innerHTML = '<div class="empty">등록된 강의가 없어요. 곧 오픈될 예정이에요! 📚</div>';
+      return;
+    }
+    list.innerHTML = data.map(c => `
+      <div class="course-card" onclick="location.href='course-detail.html?id=${c.id}&from=library.html'">
+        <div class="course-icon">${typeIcon[c.type] || '📚'}</div>
+        <div style="flex:1;">
+          <div class="course-title">${c.title}</div>
+          <div class="course-desc">${c.description || ''}</div>
+          <div class="course-meta">
+            <span class="badge ${c.is_free ? 'badge-free' : 'badge-lv'}">${c.is_free ? '무료' : '유료'}</span>
+            ${c.required_level > 1 ? `<span class="badge badge-lv">Lv.${c.required_level} 이상</span>` : ''}
+            <span style="font-size:11px;color:var(--text-muted);">${typeLabel[c.type] || ''}</span>
+            ${c.duration_min ? `<span style="font-size:11px;color:var(--text-muted);">${c.duration_min}분</span>` : ''}
+            <span style="font-size:11px;color:var(--text-muted);">강사: ${c.users?.nickname || '관리자'}</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // 커뮤니티 자료 (자격증 스터디 + 정보&뉴스)
+  async function loadCommunityPosts() {
+    const { data: communities } = await soolClient
+      .from('communities')
+      .select('id, name')
+      .in('name', ['자격증 스터디', '정보 & 뉴스']);
+
+    if (!communities || communities.length === 0) {
+      document.getElementById('community-posts-list').innerHTML = '<div class="empty">커뮤니티 자료가 없어요.</div>';
+      return;
+    }
+
+    const ids = communities.map(c => c.id);
+    const { data } = await soolClient
+      .from('posts')
+      .select('*, users(nickname), communities(name, icon)')
+      .in('community_id', ids)
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    const list = document.getElementById('community-posts-list');
+    if (!data || data.length === 0) {
+      list.innerHTML = '<div class="empty">아직 자료가 없어요.</div>';
+      return;
+    }
+    list.innerHTML = data.map(p => `
+      <div class="community-post-card" onclick="location.href='post-detail.html?id=${p.id}&from=library.html'">
+        <div class="community-post-title">${p.communities?.icon || ''} ${p.title}</div>
+        <div class="community-post-meta">@${p.users?.nickname || '익명'} · ${p.communities?.name || ''} · ${timeAgo(p.created_at)}</div>
+      </div>
+    `).join('');
+  }
+
+  // 내 수강 목록
+  async function loadMyCourses(userId) {
+    const { data } = await soolClient
+      .from('course_enrollments')
+      .select('*, courses(title, type, duration_min)')
+      .eq('user_id', userId)
+      .eq('completed', false)
+      .order('created_at', { ascending: false });
+
+    const list = document.getElementById('my-courses-list');
+    if (!data || data.length === 0) {
+      list.innerHTML = '<div class="empty">수강 중인 강의가 없어요.<br>강의 목록에서 수강 신청해보세요!</div>';
+      return;
+    }
+    list.innerHTML = data.map(e => `
+      <div class="course-card" onclick="location.href='course-detail.html?id=${e.course_id}&from=library.html'">
+        <div class="course-icon">${typeIcon[e.courses?.type] || '📚'}</div>
+        <div style="flex:1;">
+          <div class="course-title">${e.courses?.title || '—'}</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${e.progress}%"></div></div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">${e.progress}% 완료</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // 수료증
+  async function loadCerts(userId) {
+    const { data } = await soolClient
+      .from('course_enrollments')
+      .select('*, courses(title, category)')
+      .eq('user_id', userId)
+      .eq('completed', true)
+      .order('completed_at', { ascending: false });
+
+    const list = document.getElementById('certs-list');
+    if (!data || data.length === 0) {
+      list.innerHTML = `<div style="background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:24px;text-align:center;"><div style="font-size:40px;margin-bottom:12px;">🎓</div><div style="font-size:14px;color:var(--text-secondary);line-height:1.6;">강의를 수료하면 수료증이 발급돼요.<br>수료증은 프로필에 표시됩니다.</div></div>`;
+      return;
+    }
+    list.innerHTML = data.map(e => `
+      <div class="cert-card">
+        <div class="cert-badge">🎓</div>
+        <div class="cert-title">${e.courses?.title || '—'} 수료증</div>
+        <div class="cert-date">수료일: ${e.completed_at ? new Date(e.completed_at).toLocaleDateString('ko-KR') : '—'}</div>
+      </div>
+    `).join('');
+  }
 </script>
 </body>
 </html>

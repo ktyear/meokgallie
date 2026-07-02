@@ -67,15 +67,15 @@
         건물 바로가기 <span id="shortcut-arrow">▾</span>
       </div>
       <div id="ui-shortcut-list">
-        <button class="shortcut-btn" onclick="moveToBuilding(-5.5,-3.5,'bar')"><span class="congestion-bar bar-green"></span><span>🍸</span>술바</button>
-        <button class="shortcut-btn" onclick="moveToBuilding(5.5,-3.5,'library')"><span class="congestion-bar bar-yellow"></span><span>📚</span>도서관</button>
-        <button class="shortcut-btn" onclick="moveToBuilding(0,-7.5,'community')"><span class="congestion-bar bar-red"></span><span>🏛️</span>커뮤니티</button>
-        <button class="shortcut-btn" onclick="moveToBuilding(7.0,0,'shop')"><span class="congestion-bar bar-green"></span><span>🛒</span>주류상점</button>
-        <button class="shortcut-btn" onclick="moveToBuilding(-7.0,0,'brewery')"><span class="congestion-bar bar-yellow"></span><span>🏺</span>양조장</button>
-        <button class="shortcut-btn" onclick="moveToBuilding(-2.0,5.5,'studio')"><span class="congestion-bar bar-green"></span><span>🎬</span>영상관</button>
-        <button class="shortcut-btn" onclick="moveToBuilding(2.5,5.5,'infoCenter')"><span class="congestion-bar bar-green"></span><span>🗺️</span>안내소</button>
-        <button class="shortcut-btn" onclick="moveToBuilding(-11.0,-5.0,'popupSquare')"><span class="congestion-bar bar-yellow"></span><span>🎪</span>팝업광장</button>
-        <button class="shortcut-btn" onclick="moveToBuilding(11.0,-5.0,'myspace')"><span class="congestion-bar bar-green"></span><span>🏠</span>내공간</button>
+        <button class="shortcut-btn" onclick="moveToBuilding(-7.0,-5.0,'bar')"><span class="congestion-bar bar-green"></span><span>🍸</span>술바</button>
+        <button class="shortcut-btn" onclick="moveToBuilding(7.0,-5.0,'library')"><span class="congestion-bar bar-yellow"></span><span>📚</span>도서관</button>
+        <button class="shortcut-btn" onclick="moveToBuilding(0.0,-12.0,'community')"><span class="congestion-bar bar-red"></span><span>🏛️</span>커뮤니티</button>
+        <button class="shortcut-btn" onclick="moveToBuilding(9.0,0.0,'shop')"><span class="congestion-bar bar-green"></span><span>🛒</span>주류상점</button>
+        <button class="shortcut-btn" onclick="moveToBuilding(-9.0,0.0,'brewery')"><span class="congestion-bar bar-yellow"></span><span>🏺</span>양조장</button>
+        <button class="shortcut-btn" onclick="moveToBuilding(-3.0,8.0,'studio')"><span class="congestion-bar bar-green"></span><span>🎬</span>영상관</button>
+        <button class="shortcut-btn" onclick="moveToBuilding(3.5,8.0,'infoCenter')"><span class="congestion-bar bar-green"></span><span>🗺️</span>안내소</button>
+        <button class="shortcut-btn" onclick="moveToBuilding(-6.0,-10.0,'popupSquare')"><span class="congestion-bar bar-yellow"></span><span>🎪</span>팝업광장</button>
+        <button class="shortcut-btn" onclick="moveToBuilding(6.0,-10.0,'myspace')"><span class="congestion-bar bar-green"></span><span>🏠</span>내공간</button>
         <button class="shortcut-btn" onclick="moveToBuilding(-11.0,5.0,'cafe')"><span class="congestion-bar bar-green"></span><span>🌿</span>소버카페</button>
         <button class="shortcut-btn" onclick="moveToBuilding(11.0,5.0,'restaurant')"><span class="congestion-bar bar-red"></span><span>🍽️</span>마리아주</button>
       </div>
@@ -231,8 +231,24 @@
     }
 
     // 숏컷 → 카메라 이동 + 팝업 표시
+            // 건물별 정면 바라보는 각도 (라디안)
+    const BUILDING_THETA = {
+      bar:         0.951,
+      library:     -0.951,
+      community:   -0.0,
+      shop:        -1.571,
+      brewery:     1.571,
+      studio:      2.783,
+      infoCenter:  -2.729,
+      popupSquare: 0.54,
+      myspace:     -0.54,
+      cafe:        1.997,
+      restaurant:  -1.997,
+    };
+
     function moveToBuilding(x, z, buildingId) {
-      SoolControls.moveTo(x, z);
+      const theta = BUILDING_THETA[buildingId];
+      SoolControls.moveTo(x, z, theta);
       // 카메라 이동 후 팝업 표시 (이동 애니메이션 후)
       setTimeout(() => {
         const registry = SoolBuildings.getRegistry();
@@ -240,7 +256,7 @@
         if (entry && SoolPopup) {
           SoolPopup.showByData(entry.data);
         }
-      }, 600);
+      }, 800);
     }
 
     document.addEventListener('DOMContentLoaded', () => {

@@ -247,10 +247,11 @@ const SoolControls = (() => {
   }
 
   // ── 건물 위치로 카메라 이동 ─────────────────
-  function moveTo(worldX, worldZ) {
+  function moveTo(worldX, worldZ, theta) {
     state.tPanX = worldX;
     state.tPanZ = worldZ;
     state.tRadius = Math.min(state.tRadius, 18);
+    if (theta !== undefined) state.tTheta = theta;
   }
 
   // ── getTheta (나침반용) ───────────────────────

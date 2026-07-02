@@ -90,6 +90,60 @@ Unity 전환 이후 간단한 도트 수준의 존재 표시만 검토.
 
 ---
 
+## [v1.6.7] — 2026-07-03 · 양조장 건물 구현
+
+### Supabase DB 변경
+
+#### brewery_posts 테이블 신규 생성
+- id / user_id (FK → users) / type (story·brewery·method)
+- title / content / image_url / embed_url
+- like_count / comment_count / view_count / created_at / updated_at
+
+#### brewery_comments 테이블 신규 생성
+- id / post_id (FK → brewery_posts) / user_id (FK → users)
+- content / created_at
+
+#### brewery_likes 테이블 신규 생성
+- id / post_id (FK → brewery_posts) / user_id (FK → users) / created_at
+- UNIQUE(post_id, user_id) — 좋아요 중복 방지
+
+#### 초기 데이터 삽입
+- 양조 이야기: 누룩, 술의 씨앗 — 천년을 이어온 발효의 비밀
+- 양조장 소개: 복순도가 손막걸리 양조장
+- 양조 방법: 집에서 만드는 단양주 막걸리 — 7일 완성 레시피
+
+### 신규 파일
+
+#### brewery-detail.html
+- 양조장 게시글 상세 페이지
+- 제목·내용·작성자·조회수 표시
+- 👍 좋아요 토글 (중복 클릭 방지, 초기 상태 확인)
+- 댓글 작성·조회
+- 비로그인 시 댓글 폼 → 로그인 유도
+- XSS 방지 (textContent 사용)
+- 에러 처리 (console.error)
+
+### 변경 파일
+
+#### brewery.html
+- 탭 이름 변경: 스토리→양조 이야기 / 양조장 탐방→양조장 소개 / 주종 가이드→양조 방법
+- 각 탭 → brewery_posts 테이블 실데이터 로딩
+- 카드 형태로 간략 내용 표시 → 클릭 시 brewery-detail.html 이동
+- ✏️ 글쓰기 버튼 추가 (비로그인 시 🔐 로그인 후 작성으로 표시)
+- XSS 방지 esc() 함수 추가
+- 안전한 문자열 자르기 safeSlice() 함수 추가
+- .limit(50) 추가
+- 에러 처리 추가
+- sessionStorage 탭 복원 패턴 적용
+- 마을로 돌아가기 → index.html 고정
+
+### 기술 결정
+- 양조장 콘텐츠는 커뮤니티(posts) 테이블과 분리하여 brewery_posts 전용 테이블로 관리
+- 커뮤니티 센터와 양조장의 콘텐츠 독립성 확보
+- 기존 커뮤니티에서 양조장 관련 커뮤니티 삭제
+
+---
+
 ## [v1.6.6] — 2026-07-02 · 건물 배치 개선 & 바로가기 카메라 연동
 
 ### 변경 파일

@@ -47,41 +47,92 @@
 </nav>
 <div class="hero">
   <div class="hero-inner">
-    <div class="hero-tag">양조장 · 전통주 & 스토리</div>
+    <div class="hero-tag">양조장 · 전통주 & 양조 이야기</div>
     <h1 class="hero-title">🏺 양조장</h1>
-    <p class="hero-sub">전통주 스토리텔링, 장인의 이야기.<br>막걸리부터 증류식 소주까지 우리 술의 역사.</p>
+    <p class="hero-sub">전통주 양조 이야기텔링, 장인의 이야기.<br>막걸리부터 증류식 소주까지 우리 술의 역사.</p>
   </div>
 </div>
 <div class="tabs">
-  <div class="tab active" onclick="switchTab('stories',this)">스토리</div>
-  <div class="tab" onclick="switchTab('breweries',this)">양조장 탐방</div>
-  <div class="tab" onclick="switchTab('types',this)">주종 가이드</div>
+  <div class="tab active" onclick="switchTab('stories',this)">양조 이야기</div>
+  <div class="tab" onclick="switchTab('breweries',this)">양조장 소개</div>
+  <div class="tab" onclick="switchTab('types',this)">양조 방법</div>
 </div>
 <div id="tab-stories" class="tab-content active">
   <div class="section">
-    <p class="section-title">장인의 이야기</p>
-    <div class="story-card"><div class="story-header"><div class="story-icon">🏺</div><div><div class="story-title">600년 전통, 안동소주 이야기</div><div class="story-sub">경북 안동 · 조선옥</div></div></div><div class="story-body">고려시대 원나라에서 전해진 증류 기술이 안동 지방에 뿌리내린 이야기. 14대째 가업을 이어온 장인의 철학...</div><span class="story-tag">증류식 소주</span></div>
-    <div class="story-card"><div class="story-header"><div class="story-icon">🍶</div><div><div class="story-title">쌀 한 톨의 기다림 — 막걸리 발효 72시간</div><div class="story-sub">경기도 포천 · 이동막걸리</div></div></div><div class="story-body">일교차가 큰 포천의 기후가 빚어내는 독특한 맛. 전통 누룩부터 현대화까지의 여정...</div><span class="story-tag">막걸리</span></div>
-    <div class="story-card"><div class="story-header"><div class="story-icon">🌾</div><div><div class="story-title">전통 청주의 부활 — 한산소곡주</div><div class="story-sub">충남 서천 · 한산 소곡주 양조장</div></div></div><div class="story-body">백제 시대부터 내려온 1500년의 역사. 100일 동안 숙성된 청주가 완성되기까지...</div><span class="story-tag">청주</span></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <p class="section-title" style="margin-bottom:0;">양조 이야기</p>
+      <button id="write-stories-btn" onclick="goWrite('stories')" style="background:rgba(139,90,43,0.15);border:1px solid rgba(139,90,43,0.3);border-radius:6px;color:var(--brown-400);font-size:12px;padding:5px 12px;cursor:pointer;font-family:inherit;">✏️ 글쓰기</button>
+    </div>
+    <div id="stories-list">
+      <div class="story-card" onclick="location.href='brewery-detail.html?type=story&idx=0&from=brewery.html'">
+        <div class="story-header">
+          <div class="story-icon">🌾</div>
+          <div>
+            <div class="story-title">누룩, 술의 씨앗 — 천년을 이어온 발효의 비밀</div>
+            <div class="story-sub">술향기마을 · 읽는 시간 7분</div>
+          </div>
+        </div>
+        <div class="story-body">좋은 술은 좋은 누룩에서 시작된다. 누룩은 단순한 발효제가 아니라, 수백 가지 미생물이 공존하는 작은 생태계다. 밀이나 쌀을 거칠게 빻아 물로 반죽한 뒤 일정한 온도와 습도에서 띄워내는 누룩 제조 과정은...</div>
+        <div class="story-footer" style="margin-top:8px;">
+          <span class="story-tag">누룩</span>
+          <span class="story-tag">발효</span>
+          <span class="story-tag">전통주</span>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 <div id="tab-breweries" class="tab-content">
   <div class="section">
-    <p class="section-title">추천 양조장</p>
-    <div class="brewery-card"><div class="brewery-icon">🏺</div><div><div class="brewery-name">화요 증류소</div><div class="brewery-region">경기도 여주</div><div class="brewery-drink">화요 25·41·53도</div></div></div>
-    <div class="brewery-card"><div class="brewery-icon">🍶</div><div><div class="brewery-name">국순당</div><div class="brewery-region">강원도 횡성</div><div class="brewery-drink">백세주, 막걸리 시리즈</div></div></div>
-    <div class="brewery-card"><div class="brewery-icon">🌾</div><div><div class="brewery-name">한산 소곡주 양조장</div><div class="brewery-region">충남 서천</div><div class="brewery-drink">한산 소곡주 시리즈</div></div></div>
-    <div class="brewery-card"><div class="brewery-icon">🏡</div><div><div class="brewery-name">경주법주 양조장</div><div class="brewery-region">경북 경주</div><div class="brewery-drink">교동법주, 경주법주</div></div></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <p class="section-title" style="margin-bottom:0;">양조장 소개</p>
+      <button id="write-breweries-btn" onclick="goWrite('breweries')" style="background:rgba(139,90,43,0.15);border:1px solid rgba(139,90,43,0.3);border-radius:6px;color:var(--brown-400);font-size:12px;padding:5px 12px;cursor:pointer;font-family:inherit;">✏️ 글쓰기</button>
+    </div>
+    <div id="breweries-list">
+      <div class="brewery-card" style="cursor:pointer;" onclick="location.href='brewery-detail.html?type=brewery&idx=0&from=brewery.html'">
+        <div class="brewery-icon">🏭</div>
+        <div>
+          <div class="brewery-name">복순도가 손막걸리 양조장</div>
+          <div class="brewery-region">📍 울산광역시 울주군 상북면</div>
+          <div class="brewery-drink">대표 술: 복순도가 손막걸리, 복순도가 쌀막걸리</div>
+          <div class="story-body" style="margin-top:8px;">1대 할머니의 손맛에서 시작된 3대 가업. 1970년대 울산 장터에서 팔던 막걸리가 지금은 전국 최고의 스파클링 막걸리로 불린다...</div>
+          <div style="margin-top:8px;">
+            <span class="story-tag">막걸리</span>
+            <span class="story-tag">스파클링</span>
+            <span class="story-tag">울산</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 <div id="tab-types" class="tab-content">
   <div class="section">
-    <p class="section-title">전통주 종류 가이드</p>
-    <div class="story-card"><div class="story-header"><div class="story-icon">🍶</div><div><div class="story-title">막걸리 (濁酒)</div><div class="story-sub">도수 6~8도</div></div></div><div class="story-body">쌀·밀·옥수수 등을 발효시킨 한국의 대표 탁주. 유산균이 풍부하고 은은한 단맛과 산미가 특징.</div></div>
-    <div class="story-card"><div class="story-header"><div class="story-icon">🍵</div><div><div class="story-title">약주·청주 (藥酒·淸酒)</div><div class="story-sub">도수 13~16도</div></div></div><div class="story-body">막걸리를 맑게 걸러낸 술. 깔끔하고 섬세한 맛이 특징이며 음식과의 페어링이 뛰어남.</div></div>
-    <div class="story-card"><div class="story-header"><div class="story-icon">🏺</div><div><div class="story-title">증류식 소주 (蒸溜式燒酒)</div><div class="story-sub">도수 25~53도</div></div></div><div class="story-body">전통 방식으로 발효주를 증류한 소주. 희석식 소주와 달리 원료 본래의 맛과 향이 살아있음.</div></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <p class="section-title" style="margin-bottom:0;">양조 방법</p>
+      <button id="write-types-btn" onclick="goWrite('types')" style="background:rgba(139,90,43,0.15);border:1px solid rgba(139,90,43,0.3);border-radius:6px;color:var(--brown-400);font-size:12px;padding:5px 12px;cursor:pointer;font-family:inherit;">✏️ 글쓰기</button>
+    </div>
+    <div id="types-list">
+      <div class="story-card" onclick="location.href='brewery-detail.html?type=method&idx=0&from=brewery.html'">
+        <div class="story-header">
+          <div class="story-icon">🍶</div>
+          <div>
+            <div class="story-title">집에서 만드는 단양주 막걸리 — 7일 완성 레시피</div>
+            <div class="story-sub">난이도 ⭐⭐ · 소요 시간 7일 · 분량 약 3L</div>
+          </div>
+        </div>
+        <div class="story-body">쌀·누룩·물만으로 7일 안에 완성하는 전통 막걸리. 고두밥을 짓고 누룩과 버무려 발효시키는 단양주 방식으로, 복잡한 도구 없이 집에서도 충분히 만들 수 있다...</div>
+        <div class="story-footer" style="margin-top:8px;">
+          <span class="story-tag">막걸리</span>
+          <span class="story-tag">단양주</span>
+          <span class="story-tag">홈브루잉</span>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/core/supabase.js"></script>
 <script>
   function switchTab(name, el) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -90,15 +141,94 @@
     el.classList.add('active');
     sessionStorage.setItem('brewery_tab', name);
   }
-  function goBack() {
-    if (document.referrer && document.referrer.includes(location.hostname)) { history.back(); }
-    else { location.href = 'index.html'; }
+  function goBack() { location.href = 'index.html'; }
+
+  function timeAgo(dateStr) {
+    const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+    if (diff < 60) return '방금 전';
+    if (diff < 3600) return Math.floor(diff/60) + '분 전';
+    if (diff < 86400) return Math.floor(diff/3600) + '시간 전';
+    return Math.floor(diff/86400) + '일 전';
   }
-  // 복귀 시 탭 복원
-  document.addEventListener('DOMContentLoaded', () => {
+
+  const typeMap = { story: 'stories-list', brewery: 'breweries-list', method: 'types-list' };
+  const emptyMsg = {
+    story: '아직 양조 이야기가 없어요 🍶',
+    brewery: '아직 양조장 소개가 없어요 🏭',
+    method: '아직 양조 방법 글이 없어요 ⚗️'
+  };
+
+  // XSS 방지 함수
+  function esc(str) {
+    const d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+  }
+
+  // 안전한 내용 자르기
+  function safeSlice(str, len) {
+    if (!str) return '';
+    const chars = [...str];
+    return chars.slice(0, len).join('') + (chars.length > len ? '...' : '');
+  }
+
+  async function loadAll() {
+    const { data, error } = await soolClient
+      .from('brewery_posts')
+      .select('*, users(nickname)')
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (error) { console.error('brewery_posts 로드 실패:', error); }
+
+    ['story', 'brewery', 'method'].forEach(type => {
+      const items = (data || []).filter(p => p.type === type);
+      const listEl = document.getElementById(typeMap[type]);
+      if (!listEl) return;
+
+      if (!items || items.length === 0) {
+        listEl.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px;">${emptyMsg[type]}</div>`;
+        return;
+      }
+
+      const icon = type === 'brewery' ? '🏭' : type === 'method' ? '⚗️' : '🍶';
+      listEl.innerHTML = items.map(p => `
+        <div class="story-card" onclick="location.href='brewery-detail.html?id=${p.id}&from=brewery.html'">
+          <div class="story-header">
+            <div class="story-icon">${icon}</div>
+            <div>
+              <div class="story-title">${esc(p.title)}</div>
+              <div class="story-sub">@${esc(p.users?.nickname || '술향기마을')} · ${timeAgo(p.created_at)}</div>
+            </div>
+          </div>
+          <div class="story-body">${esc(safeSlice(p.content, 80))}</div>
+          <div class="story-footer" style="margin-top:8px;">
+            <span class="story-tag">👍 ${p.like_count || 0}</span>
+            <span class="story-tag">💬 ${p.comment_count || 0}</span>
+          </div>
+        </div>
+      `).join('');
+    });
+  }
+
+  async function goWrite(type) {
+    const { data: { session } } = await soolClient.auth.getSession();
+    if (!session) { location.href = 'auth.html'; return; }
+    location.href = `brewery-write.html?type=${type}&from=brewery.html`;
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    loadAll();
+    // 9. 글쓰기 버튼 로그인 상태에 따라 표시
+    const { data: { session } } = await soolClient.auth.getSession();
+    if (!session) {
+      document.querySelectorAll('[id^="write-"]').forEach(btn => {
+        btn.textContent = '🔐 로그인 후 작성';
+      });
+    }
     const savedTab = sessionStorage.getItem('brewery_tab');
     if (savedTab && savedTab !== 'stories') {
-      const tabMap = {"stories": 1, "breweries": 2, "types": 3};
+      const tabMap = { stories: 1, breweries: 2, types: 3 };
       const tabEl = document.querySelector(`.tab:nth-child(${tabMap[savedTab]})`);
       if (tabEl) switchTab(savedTab, tabEl);
     }

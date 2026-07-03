@@ -90,6 +90,65 @@ Unity 전환 이후 간단한 도트 수준의 존재 표시만 검토.
 
 ---
 
+## [v1.6.8] — 2026-07-03 · 영상관 구현
+
+### Supabase DB 변경
+
+#### studio_posts 테이블 신규 생성
+- id / user_id (FK → users) / type (trending·recipe·upload)
+- title / content / video_url / image_url
+- like_count / comment_count / view_count / created_at / updated_at
+
+#### studio_comments 테이블 신규 생성
+- id / post_id (FK → studio_posts) / user_id (FK → users)
+- content / created_at
+
+#### studio_likes 테이블 신규 생성
+- id / post_id (FK → studio_posts) / user_id (FK → users) / created_at
+- UNIQUE(post_id, user_id) — 좋아요 중복 방지
+
+#### 초기 데이터 삽입 (5개)
+- 트렌딩: 맥켈란 18년 vs 글렌피딕 18년 비교, 막걸리 가이드
+- 레시피: 위스키 하이볼 황금 비율, 막걸리 칵테일 5가지
+- 유저 영상: 글렌리벳 12년 리뷰
+
+### 신규 파일
+
+#### studio-detail.html
+- 영상관 상세 페이지
+- 유튜브 썸네일 표시 → 클릭 시 임베드 플레이어로 전환 (autoplay)
+- 외부 재생 차단 문제 해결 (썸네일+클릭 재생 방식)
+- 유튜브 외 외부 링크는 새 탭으로 열기
+- 👍 좋아요 토글 (중복 클릭 방지, 초기 상태 확인)
+- 댓글 작성·조회
+- XSS 방지 (esc 함수), 에러 처리
+
+#### studio-write.html
+- 영상 공유 작성 페이지
+- 카테고리 선택 (트렌딩/레시피/유저 영상) — 진입 탭 자동 선택
+- 유튜브 URL 입력 → 실시간 미리보기
+- 잘못된 URL 입력 시 에러 메시지
+- 등록 완료 후 studio.html로 자동 복귀
+
+### 변경 파일
+
+#### studio.html
+- 트렌딩·레시피·유저 영상 탭 → studio_posts 실데이터 로딩
+- 유튜브 썸네일 자동 표시 (mqdefault)
+- 카드 클릭 → studio-detail.html 이동
+- ✏️ 영상 공유 버튼 (비로그인 시 auth.html로)
+- 더미 카드 완전 제거
+- XSS 방지 esc() / safeSlice() 함수 추가
+- .limit(50) 추가
+- sessionStorage 탭 복원 패턴 적용
+- 마을로 돌아가기 → index.html 고정
+
+### 기술 결정
+- 영상관 콘텐츠는 studio_posts 전용 테이블로 독립 관리
+- 유튜브 외부 재생 차단 대응: 썸네일 먼저 표시 후 클릭 시 임베드 전환
+
+---
+
 ## [v1.6.7] — 2026-07-03 · 양조장 건물 구현
 
 ### Supabase DB 변경

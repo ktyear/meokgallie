@@ -32,8 +32,16 @@
   .video-meta{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-muted);}
   .video-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
   .upload-btn{width:100%;background:var(--pink-200);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px;transition:background 0.15s;}.upload-btn:hover{background:var(--pink-400);}
+  .video-card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;transition:border-color 0.15s;}
+  .video-card:hover{border-color:var(--pink-200);}
+  .video-title{font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:4px;}
+  .video-meta{font-size:11px;color:var(--text-muted);margin-bottom:4px;}
+  .video-desc{font-size:12px;color:var(--text-secondary);}
+  .video-tag{font-size:11px;color:var(--text-muted);background:var(--bg);border:0.5px solid var(--border);padding:2px 8px;border-radius:99px;margin-right:4px;}
   @media(max-width:480px){nav{padding:12px 16px;}.hero{padding:20px 16px 20px;}.section{padding:16px;}.video-grid{grid-template-columns:1fr;}}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/core/supabase.js"></script>
 </head>
 <body>
 <nav>
@@ -55,31 +63,30 @@
 </div>
 <div id="tab-trending" class="tab-content active">
   <div class="section">
-    <p class="section-title">지금 뜨는 영상</p>
-    <div class="video-card"><div class="video-thumb" style="background:linear-gradient(135deg,#FFB8DD,#FF44AA);">🍸<div class="video-play">▶</div></div><div class="video-body"><div class="video-title">3분 완성 유자 하이볼 레시피</div><div class="video-meta"><span>바텐더K</span><span>·</span><span>조회 12,400</span><span>·</span><span>2일 전</span></div></div></div>
-    <div class="video-card"><div class="video-thumb" style="background:linear-gradient(135deg,#F0D89A,#D4A040);">🥃<div class="video-play">▶</div></div><div class="video-body"><div class="video-title">위스키 테이스팅 노트 쓰는 법</div><div class="video-meta"><span>위스키덕후</span><span>·</span><span>조회 8,200</span><span>·</span><span>3일 전</span></div></div></div>
-    <div class="video-card"><div class="video-thumb" style="background:linear-gradient(135deg,#B8EAC8,#44CC66);">🍶<div class="video-play">▶</div></div><div class="video-body"><div class="video-title">편의점 막걸리 5종 블라인드 테스트</div><div class="video-meta"><span>전통주러버</span><span>·</span><span>조회 22,800</span><span>·</span><span>1주 전</span></div></div></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <p class="section-title" style="margin-bottom:0;">트렌딩</p>
+      <button id="write-trending-btn" onclick="goWrite('trending')" style="background:rgba(255,20,147,0.15);border:1px solid rgba(255,20,147,0.3);border-radius:6px;color:var(--pink-400);font-size:12px;padding:5px 12px;cursor:pointer;font-family:inherit;">✏️ 영상 공유</button>
+    </div>
+    <div id="trending-list"><div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px;">불러오는 중...</div></div>
   </div>
 </div>
 <div id="tab-recipe" class="tab-content">
   <div class="section">
-    <p class="section-title">레시피 영상</p>
-    <div class="video-grid">
-      <div class="video-card"><div class="video-thumb" style="background:linear-gradient(135deg,#FFE0B2,#FF9800);height:100px;font-size:32px;">🍊<div class="video-play" style="width:36px;height:36px;font-size:14px;">▶</div></div><div class="video-body"><div class="video-title" style="font-size:12px;">오렌지 하이볼</div></div></div>
-      <div class="video-card"><div class="video-thumb" style="background:linear-gradient(135deg,#B3E5FC,#0288D1);height:100px;font-size:32px;">🫐<div class="video-play" style="width:36px;height:36px;font-size:14px;">▶</div></div><div class="video-body"><div class="video-title" style="font-size:12px;">블루베리 막걸리</div></div></div>
-      <div class="video-card"><div class="video-thumb" style="background:linear-gradient(135deg,#F8BBD9,#E91E63);height:100px;font-size:32px;">🌸<div class="video-play" style="width:36px;height:36px;font-size:14px;">▶</div></div><div class="video-body"><div class="video-title" style="font-size:12px;">벚꽃 칵테일</div></div></div>
-      <div class="video-card"><div class="video-thumb" style="background:linear-gradient(135deg,#DCEDC8,#8BC34A);height:100px;font-size:32px;">🍵<div class="video-play" style="width:36px;height:36px;font-size:14px;">▶</div></div><div class="video-body"><div class="video-title" style="font-size:12px;">녹차 소주 칵테일</div></div></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <p class="section-title" style="margin-bottom:0;">레시피 영상</p>
+      <button id="write-recipe-btn" onclick="goWrite('recipe')" style="background:rgba(255,20,147,0.15);border:1px solid rgba(255,20,147,0.3);border-radius:6px;color:var(--pink-400);font-size:12px;padding:5px 12px;cursor:pointer;font-family:inherit;">✏️ 영상 공유</button>
     </div>
+    <div id="recipe-list"><div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px;">불러오는 중...</div></div>
   </div>
 </div>
+
 <div id="tab-upload" class="tab-content">
   <div class="section">
-    <div style="background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
-      <div style="font-size:36px;margin-bottom:12px;">🎥</div>
-      <div style="font-size:14px;color:var(--text-secondary);margin-bottom:8px;line-height:1.6;">나만의 술 레시피와 테이스팅 영상을 올려보세요!</div>
-      <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">업로드 권한: <strong>Lv.15 이상</strong></div>
-      <button class="upload-btn" onclick="alert('영상 업로드 기능은 준비 중이에요!')">영상 업로드</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <p class="section-title" style="margin-bottom:0;">유저 영상</p>
+      <button id="write-upload-btn" onclick="goWrite('upload')" style="background:rgba(255,20,147,0.15);border:1px solid rgba(255,20,147,0.3);border-radius:6px;color:var(--pink-400);font-size:12px;padding:5px 12px;cursor:pointer;font-family:inherit;">✏️ 영상 공유</button>
     </div>
+    <div id="upload-list"><div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px;">불러오는 중...</div></div>
   </div>
 </div>
 <script>
@@ -90,15 +97,102 @@
     el.classList.add('active');
     sessionStorage.setItem('studio_tab', name);
   }
-  function goBack() {
-    if (document.referrer && document.referrer.includes(location.hostname)) { history.back(); }
-    else { location.href = 'index.html'; }
-  }
+  function goBack() { location.href = 'index.html'; }
   // 복귀 시 탭 복원
   document.addEventListener('DOMContentLoaded', () => {
     const savedTab = sessionStorage.getItem('studio_tab');
     if (savedTab && savedTab !== 'trending') {
       const tabMap = {"trending": 1, "recipe": 2, "upload": 3};
+      const tabEl = document.querySelector(`.tab:nth-child(${tabMap[savedTab]})`);
+      if (tabEl) switchTab(savedTab, tabEl);
+    }
+  });
+
+  // XSS 방지
+  function esc(str) {
+    const d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+  }
+
+  function safeSlice(str, len) {
+    if (!str) return '';
+    const chars = [...str];
+    return chars.slice(0, len).join('') + (chars.length > len ? '...' : '');
+  }
+
+  function getYoutubeId(url) {
+    try {
+      const u = new URL(url);
+      if (u.hostname.includes('youtube.com')) return u.searchParams.get('v');
+      if (u.hostname === 'youtu.be') return u.pathname.slice(1);
+    } catch(e) {}
+    return null;
+  }
+
+  function timeAgo(dateStr) {
+    const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+    if (diff < 60) return '방금 전';
+    if (diff < 3600) return Math.floor(diff/60) + '분 전';
+    if (diff < 86400) return Math.floor(diff/3600) + '시간 전';
+    return Math.floor(diff/86400) + '일 전';
+  }
+
+  const typeMap = { trending: 'trending-list', recipe: 'recipe-list', upload: 'upload-list' };
+  const emptyMsg = {
+    trending: '아직 트렌딩 영상이 없어요 🎬',
+    recipe: '아직 레시피 영상이 없어요 🍸',
+    upload: '아직 공유된 영상이 없어요 📹'
+  };
+
+  async function loadAll() {
+    const { data, error } = await soolClient
+      .from('studio_posts')
+      .select('*, users(nickname)')
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (error) { console.error('studio_posts 로드 실패:', error); }
+
+    ['trending', 'recipe', 'upload'].forEach(type => {
+      const items = (data || []).filter(p => p.type === type);
+      const listEl = document.getElementById(typeMap[type]);
+      if (!listEl) return;
+
+      if (!items || items.length === 0) {
+        listEl.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px;">${emptyMsg[type]}</div>`;
+        return;
+      }
+
+      listEl.innerHTML = items.map(p => {
+        const ytId = p.video_url ? getYoutubeId(p.video_url) : null;
+        const thumb = ytId ? `<img src="https://img.youtube.com/vi/${ytId}/mqdefault.jpg" style="width:100%;border-radius:8px;margin-bottom:8px;aspect-ratio:16/9;object-fit:cover;" onerror="this.style.display='none'">` : '';
+        return `
+          <div class="video-card" onclick="location.href='studio-detail.html?id=${p.id}&from=studio.html'">
+            ${thumb}
+            <div class="video-title">${esc(p.title)}</div>
+            <div class="video-meta">@${esc(p.users?.nickname || '술향기마을')} · ${timeAgo(p.created_at)}</div>
+            <div class="video-desc">${esc(safeSlice(p.content, 60))}</div>
+            <div style="margin-top:8px;">
+              <span class="video-tag">👍 ${p.like_count || 0}</span>
+              <span class="video-tag">💬 ${p.comment_count || 0}</span>
+            </div>
+          </div>`;
+      }).join('');
+    });
+  }
+
+  async function goWrite(type) {
+    const { data: { session } } = await soolClient.auth.getSession();
+    if (!session) { location.href = 'auth.html'; return; }
+    location.href = `studio-write.html?type=${type}&from=studio.html`;
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    loadAll();
+    const savedTab = sessionStorage.getItem('studio_tab');
+    if (savedTab && savedTab !== 'trending') {
+      const tabMap = { trending: 1, recipe: 2, upload: 3 };
       const tabEl = document.querySelector(`.tab:nth-child(${tabMap[savedTab]})`);
       if (tabEl) switchTab(savedTab, tabEl);
     }

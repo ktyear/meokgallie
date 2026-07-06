@@ -19,8 +19,9 @@
   .hero-title{font-size:24px;font-weight:700;color:#fff;margin-bottom:6px;}
   .hero-sub{font-size:14px;color:rgba(255,255,255,0.7);line-height:1.65;}
   .section{padding:20px 24px;max-width:640px;margin:0 auto;}
-  .section-title{font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:14px;}
-  .tabs{background:var(--bg-card);border-bottom:0.5px solid var(--border);display:flex;overflow-x:auto;justify-content:center;}
+  .section-title{font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;}
+  .add-btn{font-size:12px;font-weight:600;color:var(--mint-400);cursor:pointer;background:none;border:none;font-family:inherit;text-transform:none;letter-spacing:0;}
+  .tabs{background:var(--bg-card);border-bottom:0.5px solid var(--border);display:flex;overflow-x:auto;justify-content:center;position:sticky;top:47px;z-index:9;}
   .tabs::-webkit-scrollbar{display:none;}
   .tab{padding:12px 18px;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.15s;}.tab.active{color:var(--mint-400);border-bottom-color:var(--mint-200);}
   .tab-content{display:none;}.tab-content.active{display:block;}
@@ -29,14 +30,30 @@
   .nolo-name{font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:3px;}
   .nolo-desc{font-size:12px;color:var(--text-secondary);line-height:1.5;}
   .nolo-rating{font-size:12px;color:var(--mint-400);margin-top:5px;}
-  .nolo-tag{display:inline-block;font-size:10px;background:var(--mint-50);color:var(--mint-600);padding:2px 7px;border-radius:99px;margin-top:4px;font-weight:500;}
+  .nolo-tag{display:inline-block;font-size:10px;background:var(--mint-50);color:var(--mint-600);padding:2px 7px;border-radius:99px;margin-top:4px;margin-right:4px;font-weight:500;}
+  .nolo-tag.user{background:#EEF; color:#556;}
   .challenge-card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;}
   .challenge-title{font-size:14px;font-weight:600;margin-bottom:4px;}
   .challenge-desc{font-size:13px;color:var(--text-secondary);line-height:1.5;margin-bottom:10px;}
   .progress-bar{height:6px;background:var(--mint-50);border-radius:99px;overflow:hidden;margin-bottom:6px;}
   .progress-fill{height:100%;background:var(--mint-200);border-radius:99px;}
   .progress-label{font-size:11px;color:var(--text-muted);}
-  .join-btn{background:var(--mint-200);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px;}.join-btn:hover{background:var(--mint-400);}
+  .join-btn{background:var(--mint-200);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px;font-family:inherit;}.join-btn:hover{background:var(--mint-400);}
+  .join-btn.joined{background:var(--mint-50);color:var(--mint-600);cursor:default;}
+  .empty{text-align:center;padding:32px 20px;color:var(--text-muted);font-size:13px;}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:none;align-items:flex-end;justify-content:center;z-index:50;}
+  .modal-overlay.show{display:flex;}
+  .modal{background:#fff;border-radius:16px 16px 0 0;padding:20px 20px 24px;width:100%;max-width:640px;max-height:85vh;overflow-y:auto;}
+  .modal-title{font-size:16px;font-weight:700;margin-bottom:16px;}
+  .form-row{margin-bottom:12px;}
+  .form-label{font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px;display:block;}
+  .form-select,.form-input,.form-textarea{width:100%;border:0.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;font-family:inherit;color:var(--text-primary);outline:none;}
+  .form-select:focus,.form-input:focus,.form-textarea:focus{border-color:var(--mint-200);}
+  .form-textarea{resize:none;height:70px;}
+  .modal-actions{display:flex;gap:8px;margin-top:16px;}
+  .btn-cancel{flex:1;padding:12px;border-radius:8px;border:0.5px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text-secondary);}
+  .btn-submit{flex:2;padding:12px;border-radius:8px;border:none;background:var(--mint-200);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+  .modal-msg{font-size:12px;color:var(--mint-600);margin-bottom:8px;min-height:16px;}
   @media(max-width:480px){nav{padding:12px 16px;}.hero{padding:20px 16px 20px;}.section{padding:16px;}}
 </style>
 </head>
@@ -60,45 +77,87 @@
 </div>
 <div id="tab-nolo" class="tab-content active">
   <div class="section">
-    <p class="section-title">무알코올 · 저알코올 리뷰</p>
-    <div class="nolo-card"><div class="nolo-icon">🫧</div><div><div class="nolo-name">하이트제로 0.00</div><div class="nolo-desc">맥주 느낌을 그대로 살린 무알코올 음료. 탄산감과 쓴맛이 실제 맥주와 가장 유사.</div><div class="nolo-rating">★★★★☆</div><span class="nolo-tag">무알코올</span></div></div>
-    <div class="nolo-card"><div class="nolo-icon">🍹</div><div><div class="nolo-name">산미구엘 프리</div><div class="nolo-desc">필리핀 라거 스타일의 무알코올 맥주. 상큼하고 가벼운 맛이 여름에 잘 어울림.</div><div class="nolo-rating">★★★★☆</div><span class="nolo-tag">무알코올</span></div></div>
-    <div class="nolo-card"><div class="nolo-icon">🍵</div><div><div class="nolo-name">홈브루 콤부차 진저</div><div class="nolo-desc">생강 향 가득한 발효 음료. 낮은 알코올 함량과 독특한 산미가 특징.</div><div class="nolo-rating">★★★☆☆</div><span class="nolo-tag">저알코올</span></div></div>
+    <p class="section-title">무알코올 · 저알코올 리뷰 <button class="add-btn" onclick="openNoloModal()">+ 음료 등록</button></p>
+    <div id="nolo-list"><div class="empty">불러오는 중...</div></div>
   </div>
 </div>
 <div id="tab-challenge" class="tab-content">
   <div class="section">
     <p class="section-title">진행 중인 절주 챌린지</p>
-    <div class="challenge-card">
-      <div class="challenge-title">🌙 30일 절주 챌린지</div>
-      <div class="challenge-desc">30일 동안 음주 횟수를 줄이는 챌린지. 함께하는 사람들과 서로 응원해요.</div>
-      <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
-      <div class="progress-label">18일 진행 중 · 참여자 840명</div>
-      <button class="join-btn" onclick="alert('챌린지 참여 기능은 준비 중이에요!')">챌린지 참여</button>
-    </div>
-    <div class="challenge-card">
-      <div class="challenge-title">🌿 주말 소버 챌린지</div>
-      <div class="challenge-desc">이번 주말만큼은 술 없이! 대신 맛있는 무알코올 음료를 즐겨보세요.</div>
-      <div class="progress-bar"><div class="progress-fill" style="width:30%"></div></div>
-      <div class="progress-label">3일 진행 중 · 참여자 1,240명</div>
-      <button class="join-btn" onclick="alert('챌린지 참여 기능은 준비 중이에요!')">챌린지 참여</button>
-    </div>
+    <div id="challenge-list"><div class="empty">불러오는 중...</div></div>
   </div>
 </div>
 <div id="tab-today" class="tab-content">
   <div class="section">
-    <p class="section-title">오늘의 무알코올 한 잔</p>
-    <div class="nolo-card" style="border-color:var(--mint-200);">
-      <div class="nolo-icon">✨</div>
-      <div>
-        <div class="nolo-name">스파클링 유자 에이드</div>
-        <div class="nolo-desc">신선한 유자즙과 탄산수로 만드는 상큼한 에이드. 재료: 유자청 2큰술, 탄산수 200ml, 얼음.</div>
-        <span class="nolo-tag">오늘의 추천</span>
-      </div>
+    <p class="section-title">오늘의 한 잔 <button class="add-btn" onclick="openPickModal()">+ 오늘 마시는 술 올리기</button></p>
+    <div id="today-list"><div class="empty">불러오는 중...</div></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="nolo-modal">
+  <div class="modal">
+    <div class="modal-title">무알코올 음료 등록</div>
+    <div class="modal-msg" id="nolo-msg"></div>
+    <div class="form-row">
+      <label class="form-label">구분</label>
+      <select class="form-select" id="nolo-category">
+        <option value="무알코올">무알코올</option>
+        <option value="저알코올">저알코올</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label class="form-label">이름</label>
+      <input class="form-input" id="nolo-name" placeholder="예: 하이트제로 0.00">
+    </div>
+    <div class="form-row">
+      <label class="form-label">설명</label>
+      <textarea class="form-textarea" id="nolo-desc" placeholder="맛, 특징 등을 적어주세요"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('nolo-modal')">취소</button>
+      <button class="btn-submit" onclick="submitNolo()">등록하기</button>
     </div>
   </div>
 </div>
+
+<div class="modal-overlay" id="pick-modal">
+  <div class="modal">
+    <div class="modal-title">오늘 마시는 술 올리기</div>
+    <div class="modal-msg" id="pick-msg"></div>
+    <div class="form-row">
+      <label class="form-label">이모지 (선택)</label>
+      <input class="form-input" id="pick-emoji" placeholder="✨" maxlength="4">
+    </div>
+    <div class="form-row">
+      <label class="form-label">제목</label>
+      <input class="form-input" id="pick-title" placeholder="예: 스파클링 유자 에이드">
+    </div>
+    <div class="form-row">
+      <label class="form-label">설명</label>
+      <textarea class="form-textarea" id="pick-desc" placeholder="어떻게 만들었는지, 왜 좋았는지 적어주세요"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('pick-modal')">취소</button>
+      <button class="btn-submit" onclick="submitPick()">등록하기</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/core/supabase.js"></script>
 <script>
+  let currentUser = null;
+
+  function esc(str) {
+    const d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+  }
+
+  function goBack() {
+    location.href = 'index.html';
+  }
+
   function switchTab(name, el) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -106,19 +165,165 @@
     el.classList.add('active');
     sessionStorage.setItem('cafe_tab', name);
   }
-  function goBack() {
-    if (document.referrer && document.referrer.includes(location.hostname)) { history.back(); }
-    else { location.href = 'index.html'; }
-  }
-  // 복귀 시 탭 복원
-  document.addEventListener('DOMContentLoaded', () => {
+
+  function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+  async function init() {
+    const { data: { session } } = await soolClient.auth.getSession();
+    if (session) {
+      const { data: user } = await soolClient.from('users').select('id, nickname').eq('id', session.user.id).single();
+      currentUser = user;
+    }
+    await loadNolo();
+    await loadChallenges();
+    await loadTodayList();
+
     const savedTab = sessionStorage.getItem('cafe_tab');
     if (savedTab && savedTab !== 'nolo') {
-      const tabMap = {"nolo": 1, "challenge": 2, "today": 3};
+      const tabMap = { nolo: 1, challenge: 2, today: 3 };
       const tabEl = document.querySelector(`.tab:nth-child(${tabMap[savedTab]})`);
       if (tabEl) switchTab(savedTab, tabEl);
     }
-  });
+  }
+
+  async function loadNolo() {
+    const { data, error } = await soolClient
+      .from('cafe_nolo_drinks')
+      .select('*, users(nickname)')
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    const list = document.getElementById('nolo-list');
+    if (error) { console.error('무알코올 목록 로드 실패:', error); list.innerHTML = '<div class="empty">불러오지 못했어요</div>'; return; }
+    if (!data || data.length === 0) { list.innerHTML = '<div class="empty">아직 등록된 음료가 없어요</div>'; return; }
+
+    const icon = { '무알코올': '🫧', '저알코올': '🍵' };
+    list.innerHTML = data.map(d => `
+      <div class="nolo-card" onclick="location.href='cafe-detail.html?type=nolo&id=${d.id}&from=cafe.html'">
+        <div class="nolo-icon">${icon[d.category] || '🥤'}</div>
+        <div>
+          <div class="nolo-name">${esc(d.name)}</div>
+          <div class="nolo-desc">${esc(d.description || '')}</div>
+          <div class="nolo-rating">${d.avg_rating > 0 ? '★ ' + d.avg_rating : '아직 평점 없음'} · 리뷰 ${d.review_count || 0}개</div>
+          <span class="nolo-tag">${esc(d.category)}</span>${d.user_id ? `<span class="nolo-tag user">@${esc(d.users?.nickname || '유저')}</span>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function openNoloModal() {
+    if (!currentUser) { alert('로그인 후 등록할 수 있어요'); location.href = 'auth.html'; return; }
+    document.getElementById('nolo-msg').textContent = '';
+    document.getElementById('nolo-name').value = '';
+    document.getElementById('nolo-desc').value = '';
+    document.getElementById('nolo-modal').classList.add('show');
+  }
+
+  async function submitNolo() {
+    const name = document.getElementById('nolo-name').value.trim();
+    const description = document.getElementById('nolo-desc').value.trim();
+    const category = document.getElementById('nolo-category').value;
+    const msg = document.getElementById('nolo-msg');
+    if (!name) { msg.textContent = '이름을 입력해주세요'; return; }
+
+    const { error } = await soolClient.from('cafe_nolo_drinks').insert({ name, category, description, user_id: currentUser.id });
+    if (error) { console.error('등록 실패:', error); msg.textContent = '등록에 실패했어요'; return; }
+    closeModal('nolo-modal');
+    await loadNolo();
+  }
+
+  async function loadChallenges() {
+    const { data: challenges, error } = await soolClient.from('challenges').select('*').order('created_at', { ascending: false });
+    const list = document.getElementById('challenge-list');
+    if (error) { list.innerHTML = '<div class="empty">불러오지 못했어요</div>'; return; }
+    if (!challenges || challenges.length === 0) { list.innerHTML = '<div class="empty">진행 중인 챌린지가 없어요</div>'; return; }
+
+    let myParticipations = [];
+    if (currentUser) {
+      const { data } = await soolClient.from('challenge_participants').select('challenge_id, joined_at').eq('user_id', currentUser.id);
+      myParticipations = data || [];
+    }
+
+    const cards = await Promise.all(challenges.map(async (c) => {
+      const { count } = await soolClient.from('challenge_participants').select('id', { count: 'exact', head: true }).eq('challenge_id', c.id);
+      const mine = myParticipations.find(p => p.challenge_id === c.id);
+      let progressHtml, btnHtml;
+      if (mine) {
+        const daysPassed = Math.floor((Date.now() - new Date(mine.joined_at)) / 86400000);
+        const pct = Math.min(100, Math.round((daysPassed / c.duration_days) * 100));
+        progressHtml = `<div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <div class="progress-label">${daysPassed}일 진행 중 · 참여자 ${count || 0}명</div>`;
+        btnHtml = `<button class="join-btn joined">참여 중 ✓</button>`;
+      } else {
+        progressHtml = `<div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+          <div class="progress-label">참여자 ${count || 0}명</div>`;
+        btnHtml = `<button class="join-btn" onclick="joinChallenge('${c.id}')">챌린지 참여</button>`;
+      }
+      return `
+        <div class="challenge-card">
+          <div class="challenge-title">${esc(c.emoji || '🌙')} ${esc(c.title)}</div>
+          <div class="challenge-desc">${esc(c.description || '')}</div>
+          ${progressHtml}
+          ${btnHtml}
+        </div>
+      `;
+    }));
+    list.innerHTML = cards.join('');
+  }
+
+  async function joinChallenge(id) {
+    if (!currentUser) { alert('로그인 후 참여할 수 있어요'); location.href = 'auth.html'; return; }
+    const { error } = await soolClient.from('challenge_participants').insert({ challenge_id: id, user_id: currentUser.id });
+    if (error) { console.error('참여 실패:', error); return; }
+    await loadChallenges();
+  }
+
+  async function loadTodayList() {
+    const { data, error } = await soolClient
+      .from('cafe_daily_picks')
+      .select('*, users(nickname)')
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    const wrap = document.getElementById('today-list');
+    if (error) { wrap.innerHTML = '<div class="empty">불러오지 못했어요</div>'; return; }
+    if (!data || data.length === 0) { wrap.innerHTML = '<div class="empty">아직 등록된 오늘의 한 잔이 없어요</div>'; return; }
+
+    wrap.innerHTML = data.map(d => `
+      <div class="nolo-card" onclick="location.href='cafe-detail.html?type=pick&id=${d.id}&from=cafe.html'" style="${!d.user_id ? 'border-color:var(--mint-200);' : ''}">
+        <div class="nolo-icon">${esc(d.emoji || '✨')}</div>
+        <div>
+          <div class="nolo-name">${esc(d.title)}</div>
+          <div class="nolo-desc">${esc(d.description || '')}</div>
+          <span class="nolo-tag">${d.user_id ? '유저 추천' : (d.tag || '공식 추천')}</span>${d.user_id ? `<span class="nolo-tag user">@${esc(d.users?.nickname || '유저')}</span>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function openPickModal() {
+    if (!currentUser) { alert('로그인 후 등록할 수 있어요'); location.href = 'auth.html'; return; }
+    document.getElementById('pick-msg').textContent = '';
+    document.getElementById('pick-emoji').value = '';
+    document.getElementById('pick-title').value = '';
+    document.getElementById('pick-desc').value = '';
+    document.getElementById('pick-modal').classList.add('show');
+  }
+
+  async function submitPick() {
+    const title = document.getElementById('pick-title').value.trim();
+    const description = document.getElementById('pick-desc').value.trim();
+    const emoji = document.getElementById('pick-emoji').value.trim() || '✨';
+    const msg = document.getElementById('pick-msg');
+    if (!title) { msg.textContent = '제목을 입력해주세요'; return; }
+
+    const { error } = await soolClient.from('cafe_daily_picks').insert({ title, description, emoji, tag: '유저 추천', user_id: currentUser.id });
+    if (error) { console.error('등록 실패:', error); msg.textContent = '등록에 실패했어요'; return; }
+    closeModal('pick-modal');
+    await loadTodayList();
+  }
+
+  init();
 </script>
 </body>
 </html>

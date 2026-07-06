@@ -12,15 +12,15 @@
   .nav-back{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-secondary);text-decoration:none;cursor:pointer;}.nav-back:hover{color:var(--orange-400);}.nav-back svg{width:16px;height:16px;}
   .nav-logo{font-size:15px;font-weight:600;display:flex;align-items:center;gap:7px;}
   .nav-logo-dot{width:8px;height:8px;border-radius:50%;background:var(--orange-200);}
-  .nav-spacer{width:80px;}
+  .nav-write{font-size:13px;font-weight:600;color:var(--orange-400);cursor:pointer;background:none;border:none;font-family:inherit;}
   .hero{background:linear-gradient(135deg,#3A0E04 0%,#8A3010 100%);padding:32px 24px 28px;}
   .hero-inner{max-width:640px;margin:0 auto;}
   .hero-tag{display:inline-block;font-size:11px;font-weight:600;color:#FFCCA8;background:rgba(255,255,255,0.1);padding:3px 10px;border-radius:99px;margin-bottom:10px;}
   .hero-title{font-size:24px;font-weight:700;color:#fff;margin-bottom:6px;}
   .hero-sub{font-size:14px;color:rgba(255,255,255,0.7);line-height:1.65;}
   .section{padding:20px 24px;max-width:640px;margin:0 auto;}
-  .section-title{font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:14px;}
-  .tabs{background:var(--bg-card);border-bottom:0.5px solid var(--border);display:flex;overflow-x:auto;justify-content:center;}
+  .section-title{font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;}
+  .tabs{background:var(--bg-card);border-bottom:0.5px solid var(--border);display:flex;overflow-x:auto;justify-content:center;position:sticky;top:47px;z-index:9;}
   .tabs::-webkit-scrollbar{display:none;}
   .tab{padding:12px 18px;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.15s;}.tab.active{color:var(--orange-400);border-bottom-color:var(--orange-200);}
   .tab-content{display:none;}.tab-content.active{display:block;}
@@ -29,13 +29,36 @@
   .pairing-combo{display:flex;align-items:center;gap:6px;font-size:22px;}
   .pairing-plus{font-size:14px;color:var(--text-muted);}
   .pairing-title{font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:4px;}
-  .pairing-body{font-size:13px;color:var(--text-secondary);line-height:1.55;}
+  .pairing-body{font-size:13px;color:var(--text-secondary);line-height:1.55;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
   .pairing-tag{display:inline-block;font-size:11px;background:var(--orange-50);color:var(--orange-600);padding:2px 8px;border-radius:99px;margin-top:8px;}
-  .recipe-card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;}
+  .pairing-meta{font-size:11px;color:var(--text-muted);margin-top:6px;}
+  .recipe-card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;cursor:pointer;transition:border-color 0.15s;}.recipe-card:hover{border-color:var(--orange-200);}
   .recipe-title{font-size:14px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
-  .recipe-ingredient{font-size:13px;color:var(--text-secondary);line-height:1.7;margin-bottom:8px;}
-  .recipe-step{font-size:12px;color:var(--text-muted);line-height:1.7;}
-  .recipe-step span{font-weight:600;color:var(--orange-400);}
+  .recipe-preview{font-size:13px;color:var(--text-secondary);line-height:1.6;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;white-space:pre-wrap;}
+  .empty{text-align:center;padding:32px 20px;color:var(--text-muted);font-size:13px;}
+  .cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+  .cat-item{background:var(--bg-card);border:0.5px solid var(--border);border-radius:10px;padding:14px;text-align:center;cursor:pointer;transition:border-color 0.15s;}.cat-item:hover{border-color:var(--orange-200);}
+  .cat-item.active{border-color:var(--orange-200);background:var(--orange-50);}
+  .cat-emoji{font-size:24px;margin-bottom:6px;}
+  .cat-name{font-size:12px;font-weight:500;}
+  #search-results{margin-top:16px;}
+  /* 글쓰기 모달 */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:none;align-items:flex-end;justify-content:center;z-index:50;}
+  .modal-overlay.show{display:flex;}
+  .modal{background:#fff;border-radius:16px 16px 0 0;padding:20px 20px 24px;width:100%;max-width:640px;max-height:85vh;overflow-y:auto;}
+  .modal-title{font-size:16px;font-weight:700;margin-bottom:16px;}
+  .form-row{margin-bottom:12px;}
+  .form-label{font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px;display:block;}
+  .form-select,.form-input,.form-textarea{width:100%;border:0.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;font-family:inherit;color:var(--text-primary);outline:none;}
+  .form-select:focus,.form-input:focus,.form-textarea:focus{border-color:var(--orange-200);}
+  .form-textarea{resize:none;height:80px;}
+  .form-type-toggle{display:flex;gap:8px;margin-bottom:12px;}
+  .type-btn{flex:1;padding:10px;border:0.5px solid var(--border);border-radius:8px;text-align:center;font-size:13px;font-weight:500;cursor:pointer;color:var(--text-muted);}
+  .type-btn.active{border-color:var(--orange-200);background:var(--orange-50);color:var(--orange-400);}
+  .modal-actions{display:flex;gap:8px;margin-top:16px;}
+  .btn-cancel{flex:1;padding:12px;border-radius:8px;border:0.5px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text-secondary);}
+  .btn-submit{flex:2;padding:12px;border-radius:8px;border:none;background:var(--orange-200);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+  .modal-msg{font-size:12px;color:var(--orange-600);margin-bottom:8px;min-height:16px;}
   @media(max-width:480px){nav{padding:12px 16px;}.hero{padding:20px 16px 20px;}.section{padding:16px;}}
 </style>
 </head>
@@ -43,7 +66,7 @@
 <nav>
   <a class="nav-back" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>마을로 돌아가기</a>
   <div class="nav-logo"><div class="nav-logo-dot"></div>술향기마을</div>
-  <div class="nav-spacer"></div>
+  <button class="nav-write" onclick="openWriteModal()">+ 글쓰기</button>
 </nav>
 <div class="hero">
   <div class="hero-inner">
@@ -60,41 +83,97 @@
 <div id="tab-pairings" class="tab-content active">
   <div class="section">
     <p class="section-title">오늘의 페어링 추천</p>
-    <div class="pairing-card"><div class="pairing-header"><div class="pairing-combo"><span>🥃</span><span class="pairing-plus">+</span><span>🧀</span></div><div><div class="pairing-title">위스키 × 치즈</div></div></div><div class="pairing-body">스모키한 아이슬레이 위스키에는 블루치즈, 부드러운 하이랜드 위스키엔 체더치즈가 잘 어울려요.</div><span class="pairing-tag">위스키</span></div>
-    <div class="pairing-card"><div class="pairing-header"><div class="pairing-combo"><span>🍶</span><span class="pairing-plus">+</span><span>🥟</span></div><div><div class="pairing-title">막걸리 × 전</div></div></div><div class="pairing-body">비 오는 날 파전과 막걸리의 조합은 역시 클래식. 막걸리의 산미가 기름진 전을 깔끔하게 잡아줘요.</div><span class="pairing-tag">전통주</span></div>
-    <div class="pairing-card"><div class="pairing-header"><div class="pairing-combo"><span>🍷</span><span class="pairing-plus">+</span><span>🥩</span></div><div><div class="pairing-title">레드와인 × 스테이크</div></div></div><div class="pairing-body">타닌이 강한 까베르네 소비뇽은 지방이 풍부한 채끝 스테이크와 최고의 조화를 이뤄요.</div><span class="pairing-tag">와인</span></div>
-    <div class="pairing-card"><div class="pairing-header"><div class="pairing-combo"><span>🍺</span><span class="pairing-plus">+</span><span>🍕</span></div><div><div class="pairing-title">IPA × 피자</div></div></div><div class="pairing-body">홉의 쓴맛이 피자의 느끼함을 잡아주고 탄산이 입을 개운하게 해줘요.</div><span class="pairing-tag">맥주</span></div>
+    <div id="pairings-list"><div class="empty">불러오는 중...</div></div>
   </div>
 </div>
 <div id="tab-recipes" class="tab-content">
   <div class="section">
     <p class="section-title">안주 레시피</p>
-    <div class="recipe-card">
-      <div class="recipe-title">🧀 위스키 치즈 보드</div>
-      <div class="recipe-ingredient">재료: 체더치즈, 블루치즈, 크래커, 꿀, 호두, 포도</div>
-      <div class="recipe-step"><span>1.</span> 치즈를 실온에 30분 꺼내 풍미를 살린다.<br><span>2.</span> 나무 보드에 치즈를 간격을 두고 배치한다.<br><span>3.</span> 빈 공간에 크래커, 포도, 호두를 채운다.<br><span>4.</span> 꿀을 블루치즈 위에 살짝 뿌려 완성.</div>
-    </div>
-    <div class="recipe-card">
-      <div class="recipe-title">🥟 막걸리 파전</div>
-      <div class="recipe-ingredient">재료: 부침가루 1컵, 막걸리 1컵, 대파 3대, 홍고추, 식용유</div>
-      <div class="recipe-step"><span>1.</span> 부침가루와 막걸리를 1:1로 섞어 반죽한다.<br><span>2.</span> 대파와 홍고추를 적당히 썰어 넣는다.<br><span>3.</span> 기름 두른 팬에 반죽을 얇게 펴 굽는다.<br><span>4.</span> 노릇하게 앞뒤로 구워 완성.</div>
-    </div>
+    <div id="recipes-list"><div class="empty">불러오는 중...</div></div>
   </div>
 </div>
 <div id="tab-search" class="tab-content">
   <div class="section">
     <p class="section-title">마시는 술로 안주 찾기</p>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
-      <div style="background:var(--bg-card);border:0.5px solid var(--border);border-radius:10px;padding:14px;text-align:center;cursor:pointer;" onclick="alert('위스키 페어링 목록은 준비 중이에요!')"><div style="font-size:24px;margin-bottom:6px;">🥃</div><div style="font-size:12px;font-weight:500;">위스키</div></div>
-      <div style="background:var(--bg-card);border:0.5px solid var(--border);border-radius:10px;padding:14px;text-align:center;cursor:pointer;" onclick="alert('전통주 페어링 목록은 준비 중이에요!')"><div style="font-size:24px;margin-bottom:6px;">🍶</div><div style="font-size:12px;font-weight:500;">전통주</div></div>
-      <div style="background:var(--bg-card);border:0.5px solid var(--border);border-radius:10px;padding:14px;text-align:center;cursor:pointer;" onclick="alert('와인 페어링 목록은 준비 중이에요!')"><div style="font-size:24px;margin-bottom:6px;">🍷</div><div style="font-size:12px;font-weight:500;">와인</div></div>
-      <div style="background:var(--bg-card);border:0.5px solid var(--border);border-radius:10px;padding:14px;text-align:center;cursor:pointer;" onclick="alert('맥주 페어링 목록은 준비 중이에요!')"><div style="font-size:24px;margin-bottom:6px;">🍺</div><div style="font-size:12px;font-weight:500;">맥주</div></div>
-      <div style="background:var(--bg-card);border:0.5px solid var(--border);border-radius:10px;padding:14px;text-align:center;cursor:pointer;" onclick="alert('칵테일 페어링 목록은 준비 중이에요!')"><div style="font-size:24px;margin-bottom:6px;">🍸</div><div style="font-size:12px;font-weight:500;">칵테일</div></div>
-      <div style="background:var(--bg-card);border:0.5px solid var(--border);border-radius:10px;padding:14px;text-align:center;cursor:pointer;" onclick="alert('기타 페어링 목록은 준비 중이에요!')"><div style="font-size:24px;margin-bottom:6px;">🥂</div><div style="font-size:12px;font-weight:500;">기타</div></div>
+    <div class="cat-grid" id="cat-grid"></div>
+    <div id="search-results"></div>
+  </div>
+</div>
+
+<!-- 글쓰기 모달 -->
+<div class="modal-overlay" id="write-modal">
+  <div class="modal">
+    <div class="modal-title">마리아주에 글쓰기</div>
+    <div class="modal-msg" id="write-msg"></div>
+    <div class="form-type-toggle">
+      <div class="type-btn active" id="type-btn-pairing" onclick="setWriteType('pairing')">🍽️ 페어링 추천</div>
+      <div class="type-btn" id="type-btn-recipe" onclick="setWriteType('recipe')">📖 안주 레시피</div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">카테고리</label>
+      <select class="form-select" id="write-category">
+        <option value="위스키">위스키</option>
+        <option value="전통주">전통주</option>
+        <option value="와인">와인</option>
+        <option value="맥주">맥주</option>
+        <option value="칵테일">칵테일</option>
+        <option value="기타">기타</option>
+      </select>
+    </div>
+    <div class="form-row" id="write-emoji-row">
+      <label class="form-label">조합 이모지 (예: 🥃 + 🧀)</label>
+      <div style="display:flex;gap:8px;">
+        <input class="form-input" id="write-emoji-drink" placeholder="🥃" maxlength="4">
+        <input class="form-input" id="write-emoji-food" placeholder="🧀" maxlength="4">
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">제목</label>
+      <input class="form-input" id="write-title" placeholder="예: 위스키 × 치즈">
+    </div>
+    <div class="form-row">
+      <label class="form-label" id="write-content-label">설명</label>
+      <textarea class="form-textarea" id="write-content" placeholder="어떤 조합인지, 왜 잘 어울리는지 적어주세요"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeWriteModal()">취소</button>
+      <button class="btn-submit" onclick="submitPost()">등록하기</button>
     </div>
   </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/core/supabase.js"></script>
 <script>
+  const categories = [
+    { key: '위스키', emoji: '🥃' },
+    { key: '전통주', emoji: '🍶' },
+    { key: '와인', emoji: '🍷' },
+    { key: '맥주', emoji: '🍺' },
+    { key: '칵테일', emoji: '🍸' },
+    { key: '기타', emoji: '🥂' },
+  ];
+  let currentUser = null;
+  let writeType = 'pairing';
+  let activeCategory = null;
+
+  // XSS 방지
+  function esc(str) {
+    const d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+  }
+  // 유니코드(이모지) 안전 자르기
+  function safeSlice(str, len) {
+    if (!str) return '';
+    const arr = Array.from(str);
+    return arr.length > len ? arr.slice(0, len).join('') + '…' : str;
+  }
+
+  function goBack() {
+    location.href = 'index.html';
+  }
+
   function switchTab(name, el) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -102,19 +181,164 @@
     el.classList.add('active');
     sessionStorage.setItem('restaurant_tab', name);
   }
-  function goBack() {
-    if (document.referrer && document.referrer.includes(location.hostname)) { history.back(); }
-    else { location.href = 'index.html'; }
-  }
-  // 복귀 시 탭 복원
-  document.addEventListener('DOMContentLoaded', () => {
+
+  async function init() {
+    const { data: { session } } = await soolClient.auth.getSession();
+    if (session) {
+      const { data: user } = await soolClient.from('users').select('id, nickname').eq('id', session.user.id).single();
+      currentUser = user;
+    }
+    renderCatGrid();
+    await loadPairings();
+    await loadRecipes();
+
     const savedTab = sessionStorage.getItem('restaurant_tab');
     if (savedTab && savedTab !== 'pairings') {
-      const tabMap = {"pairings": 1, "recipes": 2, "search": 3};
+      const tabMap = { pairings: 1, recipes: 2, search: 3 };
       const tabEl = document.querySelector(`.tab:nth-child(${tabMap[savedTab]})`);
       if (tabEl) switchTab(savedTab, tabEl);
     }
-  });
+  }
+
+  async function loadPairings() {
+    const { data, error } = await soolClient
+      .from('pairing_posts')
+      .select('*, users(nickname)')
+      .eq('type', 'pairing')
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    const list = document.getElementById('pairings-list');
+    if (error) { console.error('페어링 로드 실패:', error); list.innerHTML = '<div class="empty">불러오지 못했어요</div>'; return; }
+    if (!data || data.length === 0) { list.innerHTML = '<div class="empty">아직 등록된 페어링이 없어요</div>'; return; }
+
+    list.innerHTML = data.map(p => `
+      <div class="pairing-card" onclick="goDetail('${p.id}')">
+        <div class="pairing-header">
+          <div class="pairing-combo"><span>${esc(p.emoji_drink || '🥃')}</span><span class="pairing-plus">+</span><span>${esc(p.emoji_food || '🍽️')}</span></div>
+          <div><div class="pairing-title">${esc(p.title)}</div></div>
+        </div>
+        <div class="pairing-body">${esc(p.content)}</div>
+        <span class="pairing-tag">${esc(p.tag || p.category)}</span>
+        <div class="pairing-meta">@${esc(p.users?.nickname || '관리자')} · 👍 ${p.like_count || 0}</div>
+      </div>
+    `).join('');
+  }
+
+  async function loadRecipes() {
+    const { data, error } = await soolClient
+      .from('pairing_posts')
+      .select('*, users(nickname)')
+      .eq('type', 'recipe')
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    const list = document.getElementById('recipes-list');
+    if (error) { console.error('레시피 로드 실패:', error); list.innerHTML = '<div class="empty">불러오지 못했어요</div>'; return; }
+    if (!data || data.length === 0) { list.innerHTML = '<div class="empty">아직 등록된 레시피가 없어요</div>'; return; }
+
+    list.innerHTML = data.map(r => `
+      <div class="recipe-card" onclick="goDetail('${r.id}')">
+        <div class="recipe-title">${esc(r.title)}</div>
+        <div class="recipe-preview">${esc(safeSlice(r.content, 80))}</div>
+        <div class="pairing-meta">@${esc(r.users?.nickname || '관리자')} · 👍 ${r.like_count || 0}</div>
+      </div>
+    `).join('');
+  }
+
+  function renderCatGrid() {
+    document.getElementById('cat-grid').innerHTML = categories.map(c => `
+      <div class="cat-item" id="cat-${c.key}" onclick="filterByCategory('${c.key}')">
+        <div class="cat-emoji">${c.emoji}</div>
+        <div class="cat-name">${c.key}</div>
+      </div>
+    `).join('');
+  }
+
+  async function filterByCategory(key) {
+    document.querySelectorAll('.cat-item').forEach(el => el.classList.remove('active'));
+    document.getElementById('cat-' + key).classList.add('active');
+    activeCategory = key;
+
+    const results = document.getElementById('search-results');
+    results.innerHTML = '<div class="empty">불러오는 중...</div>';
+
+    const { data, error } = await soolClient
+      .from('pairing_posts')
+      .select('*, users(nickname)')
+      .eq('category', key)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (error) { results.innerHTML = '<div class="empty">불러오지 못했어요</div>'; return; }
+    if (!data || data.length === 0) { results.innerHTML = `<div class="empty">'${esc(key)}' 관련 안주 콘텐츠가 아직 없어요</div>`; return; }
+
+    results.innerHTML = data.map(p => `
+      <div class="${p.type === 'recipe' ? 'recipe-card' : 'pairing-card'}" onclick="goDetail('${p.id}')" style="margin-top:10px;">
+        <div class="recipe-title">${p.type === 'recipe' ? '📖' : '🍽️'} ${esc(p.title)}</div>
+        <div class="recipe-preview">${esc(safeSlice(p.content, 80))}</div>
+      </div>
+    `).join('');
+  }
+
+  function goDetail(id) {
+    location.href = `pairing-detail.html?id=${id}&from=restaurant.html`;
+  }
+
+  // ── 글쓰기 모달 ──────────────────────
+  function openWriteModal() {
+    if (!currentUser) { alert('로그인 후 글을 작성할 수 있어요'); location.href = 'auth.html'; return; }
+    document.getElementById('write-modal').classList.add('show');
+  }
+  function closeWriteModal() {
+    document.getElementById('write-modal').classList.remove('show');
+    document.getElementById('write-msg').textContent = '';
+    document.getElementById('write-title').value = '';
+    document.getElementById('write-content').value = '';
+    document.getElementById('write-emoji-drink').value = '';
+    document.getElementById('write-emoji-food').value = '';
+  }
+  function setWriteType(type) {
+    writeType = type;
+    document.getElementById('type-btn-pairing').classList.toggle('active', type === 'pairing');
+    document.getElementById('type-btn-recipe').classList.toggle('active', type === 'recipe');
+    document.getElementById('write-emoji-row').style.display = type === 'pairing' ? 'block' : 'none';
+    document.getElementById('write-content-label').textContent = type === 'pairing' ? '설명' : '재료 & 조리법';
+    document.getElementById('write-content').placeholder = type === 'pairing'
+      ? '어떤 조합인지, 왜 잘 어울리는지 적어주세요'
+      : '재료: ...\n1. ...\n2. ...';
+  }
+
+  async function submitPost() {
+    if (!currentUser) return;
+    const category = document.getElementById('write-category').value;
+    const title = document.getElementById('write-title').value.trim();
+    const content = document.getElementById('write-content').value.trim();
+    const msg = document.getElementById('write-msg');
+
+    if (!title || !content) { msg.textContent = '제목과 내용을 입력해주세요'; return; }
+
+    const payload = {
+      type: writeType,
+      category,
+      title,
+      content,
+      user_id: currentUser.id,
+    };
+    if (writeType === 'pairing') {
+      payload.emoji_drink = document.getElementById('write-emoji-drink').value.trim() || '🥃';
+      payload.emoji_food = document.getElementById('write-emoji-food').value.trim() || '🍽️';
+      payload.tag = category;
+    }
+
+    const { error } = await soolClient.from('pairing_posts').insert(payload);
+    if (error) { console.error('등록 실패:', error); msg.textContent = '등록에 실패했어요. 다시 시도해주세요'; return; }
+
+    closeWriteModal();
+    if (writeType === 'pairing') { await loadPairings(); } else { await loadRecipes(); }
+  }
+
+  init();
 </script>
 </body>
 </html>

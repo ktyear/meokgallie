@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>마리아주 — 술향기마을</title>
+<style>
+  :root{--orange-50:#FFF4EE;--orange-100:#FFCCA8;--orange-200:#FF6644;--orange-400:#DD4422;--orange-600:#AA2810;--orange-900:#3A0E04;--bg:#FAF1EE;--bg-card:#fff;--text-primary:#1a0804;--text-secondary:#6b2c1a;--text-muted:#a07060;--border:rgba(0,0,0,0.07);}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;}
+  nav{background:var(--bg-card);border-bottom:0.5px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+  .nav-back{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-secondary);cursor:pointer;}.nav-back:hover{color:var(--orange-400);}.nav-back svg{width:16px;height:16px;}
+  .nav-logo{font-size:15px;font-weight:600;display:flex;align-items:center;gap:7px;}
+  .nav-logo-dot{width:8px;height:8px;border-radius:50%;background:var(--orange-200);}
+  .nav-spacer{width:80px;}
+  .hero{background:linear-gradient(135deg,#3A0E04 0%,#8A3010 100%);padding:24px 24px 20px;}
+  .hero-inner{max-width:640px;margin:0 auto;}
+  .hero-type{font-size:11px;font-weight:600;color:#FFCCA8;background:rgba(255,255,255,0.1);padding:3px 10px;border-radius:99px;display:inline-block;margin-bottom:10px;}
+  .hero-combo{font-size:28px;margin-bottom:8px;}
+  .hero-title{font-size:22px;font-weight:700;color:#fff;margin-bottom:6px;line-height:1.4;}
+  .hero-meta{font-size:12px;color:rgba(255,255,255,0.7);}
+  .content{max-width:640px;margin:0 auto;padding:20px 24px 40px;}
+  .section{margin-bottom:16px;background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .body-text{font-size:14px;color:var(--text-secondary);line-height:1.9;white-space:pre-wrap;}
+  .tag{font-size:11px;color:var(--orange-600);background:var(--orange-50);border:0.5px solid var(--orange-100);padding:3px 10px;border-radius:99px;display:inline-block;margin:4px 4px 0 0;}
+  .actions{display:flex;gap:8px;margin-top:16px;}
+  .like-btn{display:flex;align-items:center;gap:5px;font-size:13px;background:var(--bg-card);border:0.5px solid var(--border);border-radius:99px;padding:7px 16px;cursor:pointer;font-family:inherit;transition:all 0.15s;}
+  .like-btn:hover{border-color:var(--orange-200);}
+  .like-btn.liked{background:var(--orange-50);border-color:var(--orange-200);color:var(--orange-400);}
+  .comment-title{font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:12px;}
+  .comment-item{padding:10px 0;border-bottom:0.5px solid var(--border);}
+  .comment-item:last-child{border-bottom:none;}
+  .comment-nick{font-size:12px;font-weight:600;color:var(--text-secondary);}
+  .comment-time{font-size:11px;color:var(--text-muted);margin-left:auto;}
+  .comment-header{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+  .comment-body{font-size:13px;color:var(--text-secondary);line-height:1.6;}
+  .comment-form{margin-top:12px;display:flex;flex-direction:column;gap:8px;}
+  .comment-input{width:100%;background:var(--bg);border:0.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text-primary);font-family:inherit;resize:none;height:72px;outline:none;transition:border-color 0.15s;}
+  .comment-input:focus{border-color:var(--orange-200);}
+  .comment-input::placeholder{color:var(--text-muted);}
+  .comment-submit{align-self:flex-end;background:var(--orange-200);color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+  .empty{text-align:center;padding:20px;color:var(--text-muted);font-size:13px;}
+  #page-loading{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:100;}
+  #page-loading.hide{display:none;}
+  @media(max-width:480px){nav{padding:12px 16px;}.hero{padding:20px 16px;}.content{padding:16px 16px 32px;}}
+</style>
+</head>
+<body>
+
+<div id="page-loading">
+  <div style="font-size:13px;color:var(--text-muted);">불러오는 중...</div>
+</div>
+
+<nav>
+  <a class="nav-back" onclick="goBack()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>
+    뒤로가기
+  </a>
+  <div class="nav-logo"><div class="nav-logo-dot"></div>술향기마을</div>
+  <div class="nav-spacer"></div>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-type" id="p-type">—</div>
+    <div class="hero-combo" id="p-combo" style="display:none;"></div>
+    <div class="hero-title" id="p-title">—</div>
+    <div class="hero-meta" id="p-meta"></div>
+  </div>
+</div>
+
+<div class="content">
+  <div class="section">
+    <div class="body-text" id="p-body"></div>
+    <div style="margin-top:12px;" id="p-tags"></div>
+    <div class="actions">
+      <button class="like-btn" id="like-btn" onclick="toggleLike()">👍 <span id="like-count">0</span></button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="comment-title">댓글 <span id="comment-count"></span></div>
+    <div id="comments-list"><div class="empty">불러오는 중...</div></div>
+    <div id="comment-form-wrap">
+      <div class="comment-form">
+        <textarea class="comment-input" id="comment-input" placeholder="댓글을 작성해주세요..."></textarea>
+        <button class="comment-submit" onclick="submitComment()">댓글 등록</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/core/supabase.js"></script>
+<script>
+  const params = new URLSearchParams(location.search);
+  const postId = params.get('id');
+  let currentUser = null;
+  let postData = null;
+  let isLiked = false;
+  let isTogglingLike = false; // 중복 클릭 방지
+
+  // XSS 방지
+  function esc(str) {
+    const d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+  }
+
+  const typeLabels = { pairing: '페어링 추천', recipe: '안주 레시피' };
+
+  function goBack() {
+    const from = params.get('from');
+    location.href = from || 'restaurant.html';
+  }
+
+  function timeAgo(dateStr) {
+    const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+    if (diff < 60) return '방금 전';
+    if (diff < 3600) return Math.floor(diff/60) + '분 전';
+    if (diff < 86400) return Math.floor(diff/3600) + '시간 전';
+    return Math.floor(diff/86400) + '일 전';
+  }
+
+  async function init() {
+    if (!postId) { location.href = 'restaurant.html'; return; }
+
+    const { data: { session } } = await soolClient.auth.getSession();
+    if (session) {
+      const { data: user } = await soolClient.from('users').select('id, nickname').eq('id', session.user.id).single();
+      currentUser = user;
+    } else {
+      document.getElementById('comment-form-wrap').innerHTML = `<div class="empty"><a href="auth.html" style="color:var(--orange-400);text-decoration:none;">로그인</a> 후 댓글을 작성할 수 있어요</div>`;
+    }
+
+    await loadRealPost();
+    document.getElementById('page-loading').classList.add('hide');
+  }
+
+  async function loadRealPost() {
+    const { data, error } = await soolClient.from('pairing_posts').select('*, users(nickname)').eq('id', postId).single();
+    if (error) { console.error('게시글 로드 실패:', error); }
+    if (!data) { location.href = 'restaurant.html'; return; }
+    postData = data;
+
+    // 조회수 증가
+    await soolClient.from('pairing_posts').update({ view_count: (data.view_count || 0) + 1 }).eq('id', postId);
+
+    document.title = data.title + ' — 술향기마을';
+    document.getElementById('p-type').textContent = typeLabels[data.type] || '마리아주';
+    document.getElementById('p-title').textContent = data.title;
+    document.getElementById('p-meta').textContent = '@' + (data.users?.nickname || '관리자');
+    document.getElementById('p-body').textContent = data.content; // textContent 사용으로 XSS 방지
+    document.getElementById('like-count').textContent = data.like_count || 0;
+
+    if (data.type === 'pairing') {
+      const combo = document.getElementById('p-combo');
+      combo.style.display = 'block';
+      combo.textContent = `${data.emoji_drink || '🥃'} + ${data.emoji_food || '🍽️'}`;
+    }
+    if (data.category) {
+      document.getElementById('p-tags').innerHTML = `<span class="tag">${esc(data.category)}</span>`;
+    }
+
+    // 좋아요 상태 확인
+    if (currentUser) {
+      const { data: liked } = await soolClient
+        .from('pairing_likes')
+        .select('id')
+        .eq('post_id', postId)
+        .eq('user_id', currentUser.id)
+        .single();
+      if (liked) {
+        isLiked = true;
+        document.getElementById('like-btn').classList.add('liked');
+      }
+    }
+
+    await loadComments();
+  }
+
+  async function toggleLike() {
+    if (!currentUser || !postId) return;
+    if (isTogglingLike) return; // 중복 클릭 방지
+    isTogglingLike = true;
+    const btn = document.getElementById('like-btn');
+    const countEl = document.getElementById('like-count');
+    const count = parseInt(countEl.textContent);
+
+    if (isLiked) {
+      await soolClient.from('pairing_likes').delete().eq('post_id', postId).eq('user_id', currentUser.id);
+      await soolClient.from('pairing_posts').update({ like_count: count - 1 }).eq('id', postId);
+      countEl.textContent = count - 1;
+      btn.classList.remove('liked');
+      isLiked = false;
+    } else {
+      await soolClient.from('pairing_likes').insert({ post_id: postId, user_id: currentUser.id });
+      await soolClient.from('pairing_posts').update({ like_count: count + 1 }).eq('id', postId);
+      countEl.textContent = count + 1;
+      btn.classList.add('liked');
+      isLiked = true;
+    }
+    isTogglingLike = false; // 완료 후 해제
+  }
+
+  async function loadComments() {
+    if (!postId) return;
+    const { data } = await soolClient.from('pairing_comments')
+      .select('*, users(nickname)').eq('post_id', postId).order('created_at', { ascending: true });
+
+    const list = document.getElementById('comments-list');
+    document.getElementById('comment-count').textContent = (data?.length || 0) + '개';
+
+    if (!data || data.length === 0) {
+      list.innerHTML = '<div class="empty">아직 댓글이 없어요. 첫 댓글을 남겨보세요!</div>';
+      return;
+    }
+    list.innerHTML = data.map(c => `
+      <div class="comment-item">
+        <div class="comment-header">
+          <span class="comment-nick">@${esc(c.users?.nickname || '익명')}</span>
+          <span class="comment-time">${timeAgo(c.created_at)}</span>
+        </div>
+        <div class="comment-body">${esc(c.content)}</div>
+      </div>
+    `).join('');
+  }
+
+  async function submitComment() {
+    if (!currentUser || !postId) return;
+    const content = document.getElementById('comment-input').value.trim();
+    if (!content) return;
+
+    const { error: commentError } = await soolClient.from('pairing_comments').insert({ post_id: postId, user_id: currentUser.id, content });
+    if (commentError) { console.error('댓글 등록 실패:', commentError); return; }
+    await soolClient.from('pairing_posts').update({ comment_count: (postData?.comment_count || 0) + 1 }).eq('id', postId);
+    if (postData) postData.comment_count = (postData.comment_count || 0) + 1;
+    document.getElementById('comment-input').value = '';
+    loadComments();
+  }
+
+  init();
+</script>
+</body>
+</html>

@@ -90,6 +90,72 @@ Unity 전환 이후 간단한 도트 수준의 존재 표시만 검토.
 
 ---
 
+## [v1.6.9] — 2026-07-06 · 마리아주 & 소버 카페 구현
+
+### Supabase DB 변경
+
+#### pairing_posts 테이블 신규 생성 (마리아주)
+- id / user_id (FK → users, null=관리자) / type (pairing·recipe)
+- category / title / content / emoji_drink / emoji_food / tag
+- view_count / like_count / comment_count / created_at
+
+#### pairing_likes / pairing_comments 테이블 신규 생성
+- 양조장 좋아요·댓글 구조와 동일 (post_id, user_id, UNIQUE 제약)
+
+#### cafe_nolo_drinks 테이블 신규 생성 (소버 카페)
+- id / user_id (FK → users, null=관리자) / name / category (무알코올·저알코올)
+- description / avg_rating / review_count / created_at
+
+#### cafe_nolo_reviews 테이블 신규 생성
+- id / nolo_drink_id (FK) / user_id (FK) / rating(1~5) / content / created_at
+
+#### challenges / challenge_participants 테이블 신규 생성
+- challenges: title / description / emoji / duration_days
+- challenge_participants: challenge_id / user_id / joined_at, UNIQUE(challenge_id, user_id)
+- 진행률(%)은 joined_at 기준 실시간 계산
+
+#### cafe_daily_picks 테이블 신규 생성
+- id / user_id (FK → users, null=관리자 공식) / title / description / emoji / tag / pick_date
+
+#### 샘플 데이터 삽입
+- 마리아주: 페어링 추천 6개, 안주 레시피 3개
+- 소버 카페: 무알코올 음료 3개, 절주 챌린지 2개, 오늘의 한 잔 1개
+
+### 신규 파일
+
+#### pairing-detail.html
+- 마리아주 페어링·레시피 상세 페이지, 좋아요·댓글 (양조장 패턴과 동일)
+
+#### cafe-detail.html
+- 소버 카페 상세 페이지, `type` 파라미터로 무알코올 음료 상세(별점 리뷰) /
+  오늘의 한 잔 상세를 한 파일에서 분기 처리
+
+### 변경 파일
+
+#### restaurant.html (마리아주)
+- 페어링 추천·안주 레시피 더미 데이터 → pairing_posts 실데이터 연동
+- "+ 글쓰기"로 유저가 직접 페어링/레시피 등록 가능
+- 술로 찾기 탭 카테고리 필터 실제 동작하도록 구현
+- 마을로 돌아가기 → index.html 고정 (기존 history.back() 조건부 로직 버그 수정)
+
+#### cafe.html (소버 카페)
+- 무알코올 리뷰 탭: cafe_nolo_drinks 실데이터 연동, "+ 음료 등록"으로 유저 등록 가능
+- 절주 챌린지 탭: "참여하기" 시 실제 DB 기록, 참여자 수·진행률 실데이터 계산
+- 오늘의 한 잔 탭: 관리자 공식 추천 + 유저 피드 함께 표시, "+ 오늘 마시는 술 올리기" 추가
+- 목록 전용 구조로 재편, 카드 클릭 시 cafe-detail.html로 이동 (다른 건물과 통일)
+- 모달 방식 리뷰 작성 → 상세페이지 방식으로 구조 변경
+
+#### admin.html
+- 🍽️ 마리아주 탭 신규 추가 — 게시글 목록, 삭제, 상세 이동
+- 🌿 소버카페 탭 신규 추가 — 무알코올 음료 / 오늘의 한 잔 / 절주 챌린지 참여 현황 3개 섹션
+
+### 기술 결정
+- 유저 기여 콘텐츠(user_id 있음)는 관리자 삭제만 가능, 수정 불가 원칙 그대로 적용
+- 마리아주는 페어링·레시피를 pairing_posts 단일 테이블 + type 컬럼으로 통합 (양조장 패턴과 통일)
+- 소버 카페 리뷰 시스템은 술 바(drinks·reviews)와 동일 구조 재사용
+
+---
+
 ## [v1.6.8] — 2026-07-03 · 영상관 구현
 
 ### Supabase DB 변경

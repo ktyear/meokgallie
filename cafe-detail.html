@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>소버 카페 — 술향기마을</title>
+<style>
+  :root{--mint-50:#EEFAF6;--mint-100:#B8EDD8;--mint-200:#2EC4B6;--mint-400:#22A89A;--mint-600:#108878;--bg:#EEF8F6;--bg-card:#fff;--text-primary:#041810;--text-secondary:#1a5848;--text-muted:#609080;--border:rgba(0,0,0,0.07);}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;}
+  nav{background:var(--bg-card);border-bottom:0.5px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+  .nav-back{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-secondary);cursor:pointer;}.nav-back:hover{color:var(--mint-400);}.nav-back svg{width:16px;height:16px;}
+  .nav-logo{font-size:15px;font-weight:600;display:flex;align-items:center;gap:7px;}
+  .nav-logo-dot{width:8px;height:8px;border-radius:50%;background:var(--mint-200);}
+  .nav-spacer{width:80px;}
+  .hero{background:linear-gradient(135deg,#043A30 0%,#0A7A68 100%);padding:24px 24px 20px;}
+  .hero-inner{max-width:640px;margin:0 auto;}
+  .hero-type{font-size:11px;font-weight:600;color:#B8EDD8;background:rgba(255,255,255,0.1);padding:3px 10px;border-radius:99px;display:inline-block;margin-bottom:10px;}
+  .hero-emoji{font-size:32px;margin-bottom:6px;}
+  .hero-title{font-size:22px;font-weight:700;color:#fff;margin-bottom:6px;line-height:1.4;}
+  .hero-meta{font-size:12px;color:rgba(255,255,255,0.7);}
+  .content{max-width:640px;margin:0 auto;padding:20px 24px 40px;}
+  .section{margin-bottom:16px;background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:16px 18px;}
+  .body-text{font-size:14px;color:var(--text-secondary);line-height:1.9;white-space:pre-wrap;}
+  .tag{font-size:11px;color:var(--mint-600);background:var(--mint-50);border:0.5px solid var(--mint-100);padding:3px 10px;border-radius:99px;display:inline-block;margin:4px 4px 0 0;}
+  .rating-summary{font-size:13px;color:var(--mint-400);margin-top:8px;}
+  .star-row{display:flex;gap:4px;font-size:26px;margin-bottom:14px;cursor:pointer;}
+  .star{color:var(--border);}.star.filled{color:var(--mint-200);}
+  .form-textarea{width:100%;border:0.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;font-family:inherit;color:var(--text-primary);outline:none;resize:none;height:70px;}
+  .form-textarea:focus{border-color:var(--mint-200);}
+  .submit-btn{background:var(--mint-200);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:10px;}
+  .comment-title{font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:12px;}
+  .review-item{padding:10px 0;border-bottom:0.5px solid var(--border);}
+  .review-item:last-child{border-bottom:none;}
+  .review-head{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);margin-bottom:4px;}
+  .review-body{font-size:13px;color:var(--text-secondary);line-height:1.6;}
+  .empty{text-align:center;padding:20px;color:var(--text-muted);font-size:13px;}
+  .msg{font-size:12px;color:var(--mint-600);margin-bottom:8px;min-height:16px;}
+  #page-loading{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:100;}
+  #page-loading.hide{display:none;}
+  @media(max-width:480px){nav{padding:12px 16px;}.hero{padding:20px 16px;}.content{padding:16px 16px 32px;}}
+</style>
+</head>
+<body>
+
+<div id="page-loading"><div style="font-size:13px;color:var(--text-muted);">불러오는 중...</div></div>
+
+<nav>
+  <a class="nav-back" onclick="goBack()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>
+    뒤로가기
+  </a>
+  <div class="nav-logo"><div class="nav-logo-dot"></div>술향기마을</div>
+  <div class="nav-spacer"></div>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-type" id="p-type">—</div>
+    <div class="hero-emoji" id="p-emoji"></div>
+    <div class="hero-title" id="p-title">—</div>
+    <div class="hero-meta" id="p-meta"></div>
+  </div>
+</div>
+
+<div class="content">
+  <div class="section">
+    <div class="body-text" id="p-body"></div>
+    <div id="p-tags"></div>
+    <div class="rating-summary" id="p-rating" style="display:none;"></div>
+  </div>
+
+  <!-- 무알코올 음료일 때만 표시: 리뷰 작성 -->
+  <div class="section" id="review-write-section" style="display:none;">
+    <div class="comment-title">별점 리뷰 남기기</div>
+    <div class="star-row" id="star-row">
+      <span class="star" data-v="1">★</span><span class="star" data-v="2">★</span><span class="star" data-v="3">★</span><span class="star" data-v="4">★</span><span class="star" data-v="5">★</span>
+    </div>
+    <div class="msg" id="review-msg"></div>
+    <textarea class="form-textarea" id="review-content" placeholder="어떤 맛이었는지 남겨주세요"></textarea>
+    <button class="submit-btn" onclick="submitReview()">리뷰 등록</button>
+  </div>
+
+  <div class="section" id="reviews-section" style="display:none;">
+    <div class="comment-title">리뷰 <span id="review-count"></span></div>
+    <div id="reviews-list"><div class="empty">불러오는 중...</div></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/core/supabase.js"></script>
+<script>
+  const params = new URLSearchParams(location.search);
+  const itemType = params.get('type');   // 'nolo' or 'pick'
+  const itemId = params.get('id');
+  let currentUser = null;
+  let writeStar = 0;
+
+  function esc(str) {
+    const d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+  }
+
+  function goBack() {
+    const from = params.get('from');
+    location.href = from || 'cafe.html';
+  }
+
+  function timeAgo(dateStr) {
+    const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+    if (diff < 60) return '방금 전';
+    if (diff < 3600) return Math.floor(diff/60) + '분 전';
+    if (diff < 86400) return Math.floor(diff/3600) + '시간 전';
+    return Math.floor(diff/86400) + '일 전';
+  }
+
+  async function init() {
+    if (!itemId || !itemType) { location.href = 'cafe.html'; return; }
+
+    const { data: { session } } = await soolClient.auth.getSession();
+    if (session) {
+      const { data: user } = await soolClient.from('users').select('id, nickname').eq('id', session.user.id).single();
+      currentUser = user;
+    }
+
+    if (itemType === 'nolo') { await loadNoloDetail(); } else { await loadPickDetail(); }
+    document.getElementById('page-loading').classList.add('hide');
+  }
+
+  // ── 무알코올 음료 상세 ──────────────────────
+  async function loadNoloDetail() {
+    const { data, error } = await soolClient.from('cafe_nolo_drinks').select('*, users(nickname)').eq('id', itemId).single();
+    if (error || !data) { location.href = 'cafe.html'; return; }
+
+    document.title = data.name + ' — 술향기마을';
+    document.getElementById('p-type').textContent = data.category;
+    document.getElementById('p-emoji').textContent = data.category === '무알코올' ? '🫧' : '🍵';
+    document.getElementById('p-title').textContent = data.name;
+    document.getElementById('p-meta').textContent = data.user_id ? '@' + (data.users?.nickname || '유저') + ' 등록' : '공식 등록';
+    document.getElementById('p-body').textContent = data.description || '';
+    document.getElementById('p-tags').innerHTML = `<span class="tag">${esc(data.category)}</span>`;
+
+    const ratingEl = document.getElementById('p-rating');
+    ratingEl.style.display = 'block';
+    ratingEl.textContent = data.avg_rating > 0 ? `★ ${data.avg_rating} · 리뷰 ${data.review_count || 0}개` : '아직 평점 없어요';
+
+    document.getElementById('reviews-section').style.display = 'block';
+    if (currentUser) {
+      document.getElementById('review-write-section').style.display = 'block';
+    } else {
+      document.getElementById('review-write-section').style.display = 'block';
+      document.getElementById('review-write-section').innerHTML = `<div class="empty"><a href="auth.html" style="color:var(--mint-400);text-decoration:none;">로그인</a> 후 리뷰를 작성할 수 있어요</div>`;
+    }
+
+    document.getElementById('star-row')?.addEventListener('click', (e) => {
+      const star = e.target.closest('.star');
+      if (!star) return;
+      setStar(parseInt(star.dataset.v));
+    });
+
+    await loadReviews();
+  }
+
+  function setStar(v) {
+    writeStar = v;
+    document.querySelectorAll('#star-row .star').forEach(s => {
+      s.classList.toggle('filled', parseInt(s.dataset.v) <= v);
+    });
+  }
+
+  async function loadReviews() {
+    const { data } = await soolClient.from('cafe_nolo_reviews')
+      .select('*, users(nickname)').eq('nolo_drink_id', itemId).order('created_at', { ascending: false });
+
+    const list = document.getElementById('reviews-list');
+    document.getElementById('review-count').textContent = (data?.length || 0) + '개';
+    if (!data || data.length === 0) { list.innerHTML = '<div class="empty">아직 리뷰가 없어요. 첫 리뷰를 남겨보세요!</div>'; return; }
+
+    list.innerHTML = data.map(r => `
+      <div class="review-item">
+        <div class="review-head">
+          <span>${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
+          <span>@${esc(r.users?.nickname || '익명')}</span>
+          <span>${timeAgo(r.created_at)}</span>
+        </div>
+        <div class="review-body">${esc(r.content || '')}</div>
+      </div>
+    `).join('');
+  }
+
+  async function submitReview() {
+    if (!currentUser) return;
+    const msg = document.getElementById('review-msg');
+    if (writeStar === 0) { msg.textContent = '별점을 선택해주세요'; return; }
+    const content = document.getElementById('review-content').value.trim();
+
+    const { error } = await soolClient.from('cafe_nolo_reviews').insert({
+      nolo_drink_id: itemId, user_id: currentUser.id, rating: writeStar, content
+    });
+    if (error) { console.error('리뷰 등록 실패:', error); msg.textContent = '등록에 실패했어요'; return; }
+
+    const { data: reviews } = await soolClient.from('cafe_nolo_reviews').select('rating').eq('nolo_drink_id', itemId);
+    let avg = 0;
+    if (reviews && reviews.length > 0) {
+      avg = reviews.reduce((s, r) => s + r.rating, 0) / reviews.length;
+      await soolClient.from('cafe_nolo_drinks').update({ avg_rating: Math.round(avg * 100) / 100, review_count: reviews.length }).eq('id', itemId);
+    }
+    document.getElementById('p-rating').textContent = `★ ${Math.round(avg * 100) / 100} · 리뷰 ${reviews.length}개`;
+
+    setStar(0);
+    document.getElementById('review-content').value = '';
+    msg.textContent = '';
+    await loadReviews();
+  }
+
+  // ── 오늘의 한 잔 상세 ──────────────────────
+  async function loadPickDetail() {
+    const { data, error } = await soolClient.from('cafe_daily_picks').select('*, users(nickname)').eq('id', itemId).single();
+    if (error || !data) { location.href = 'cafe.html'; return; }
+
+    document.title = data.title + ' — 술향기마을';
+    document.getElementById('p-type').textContent = data.user_id ? '유저 추천' : '오늘의 한 잔 · 공식';
+    document.getElementById('p-emoji').textContent = data.emoji || '✨';
+    document.getElementById('p-title').textContent = data.title;
+    document.getElementById('p-meta').textContent = data.user_id ? '@' + (data.users?.nickname || '유저') : '술향기마을 공식';
+    document.getElementById('p-body').textContent = data.description || '';
+    if (data.tag) { document.getElementById('p-tags').innerHTML = `<span class="tag">${esc(data.tag)}</span>`; }
+  }
+
+  init();
+</script>
+</body>
+</html>

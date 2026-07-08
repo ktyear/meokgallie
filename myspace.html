@@ -19,104 +19,34 @@
     --text-muted: #a09070;
     --border: rgba(0,0,0,0.07);
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', sans-serif;
-    background: var(--bg);
-    color: var(--text-primary);
-    min-height: 100vh;
-  }
-
-  /* 네비 */
-  nav {
-    background: var(--bg-card);
-    border-bottom: 0.5px solid var(--border);
-    padding: 14px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky; top: 0; z-index: 10;
-  }
-  .nav-back {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 13px; color: var(--text-secondary);
-    text-decoration: none; cursor: pointer;
-  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; }
+  nav { background: var(--bg-card); border-bottom: 0.5px solid var(--border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+  .nav-back { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary); text-decoration: none; cursor: pointer; }
   .nav-back:hover { color: var(--gold-400); }
   .nav-back svg { width: 16px; height: 16px; }
-  .nav-logo {
-    font-size: 15px; font-weight: 600; color: var(--text-primary);
-    display: flex; align-items: center; gap: 7px;
-  }
+  .nav-logo { font-size: 15px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 7px; }
   .nav-logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold-200); }
   .nav-spacer { width: 80px; }
-
-  /* 히어로 */
-  .hero {
-    background: linear-gradient(135deg, #FDF8EE 0%, #F5E6B0 100%);
-    border-bottom: 0.5px solid var(--border);
-    padding: 28px 24px 24px;
-  }
+  .hero { background: linear-gradient(135deg, #FDF8EE 0%, #F5E6B0 100%); border-bottom: 0.5px solid var(--border); padding: 28px 24px 24px; }
   .hero-inner { max-width: 640px; margin: 0 auto; display: flex; gap: 20px; align-items: flex-start; }
-  .house-avatar {
-    width: 72px; height: 72px; border-radius: 14px;
-    background: var(--gold-200); border: 2px solid var(--gold-400);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 32px; flex-shrink: 0;
-  }
-  .hero-tag {
-    display: inline-block; font-size: 11px; font-weight: 600;
-    color: var(--gold-600); background: var(--gold-100);
-    padding: 3px 10px; border-radius: 99px; margin-bottom: 8px;
-  }
+  .house-avatar { width: 72px; height: 72px; border-radius: 14px; background: var(--gold-200); border: 2px solid var(--gold-400); display: flex; align-items: center; justify-content: center; font-size: 32px; flex-shrink: 0; }
+  .hero-tag { display: inline-block; font-size: 11px; font-weight: 600; color: var(--gold-600); background: var(--gold-100); padding: 3px 10px; border-radius: 99px; margin-bottom: 8px; }
   .hero-title { font-size: 20px; font-weight: 700; color: var(--gold-900); margin-bottom: 4px; }
-  .hero-sub { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px; }
-
-  /* 성장 단계 바 */
-  .stage-bar { display: flex; align-items: center; gap: 10px; }
-  .stage-label { font-size: 12px; font-weight: 600; color: var(--gold-600); white-space: nowrap; }
-  .stage-track { flex: 1; height: 6px; background: var(--gold-100); border-radius: 99px; overflow: hidden; }
-  .stage-fill { height: 100%; background: var(--gold-200); border-radius: 99px; transition: width 0.6s; }
-  .stage-next { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
-
-  /* 탭 */
-  .tabs {
-    background: var(--bg-card);
-    border-bottom: 0.5px solid var(--border);
-    display: flex; overflow-x: auto;
-    max-width: 100%;
-    justify-content:center;
-  }
+  .hero-sub { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 4px; }
+  .hero-note { font-size: 11px; color: var(--text-muted); }
+  .tabs { background: var(--bg-card); border-bottom: 0.5px solid var(--border); display: flex; overflow-x: auto; max-width: 100%; justify-content:center; }
   .tabs::-webkit-scrollbar { display: none; }
-  .tab {
-    padding: 12px 18px; font-size: 13px; font-weight: 500;
-    color: var(--text-muted); cursor: pointer; white-space: nowrap;
-    border-bottom: 2px solid transparent; transition: all 0.15s;
-  }
+  .tab { padding: 12px 18px; font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.15s; }
   .tab.active { color: var(--gold-600); border-bottom-color: var(--gold-400); }
   .tab:hover { color: var(--text-secondary); }
-
-  /* 탭 콘텐츠 */
   .tab-content { display: none; }
   .tab-content.active { display: block; }
-
-  /* 섹션 공통 */
   .section { padding: 20px 24px; max-width: 640px; margin: 0 auto; }
-  .section-title {
-    font-size: 11px; font-weight: 600; color: var(--text-muted);
-    letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 14px;
-  }
-  .section-divider { border: none; border-top: 0.5px solid var(--border); margin: 4px 0; }
-
-  /* 리뷰 카드 */
+  .section-title { font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 14px; display:flex; justify-content:space-between; align-items:center; }
+  .add-btn { font-size: 12px; font-weight: 600; color: var(--gold-600); cursor: pointer; background: none; border: none; font-family: inherit; text-transform: none; letter-spacing: 0; }
   .review-list { display: flex; flex-direction: column; gap: 10px; }
-  .review-card {
-    background: var(--bg-card); border: 0.5px solid var(--border);
-    border-radius: 12px; padding: 14px 16px; cursor: pointer;
-    transition: border-color 0.15s;
-  }
+  .review-card { background: var(--bg-card); border: 0.5px solid var(--border); border-radius: 12px; padding: 14px 16px; cursor: pointer; transition: border-color 0.15s; }
   .review-card:hover { border-color: var(--gold-400); }
   .review-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
   .review-emoji { font-size: 22px; }
@@ -124,133 +54,32 @@
   .review-rating { color: var(--gold-400); font-size: 13px; }
   .review-body { font-size: 13px; color: var(--text-secondary); line-height: 1.55; margin-bottom: 8px; }
   .review-meta { display: flex; align-items: center; gap: 10px; }
-  .review-tag {
-    font-size: 11px; color: var(--text-muted);
-    background: var(--bg); border: 0.5px solid var(--border);
-    padding: 2px 8px; border-radius: 99px;
-  }
+  .review-tag { font-size: 11px; color: var(--text-muted); background: var(--bg); border: 0.5px solid var(--border); padding: 2px 8px; border-radius: 99px; }
   .review-date { font-size: 11px; color: var(--text-muted); margin-left: auto; }
-
-  /* 알림 */
-  .notif-list { display: flex; flex-direction: column; gap: 8px; }
-  .notif-item {
-    display: flex; align-items: flex-start; gap: 12px;
-    background: var(--bg-card); border: 0.5px solid var(--border);
-    border-radius: 10px; padding: 12px 14px;
-  }
-  .notif-item.unread { border-left: 3px solid var(--gold-400); }
-  .notif-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
-  .notif-body { flex: 1; }
-  .notif-text { font-size: 13px; color: var(--text-primary); line-height: 1.5; margin-bottom: 3px; }
-  .notif-text strong { color: var(--gold-600); }
-  .notif-time { font-size: 11px; color: var(--text-muted); }
-  .notif-badge {
-    font-size: 10px; font-weight: 600; color: var(--bg-card);
-    background: var(--gold-400); padding: 2px 7px; border-radius: 99px;
-    align-self: center; flex-shrink: 0;
-  }
-
-  /* 즐겨찾기 */
   .bookmark-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
-  .bookmark-card {
-    background: var(--bg-card); border: 0.5px solid var(--border);
-    border-radius: 10px; padding: 12px; cursor: pointer;
-    transition: border-color 0.15s;
-  }
+  .bookmark-card { background: var(--bg-card); border: 0.5px solid var(--border); border-radius: 10px; padding: 12px; cursor: pointer; transition: border-color 0.15s; position:relative; }
   .bookmark-card:hover { border-color: var(--gold-400); }
   .bookmark-icon { font-size: 20px; margin-bottom: 6px; }
   .bookmark-title { font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 2px; }
   .bookmark-sub { font-size: 11px; color: var(--text-muted); }
-  .bookmark-type {
-    display: inline-block; font-size: 10px; margin-top: 6px;
-    color: var(--text-muted); background: var(--bg);
-    border: 0.5px solid var(--border); padding: 1px 7px; border-radius: 99px;
-  }
-
-  /* 친구 피드 */
-  .feed-list { display: flex; flex-direction: column; gap: 8px; }
-  .feed-item {
-    display: flex; align-items: flex-start; gap: 12px;
-    background: var(--bg-card); border: 0.5px solid var(--border);
-    border-radius: 10px; padding: 12px 14px;
-  }
-  .feed-avatar {
-    width: 34px; height: 34px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px; flex-shrink: 0; border: 1px solid var(--border);
-  }
-  .feed-body { flex: 1; }
-  .feed-text { font-size: 13px; color: var(--text-primary); line-height: 1.5; margin-bottom: 3px; }
-  .feed-text strong { color: var(--gold-600); }
-  .feed-time { font-size: 11px; color: var(--text-muted); }
-
-  /* 쇼핑 */
-  .order-list { display: flex; flex-direction: column; gap: 10px; }
-  .order-card {
-    background: var(--bg-card); border: 0.5px solid var(--border);
-    border-radius: 12px; padding: 14px 16px;
-  }
-  .order-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-  .order-date { font-size: 12px; color: var(--text-muted); }
-  .order-status {
-    font-size: 11px; font-weight: 600; padding: 2px 8px;
-    border-radius: 99px;
-  }
-  .status-done { background: #E8F5E9; color: #2E7D32; }
-  .status-ready { background: #FFF3E0; color: #E65100; }
-  .order-item { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
-  .order-emoji { font-size: 22px; }
-  .order-name { font-size: 14px; font-weight: 500; color: var(--text-primary); flex: 1; }
-  .order-price { font-size: 13px; font-weight: 600; color: var(--gold-600); }
-  .order-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding-top: 8px; border-top: 0.5px solid var(--border); }
-  .order-total { font-size: 13px; color: var(--text-secondary); }
-  .reorder-btn {
-    font-size: 12px; color: var(--gold-600);
-    background: var(--gold-50); border: 0.5px solid var(--gold-100);
-    border-radius: 6px; padding: 4px 10px; cursor: pointer;
-  }
-  .reorder-btn:hover { background: var(--gold-100); }
-
-  /* 장바구니 */
-  .cart-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
-  .cart-item {
-    display: flex; align-items: center; gap: 12px;
-    background: var(--bg-card); border: 0.5px solid var(--border);
-    border-radius: 10px; padding: 12px 14px;
-  }
-  .cart-emoji { font-size: 24px; }
-  .cart-body { flex: 1; }
-  .cart-name { font-size: 14px; font-weight: 500; color: var(--text-primary); }
-  .cart-price { font-size: 13px; color: var(--text-muted); }
-  .cart-remove { font-size: 18px; color: var(--text-muted); cursor: pointer; padding: 4px; }
-  .cart-total {
-    background: var(--bg-card); border: 0.5px solid var(--border);
-    border-radius: 10px; padding: 14px 16px;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .cart-total-label { font-size: 14px; font-weight: 600; color: var(--text-primary); }
-  .cart-total-price { font-size: 16px; font-weight: 700; color: var(--gold-600); }
-  .btn-checkout {
-    width: 100%; background: var(--gold-200); color: var(--gold-900);
-    border: none; border-radius: 10px; padding: 13px;
-    font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 10px;
-    transition: background 0.15s;
-  }
-  .btn-checkout:hover { background: var(--gold-400); }
-
-  /* 빈 상태 */
+  .bookmark-type { display: inline-block; font-size: 10px; margin-top: 6px; color: var(--text-muted); background: var(--bg); border: 0.5px solid var(--border); padding: 1px 7px; border-radius: 99px; }
+  .bookmark-remove { position:absolute; top:8px; right:8px; font-size:14px; color:var(--text-muted); cursor:pointer; }
   .empty { text-align: center; padding: 40px 20px; color: var(--text-muted); }
   .empty-icon { font-size: 36px; margin-bottom: 10px; }
   .empty-text { font-size: 14px; }
-
-  /* 모바일 */
-  @media (max-width: 480px) {
-    nav { padding: 12px 16px; }
-    .hero { padding: 20px 16px 20px; }
-    .hero-inner { flex-direction: column; gap: 12px; }
-    .section { padding: 16px 16px; }
-    .bookmark-grid { grid-template-columns: 1fr; }
-  }
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:none;align-items:flex-end;justify-content:center;z-index:50;}
+  .modal-overlay.show{display:flex;}
+  .modal{background:#fff;border-radius:16px 16px 0 0;padding:20px 20px 24px;width:100%;max-width:640px;max-height:85vh;overflow-y:auto;}
+  .modal-title{font-size:16px;font-weight:700;margin-bottom:16px;}
+  .form-row{margin-bottom:12px;}
+  .form-label{font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px;display:block;}
+  .form-select,.form-input{width:100%;border:0.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;font-family:inherit;color:var(--text-primary);outline:none;}
+  .form-select:focus,.form-input:focus{border-color:var(--gold-400);}
+  .modal-actions{display:flex;gap:8px;margin-top:16px;}
+  .btn-cancel{flex:1;padding:12px;border-radius:8px;border:0.5px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text-secondary);}
+  .btn-submit{flex:2;padding:12px;border-radius:8px;border:none;background:var(--gold-200);color:var(--gold-900);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+  .modal-msg{font-size:12px;color:var(--gold-600);margin-bottom:8px;min-height:16px;}
+  @media (max-width: 480px) { nav { padding: 12px 16px; } .hero { padding: 20px 16px 20px; } .hero-inner { flex-direction: column; gap: 12px; } .section { padding: 16px 16px; } .bookmark-grid { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -264,27 +93,21 @@
   <div class="nav-spacer"></div>
 </nav>
 
-<!-- 히어로 -->
 <div class="hero">
   <div class="hero-inner">
     <div class="house-avatar">🏠</div>
     <div style="flex:1;">
       <div class="hero-tag">내 공간 · 마이하우스</div>
-      <h1 class="hero-title">술향기마을 주민 홍길동</h1>
-      <p class="hero-sub">Lv.8 소믈리에 견습 · 리뷰 23개 · 팔로워 12명</p>
-      <div class="stage-bar">
-        <span class="stage-label">🏕️ 3단계 천막</span>
-        <div class="stage-track"><div class="stage-fill" id="stageFill" style="width:46%"></div></div>
-        <span class="stage-next">부스까지 27개</span>
-      </div>
+      <h1 class="hero-title" id="user-title">술향기마을 주민</h1>
+      <p class="hero-sub" id="user-stats">불러오는 중...</p>
+      <p class="hero-note">레벨·성장 시스템은 준비 중이에요 🌱</p>
     </div>
   </div>
 </div>
 
-<!-- 탭 -->
 <div class="tabs">
-  <div class="tab active" onclick="switchTab('reviews', this)">내 리뷰 <span style="font-size:11px;color:var(--text-muted);">23</span></div>
-  <div class="tab" onclick="switchTab('notifs', this)">알림 <span style="font-size:11px;color:#E8C840;font-weight:700;">3</span></div>
+  <div class="tab active" onclick="switchTab('reviews', this)">내 리뷰</div>
+  <div class="tab" onclick="switchTab('notifs', this)">알림</div>
   <div class="tab" onclick="switchTab('bookmarks', this)">즐겨찾기</div>
   <div class="tab" onclick="switchTab('feed', this)">친구 피드</div>
   <div class="tab" onclick="switchTab('orders', this)">쇼핑</div>
@@ -293,254 +116,88 @@
 <!-- ── 내 리뷰 ── -->
 <div id="tab-reviews" class="tab-content active">
   <div class="section">
-    <p class="section-title">최근 작성한 리뷰</p>
-    <div class="review-list">
-      <div class="review-card">
-        <div class="review-header">
-          <div class="review-emoji">🥃</div>
-          <div class="review-name">야마자키 12년</div>
-          <div class="review-rating">★★★★☆</div>
-        </div>
-        <div class="review-body">부드러운 바닐라 향과 살짝 스모키한 피니시. 가성비는 아쉽지만 특별한 날에 딱 맞는 위스키.</div>
-        <div class="review-meta">
-          <span class="review-tag">위스키</span>
-          <span class="review-tag">일본</span>
-          <span class="review-date">3일 전</span>
-        </div>
-      </div>
-      <div class="review-card">
-        <div class="review-header">
-          <div class="review-emoji">🍶</div>
-          <div class="review-name">화요 41</div>
-          <div class="review-rating">★★★★★</div>
-        </div>
-        <div class="review-body">깔끔하고 부드러운 목넘김. 전통 증류식 소주의 정석. 온더록스로 마시면 더욱 좋아요.</div>
-        <div class="review-meta">
-          <span class="review-tag">전통주</span>
-          <span class="review-tag">소주</span>
-          <span class="review-date">1주 전</span>
-        </div>
-      </div>
-      <div class="review-card">
-        <div class="review-header">
-          <div class="review-emoji">🍺</div>
-          <div class="review-name">크래프트 하이볼 — 유자</div>
-          <div class="review-rating">★★★☆☆</div>
-        </div>
-        <div class="review-body">유자 향이 인공적으로 느껴져서 조금 아쉬움. 가볍게 마시기엔 좋지만 재구매 의향은 낮음.</div>
-        <div class="review-meta">
-          <span class="review-tag">하이볼</span>
-          <span class="review-tag">크래프트</span>
-          <span class="review-date">2주 전</span>
-        </div>
-      </div>
-    </div>
+    <p class="section-title">내가 작성한 리뷰</p>
+    <div class="review-list" id="reviews-list"><div class="empty"><div class="empty-icon">⏳</div><div class="empty-text">불러오는 중...</div></div></div>
   </div>
 </div>
 
-<!-- ── 알림 ── -->
+<!-- ── 알림 (준비 중) ── -->
 <div id="tab-notifs" class="tab-content">
   <div class="section">
-    <p class="section-title">새 알림 3개</p>
-    <div class="notif-list">
-      <div class="notif-item unread">
-        <div class="notif-icon">💬</div>
-        <div class="notif-body">
-          <div class="notif-text"><strong>위스키덕후</strong>님이 내 리뷰에 댓글을 남겼어요. "저도 야마자키 마셔봤는데 동의해요!"</div>
-          <div class="notif-time">방금 전</div>
-        </div>
-        <div class="notif-badge">NEW</div>
-      </div>
-      <div class="notif-item unread">
-        <div class="notif-icon">❤️</div>
-        <div class="notif-body">
-          <div class="notif-text"><strong>전통주러버</strong>님 외 4명이 내 화요 41 리뷰를 좋아해요.</div>
-          <div class="notif-time">1시간 전</div>
-        </div>
-        <div class="notif-badge">NEW</div>
-      </div>
-      <div class="notif-item unread">
-        <div class="notif-icon">🎉</div>
-        <div class="notif-body">
-          <div class="notif-text">리뷰 20개 달성! <strong>+50 XP</strong> 획득. 뱃지 '테이스터' 해금!</div>
-          <div class="notif-time">어제</div>
-        </div>
-        <div class="notif-badge">NEW</div>
-      </div>
-      <div class="notif-item">
-        <div class="notif-icon">👥</div>
-        <div class="notif-body">
-          <div class="notif-text"><strong>막걸리마스터</strong>님이 팔로우를 시작했어요.</div>
-          <div class="notif-time">3일 전</div>
-        </div>
-      </div>
-      <div class="notif-item">
-        <div class="notif-icon">🏆</div>
-        <div class="notif-body">
-          <div class="notif-text">이번 주 리뷰 랭킹 <strong>12위</strong>에 올랐어요!</div>
-          <div class="notif-time">5일 전</div>
-        </div>
-      </div>
-    </div>
+    <div class="empty"><div class="empty-icon">🔔</div><div class="empty-text">알림 기능은 준비 중이에요</div></div>
   </div>
 </div>
 
 <!-- ── 즐겨찾기 ── -->
 <div id="tab-bookmarks" class="tab-content">
   <div class="section">
-    <p class="section-title">저장한 리뷰 & 게시글</p>
-    <div class="bookmark-grid">
-      <div class="bookmark-card">
-        <div class="bookmark-icon">🥃</div>
-        <div class="bookmark-title">글렌피딕 18년 완벽 가이드</div>
-        <div class="bookmark-sub">위스키덕후 작성</div>
-        <div class="bookmark-type">리뷰</div>
-      </div>
-      <div class="bookmark-card">
-        <div class="bookmark-icon">🍶</div>
-        <div class="bookmark-title">전통주 입문자를 위한 5선</div>
-        <div class="bookmark-sub">전통주러버 작성</div>
-        <div class="bookmark-type">게시글</div>
-      </div>
-      <div class="bookmark-card">
-        <div class="bookmark-icon">🍸</div>
-        <div class="bookmark-title">집에서 만드는 진토닉 레시피</div>
-        <div class="bookmark-sub">바텐더K 작성</div>
-        <div class="bookmark-type">게시글</div>
-      </div>
-      <div class="bookmark-card">
-        <div class="bookmark-icon">🍺</div>
-        <div class="bookmark-title">여름에 마시기 좋은 맥주 10선</div>
-        <div class="bookmark-sub">크래프트맥주 작성</div>
-        <div class="bookmark-type">리뷰</div>
-      </div>
-    </div>
-    <div style="margin-top:16px;">
-      <p class="section-title">술 위시리스트</p>
-      <div class="bookmark-grid">
-        <div class="bookmark-card">
-          <div class="bookmark-icon">🥃</div>
-          <div class="bookmark-title">맥캘란 더블 캐스크 12년</div>
-          <div class="bookmark-sub">₩89,000</div>
-          <div class="bookmark-type">위시리스트</div>
-        </div>
-        <div class="bookmark-card">
-          <div class="bookmark-icon">🍶</div>
-          <div class="bookmark-title">이강주 35도</div>
-          <div class="bookmark-sub">₩42,000</div>
-          <div class="bookmark-type">위시리스트</div>
-        </div>
-      </div>
-    </div>
+    <p class="section-title">저장한 리뷰 & 게시글 & 위시리스트 <button class="add-btn" onclick="openBookmarkModal()">+ 추가</button></p>
+    <div class="bookmark-grid" id="bookmarks-list"><div class="empty"><div class="empty-icon">⏳</div><div class="empty-text">불러오는 중...</div></div></div>
   </div>
 </div>
 
-<!-- ── 친구 피드 ── -->
+<!-- ── 친구 피드 (준비 중) ── -->
 <div id="tab-feed" class="tab-content">
   <div class="section">
-    <p class="section-title">친구들의 최근 활동</p>
-    <div class="feed-list">
-      <div class="feed-item">
-        <div class="feed-avatar" style="background:#FFF3E0;">🍶</div>
-        <div class="feed-body">
-          <div class="feed-text"><strong>전통주러버</strong>님이 막걸리순희 6도를 ★★★★★ 평가했어요.</div>
-          <div class="feed-time">10분 전</div>
-        </div>
-      </div>
-      <div class="feed-item">
-        <div class="feed-avatar" style="background:#F3E5F5;">🥃</div>
-        <div class="feed-body">
-          <div class="feed-text"><strong>위스키덕후</strong>님이 위스키 마니아 커뮤니티에 글을 올렸어요.</div>
-          <div class="feed-time">1시간 전</div>
-        </div>
-      </div>
-      <div class="feed-item">
-        <div class="feed-avatar" style="background:#E8F5E9;">🍸</div>
-        <div class="feed-body">
-          <div class="feed-text"><strong>바텐더K</strong>님이 레벨업! Lv.15 소믈리에 달성.</div>
-          <div class="feed-time">3시간 전</div>
-        </div>
-      </div>
-      <div class="feed-item">
-        <div class="feed-avatar" style="background:#FFF8E1;">🍺</div>
-        <div class="feed-body">
-          <div class="feed-text"><strong>크래프트맥주</strong>님이 월간 테이스팅 챌린지에 참여했어요.</div>
-          <div class="feed-time">어제</div>
-        </div>
-      </div>
-    </div>
+    <div class="empty"><div class="empty-icon">👥</div><div class="empty-text">팔로우 기능이 만들어지면 친구들의 활동을 볼 수 있어요</div></div>
   </div>
 </div>
 
-<!-- ── 쇼핑 ── -->
+<!-- ── 쇼핑 (준비 중) ── -->
 <div id="tab-orders" class="tab-content">
   <div class="section">
-    <p class="section-title">장바구니</p>
-    <div class="cart-list">
-      <div class="cart-item">
-        <div class="cart-emoji">🥃</div>
-        <div class="cart-body">
-          <div class="cart-name">맥캘란 더블 캐스크 12년</div>
-          <div class="cart-price">₩89,000</div>
-        </div>
-        <div class="cart-remove" onclick="this.closest('.cart-item').remove(); updateCart();">✕</div>
-      </div>
-      <div class="cart-item">
-        <div class="cart-emoji">🍶</div>
-        <div class="cart-body">
-          <div class="cart-name">화요 41도 (375ml)</div>
-          <div class="cart-price">₩28,000</div>
-        </div>
-        <div class="cart-remove" onclick="this.closest('.cart-item').remove(); updateCart();">✕</div>
-      </div>
-    </div>
-    <div class="cart-total">
-      <span class="cart-total-label">합계</span>
-      <span class="cart-total-price" id="cartTotal">₩117,000</span>
-    </div>
-    <button class="btn-checkout" onclick="alert('스마트오더 기능은 준비 중이에요!')">스마트오더 결제</button>
+    <div class="empty"><div class="empty-icon">🛒</div><div class="empty-text">주류 상점이 완성되면 장바구니·주문 내역을 볼 수 있어요</div></div>
   </div>
+</div>
 
-  <hr class="section-divider">
-
-  <div class="section">
-    <p class="section-title">구매 히스토리</p>
-    <div class="order-list">
-      <div class="order-card">
-        <div class="order-header">
-          <span class="order-date">2025.06.15</span>
-          <span class="order-status status-done">픽업 완료</span>
-        </div>
-        <div class="order-item">
-          <div class="order-emoji">🍶</div>
-          <div class="order-name">화요 25도 (750ml)</div>
-          <div class="order-price">₩38,000</div>
-        </div>
-        <div class="order-footer">
-          <span class="order-total">GS25 강남점 픽업</span>
-          <button class="reorder-btn" onclick="alert('장바구니에 담겼어요!')">다시 구매</button>
-        </div>
-      </div>
-      <div class="order-card">
-        <div class="order-header">
-          <span class="order-date">2025.06.02</span>
-          <span class="order-status status-done">픽업 완료</span>
-        </div>
-        <div class="order-item">
-          <div class="order-emoji">🥃</div>
-          <div class="order-name">글렌리벳 12년 (700ml)</div>
-          <div class="order-price">₩52,000</div>
-        </div>
-        <div class="order-footer">
-          <span class="order-total">CU 서초점 픽업</span>
-          <button class="reorder-btn" onclick="alert('장바구니에 담겼어요!')">다시 구매</button>
-        </div>
-      </div>
+<!-- 즐겨찾기 추가 모달 -->
+<div class="modal-overlay" id="bookmark-modal">
+  <div class="modal">
+    <div class="modal-title">즐겨찾기 추가</div>
+    <div class="modal-msg" id="bookmark-msg"></div>
+    <div class="form-row">
+      <label class="form-label">구분</label>
+      <select class="form-select" id="bookmark-type">
+        <option value="리뷰">리뷰</option>
+        <option value="게시글">게시글</option>
+        <option value="위시리스트">위시리스트</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label class="form-label">이모지 (선택)</label>
+      <input class="form-input" id="bookmark-emoji" placeholder="🥃" maxlength="4">
+    </div>
+    <div class="form-row">
+      <label class="form-label">제목</label>
+      <input class="form-input" id="bookmark-title" placeholder="예: 글렌피딕 18년 완벽 가이드">
+    </div>
+    <div class="form-row">
+      <label class="form-label">부제 (작성자 또는 가격 등)</label>
+      <input class="form-input" id="bookmark-subtitle" placeholder="예: 위스키덕후 작성 / ₩89,000">
+    </div>
+    <div class="form-row">
+      <label class="form-label">링크 (해당 페이지 경로)</label>
+      <input class="form-input" id="bookmark-link" placeholder="예: drink-detail.html?id=...">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeBookmarkModal()">취소</button>
+      <button class="btn-submit" onclick="submitBookmark()">저장하기</button>
     </div>
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/core/supabase.js"></script>
 <script>
+  let currentUser = null;
+
+  function esc(str) {
+    const d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+  }
+  function goBack() { location.href = 'index.html'; }
+
   function switchTab(name, el) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -549,31 +206,131 @@
     sessionStorage.setItem('myspace_tab', name);
   }
 
-  // 복귀 시 탭 복원
-  document.addEventListener('DOMContentLoaded', () => {
+  function timeAgo(dateStr) {
+    const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+    if (diff < 60) return '방금 전';
+    if (diff < 3600) return Math.floor(diff/60) + '분 전';
+    if (diff < 86400) return Math.floor(diff/3600) + '시간 전';
+    if (diff < 604800) return Math.floor(diff/86400) + '일 전';
+    return Math.floor(diff/604800) + '주 전';
+  }
+
+  async function init() {
+    const { data: { session } } = await soolClient.auth.getSession();
+    if (!session) {
+      document.getElementById('user-title').textContent = '로그인이 필요해요';
+      document.getElementById('user-stats').innerHTML = `<a href="auth.html" style="color:var(--gold-600);">로그인하러 가기</a>`;
+      return;
+    }
+    const { data: user } = await soolClient.from('users').select('id, nickname').eq('id', session.user.id).single();
+    currentUser = user;
+    document.getElementById('user-title').textContent = `술향기마을 주민 ${user?.nickname || ''}`;
+
+    await loadReviews();
+    await loadBookmarks();
+
     const savedTab = sessionStorage.getItem('myspace_tab');
     if (savedTab && savedTab !== 'reviews') {
-      const tabMap = {"reviews": 1, "notifs": 2, "bookmarks": 3, "feed": 4, "orders": 5};
+      const tabMap = { reviews: 1, notifs: 2, bookmarks: 3, feed: 4, orders: 5 };
       const tabEl = document.querySelector(`.tab:nth-child(${tabMap[savedTab]})`);
       if (tabEl) switchTab(savedTab, tabEl);
     }
-  });
-
-  function updateCart() {
-    const prices = [...document.querySelectorAll('.cart-price')]
-      .map(el => parseInt(el.textContent.replace(/[^0-9]/g, '')));
-    const total = prices.reduce((a, b) => a + b, 0);
-    document.getElementById('cartTotal').textContent =
-      total > 0 ? '₩' + total.toLocaleString() : '₩0';
   }
 
-  function goBack() {
-    if (document.referrer && document.referrer.includes(location.hostname)) {
-      history.back();
-    } else {
-      location.href = 'index.html';
+  // ── 내 리뷰 (술바 + 소버카페 리뷰 통합) ──────────────────
+  async function loadReviews() {
+    const list = document.getElementById('reviews-list');
+
+    const [{ data: barReviews }, { data: cafeReviews }] = await Promise.all([
+      soolClient.from('reviews').select('*, drinks(name, category)').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
+      soolClient.from('cafe_nolo_reviews').select('*, cafe_nolo_drinks(name, category)').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
+    ]);
+
+    const merged = [
+      ...(barReviews || []).map(r => ({
+        emoji: '🥃', name: r.drinks?.name || '삭제된 술', rating: r.rating, content: r.content,
+        tag: r.drinks?.category, created_at: r.created_at, link: r.drink_id ? `drink-detail.html?id=${r.drink_id}` : null,
+      })),
+      ...(cafeReviews || []).map(r => ({
+        emoji: r.cafe_nolo_drinks?.category === '저알코올' ? '🍵' : '🫧', name: r.cafe_nolo_drinks?.name || '삭제된 음료', rating: r.rating, content: r.content,
+        tag: r.cafe_nolo_drinks?.category, created_at: r.created_at, link: r.nolo_drink_id ? `cafe-detail.html?type=nolo&id=${r.nolo_drink_id}` : null,
+      })),
+    ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+    document.getElementById('user-stats').textContent = `리뷰 ${merged.length}개`;
+
+    if (merged.length === 0) {
+      list.innerHTML = '<div class="empty"><div class="empty-icon">📝</div><div class="empty-text">아직 작성한 리뷰가 없어요</div></div>';
+      return;
     }
+
+    list.innerHTML = merged.map(r => `
+      <div class="review-card" ${r.link ? `onclick="location.href='${r.link}'"` : ''}>
+        <div class="review-header">
+          <div class="review-emoji">${r.emoji}</div>
+          <div class="review-name">${esc(r.name)}</div>
+          <div class="review-rating">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+        </div>
+        ${r.content ? `<div class="review-body">${esc(r.content)}</div>` : ''}
+        <div class="review-meta">
+          ${r.tag ? `<span class="review-tag">${esc(r.tag)}</span>` : ''}
+          <span class="review-date">${timeAgo(r.created_at)}</span>
+        </div>
+      </div>
+    `).join('');
   }
+
+  // ── 즐겨찾기 ──────────────────────
+  async function loadBookmarks() {
+    const { data, error } = await soolClient.from('bookmarks').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+    const wrap = document.getElementById('bookmarks-list');
+    if (error) { wrap.innerHTML = '<div class="empty"><div class="empty-text">불러오지 못했어요</div></div>'; return; }
+    if (!data || data.length === 0) {
+      wrap.innerHTML = '<div class="empty" style="grid-column:1/-1;"><div class="empty-icon">⭐</div><div class="empty-text">저장한 항목이 없어요</div></div>';
+      return;
+    }
+    wrap.innerHTML = data.map(b => `
+      <div class="bookmark-card" onclick="location.href='${esc(b.link_url)}'">
+        <span class="bookmark-remove" onclick="event.stopPropagation();removeBookmark('${b.id}')">✕</span>
+        <div class="bookmark-icon">${esc(b.emoji || '⭐')}</div>
+        <div class="bookmark-title">${esc(b.title)}</div>
+        <div class="bookmark-sub">${esc(b.subtitle || '')}</div>
+        <div class="bookmark-type">${esc(b.item_type)}</div>
+      </div>
+    `).join('');
+  }
+
+  function openBookmarkModal() {
+    document.getElementById('bookmark-msg').textContent = '';
+    document.getElementById('bookmark-emoji').value = '';
+    document.getElementById('bookmark-title').value = '';
+    document.getElementById('bookmark-subtitle').value = '';
+    document.getElementById('bookmark-link').value = '';
+    document.getElementById('bookmark-modal').classList.add('show');
+  }
+  function closeBookmarkModal() { document.getElementById('bookmark-modal').classList.remove('show'); }
+
+  async function submitBookmark() {
+    const item_type = document.getElementById('bookmark-type').value;
+    const emoji = document.getElementById('bookmark-emoji').value.trim() || '⭐';
+    const title = document.getElementById('bookmark-title').value.trim();
+    const subtitle = document.getElementById('bookmark-subtitle').value.trim();
+    const link_url = document.getElementById('bookmark-link').value.trim();
+    const msg = document.getElementById('bookmark-msg');
+    if (!title || !link_url) { msg.textContent = '제목과 링크는 필수예요'; return; }
+
+    const { error } = await soolClient.from('bookmarks').insert({ user_id: currentUser.id, item_type, emoji, title, subtitle, link_url });
+    if (error) { console.error('저장 실패:', error); msg.textContent = '저장에 실패했어요'; return; }
+    closeBookmarkModal();
+    await loadBookmarks();
+  }
+
+  async function removeBookmark(id) {
+    await soolClient.from('bookmarks').delete().eq('id', id);
+    await loadBookmarks();
+  }
+
+  init();
 </script>
 
 </body>

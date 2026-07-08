@@ -90,6 +90,51 @@ Unity 전환 이후 간단한 도트 수준의 존재 표시만 검토.
 
 ---
 
+## [v1.6.10] — 2026-07-06 · 팝업 광장 & 내 공간 구현
+
+### Supabase DB 변경
+
+#### popup_events 테이블 신규 생성 (팝업 광장, 관리자 등록 전용)
+- id / event_type (main·small·calendar) / title / description / emoji
+- start_date / end_date / recurrence_label / xp_reward(표시용) / created_at
+- 상태(LIVE·예정·종료)는 저장하지 않고 start_date·end_date 기준 화면에서 자동 계산
+
+#### popup_event_participants 테이블 신규 생성
+- event_id / user_id / joined_at, UNIQUE(event_id, user_id)
+
+#### bookmarks 테이블 신규 생성 (내 공간 · 즐겨찾기)
+- user_id / item_type(리뷰·게시글·위시리스트) / title / subtitle / emoji / link_url / created_at
+- 다양한 콘텐츠 타입을 하나의 테이블에 제목·링크 형태로 저장 (범용 구조)
+
+### 신규 파일
+없음 (기존 파일 수정으로 진행)
+
+### 변경 파일
+
+#### popupSquare.html
+- 진행중 · 곧 시작 · 정기 이벤트 캘린더 전부 popup_events 실데이터 연동
+- "참여하기" 클릭 시 실제 참여 기록, 참여자 수 실시간 카운트
+- XP 배지는 표시만 하고 실제 지급은 보류 (RPG 시스템 완성 후 연동 예정)
+- 마을로 돌아가기 → index.html 고정 (기존 버그 수정)
+
+#### myspace.html
+- **내 리뷰 탭**: 술 바(reviews) + 소버 카페(cafe_nolo_reviews) 리뷰를 통합해 최신순으로 표시
+- **즐겨찾기 탭**: bookmarks 실데이터 연동, "+ 추가"로 유저가 직접 저장 (다른 페이지의 자동 북마크 버튼은 추후 작업)
+- **알림 / 친구 피드 / 쇼핑 탭**: 의존 시스템(알림 인프라·팔로우·주류상점) 미완성으로 "준비 중" 안내로 전환
+- 레벨/성장 표시가 가짜 데이터였던 것을 "준비 중" 문구로 정직하게 변경
+- 마을로 돌아가기 → index.html 고정
+
+#### admin.html
+- 🎪 팝업광장 탭 신규 — SQL 없이 이벤트 등록 가능한 폼 + 목록(참여자 수·삭제)
+- 👥 유저 탭 개선 — 유저 행 클릭 시 "내 공간 상세보기" 모달 오픈, 해당 유저의 리뷰·즐겨찾기 조회 및 모더레이션 삭제 가능
+
+### 기술 결정
+- 즐겨찾기(bookmarks)는 유저 개인 데이터라 별도 관리자 탭 없이, 유저 조회 모달에서만 확인 가능하도록 구성
+- 팝업 이벤트는 유저 기여가 아닌 관리자 전용 콘텐츠로 판단, 어드민에 SQL 없는 등록 폼 제공
+- XP·레벨 관련 UI는 실제 지급 로직 없이 표시만 유지 — v1.7.0 RPG 시스템 완성 후 실연동 예정
+
+---
+
 ## [v1.6.9] — 2026-07-06 · 마리아주 & 소버 카페 구현
 
 ### Supabase DB 변경

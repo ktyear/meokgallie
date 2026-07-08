@@ -56,6 +56,20 @@
   }
   #admin-loading.hide { display: none; }
 
+  /* 유저 상세보기 모달 */
+  .user-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 200; padding: 20px; }
+  .user-modal-overlay.show { display: flex; }
+  .user-modal { background: var(--c-dark); border: 1px solid var(--c-border); border-radius: var(--radius-lg); padding: 24px; width: 100%; max-width: 560px; max-height: 85vh; overflow-y: auto; }
+  .user-modal-title { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .user-modal-sub { font-size: 12px; color: var(--c-muted); margin-bottom: 18px; }
+  .user-modal-close { float: right; cursor: pointer; color: var(--c-muted); font-size: 14px; }
+  .um-section-title { font-size: 11px; font-weight: 600; color: var(--c-muted); letter-spacing: 0.05em; text-transform: uppercase; margin: 16px 0 10px; }
+  .um-item { background: rgba(255,255,255,0.03); border: 1px solid var(--c-border); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 8px; font-size: 13px; }
+  .um-item-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; color: var(--c-muted); font-size: 12px; }
+  .um-item-body { color: var(--c-text); line-height: 1.5; }
+  .um-empty { color: var(--c-muted); font-size: 12px; padding: 12px 0; text-align: center; }
+  .um-delete { color: #f87171; cursor: pointer; font-size: 11px; }
+
   /* 네비 */
   nav {
     background: rgba(8,6,24,0.95);
@@ -301,6 +315,7 @@
   <button class="admin-tab" onclick="switchTab('courses', this)">📚 강의</button>
   <button class="admin-tab" onclick="switchTab('pairing', this)">🍽️ 마리아주</button>
   <button class="admin-tab" onclick="switchTab('cafe', this)">🌿 소버카페</button>
+  <button class="admin-tab" onclick="switchTab('popup', this)">🎪 팝업광장</button>
 </div>
 
 <!-- 콘텐츠 -->
@@ -689,6 +704,90 @@
     </table>
   </div>
 
+  <!-- 팝업광장 탭 -->
+  <div class="tab-panel" id="panel-popup">
+    <div class="form-card">
+      <h3>🎪 새 이벤트 등록</h3>
+      <div class="msg" id="popup-msg"></div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">유형 *</label>
+          <select class="form-select" id="p-type">
+            <option value="main">진행중 (큰 카드)</option>
+            <option value="small">곧 시작 (소형 카드)</option>
+            <option value="calendar">정기 일정</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">이모지</label>
+          <input class="form-input" id="p-emoji" placeholder="예) 🍺" />
+        </div>
+        <div class="form-group full">
+          <label class="form-label">제목 *</label>
+          <input class="form-input" id="p-title" placeholder="예) 이번 주의 술 투표" />
+        </div>
+        <div class="form-group full">
+          <label class="form-label">설명 <span style="opacity:0.6;">(정기 일정은 여기에 짧은 배지 텍스트: 매주/매월/시즌)</span></label>
+          <input class="form-input" id="p-desc" placeholder="예) 이번 주 가장 핫한 여름 하이볼을 골라주세요" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">시작일 (곧시작 유형에 사용)</label>
+          <input class="form-input" id="p-start" type="date" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">종료일 (진행중 유형에 사용)</label>
+          <input class="form-input" id="p-end" type="date" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">XP 보상 (표시용, 실지급 X)</label>
+          <input class="form-input" id="p-xp" type="number" placeholder="예) 20" />
+        </div>
+        <div class="form-group full">
+          <label class="form-label">정기 일정 상세 (정기 일정 유형만 사용)</label>
+          <input class="form-input" id="p-recurrence" placeholder="예) 매주 금요일 자정 마감" />
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-primary" onclick="addPopupEvent()">등록하기</button>
+        <button class="btn-sm" onclick="clearPopupForm()">초기화</button>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <div class="section-title">등록된 이벤트 목록</div>
+      <div class="section-count" id="popup-count"></div>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>유형</th>
+          <th>제목</th>
+          <th>기간</th>
+          <th>참여자</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="popup-tbody">
+        <tr><td colspan="5"><div class="empty-state"><div class="icon">🎪</div>로딩 중...</div></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- 유저 상세보기 모달 -->
+<div class="user-modal-overlay" id="user-detail-modal">
+  <div class="user-modal">
+    <span class="user-modal-close" onclick="closeUserDetail()">✕ 닫기</span>
+    <div class="user-modal-title" id="um-title">—</div>
+    <div class="user-modal-sub" id="um-sub"></div>
+
+    <div class="um-section-title">작성한 리뷰</div>
+    <div id="um-reviews"><div class="um-empty">불러오는 중...</div></div>
+
+    <div class="um-section-title">즐겨찾기</div>
+    <div id="um-bookmarks"><div class="um-empty">불러오는 중...</div></div>
+  </div>
 </div>
 
 <!-- Supabase CDN -->
@@ -725,6 +824,7 @@
     loadCafeNolo();
     loadCafePicks();
     loadCafeChallenges();
+    loadPopupEvents();
   }
 
   function showAccessDenied() {
@@ -830,7 +930,7 @@
     }
 
     tbody.innerHTML = data.map(u => `
-      <tr>
+      <tr style="cursor:pointer;" onclick="openUserDetail('${u.id}', '${(u.nickname || '').replace(/'/g, "\\'")}')">
         <td>${u.nickname}</td>
         <td>${u.email}</td>
         <td>Lv.${u.level}</td>
@@ -1191,6 +1291,139 @@
       `;
     }));
     tbody.innerHTML = rows.join('');
+  }
+
+  // ── 유저 상세보기 (내 공간 조회) ────────────────
+  function timeAgoAdmin(dateStr) {
+    return new Date(dateStr).toLocaleDateString('ko-KR');
+  }
+
+  async function openUserDetail(userId, nickname) {
+    document.getElementById('um-title').textContent = `${nickname}님의 내 공간`;
+    document.getElementById('um-sub').textContent = '리뷰 · 즐겨찾기 조회 (모더레이션용)';
+    document.getElementById('um-reviews').innerHTML = '<div class="um-empty">불러오는 중...</div>';
+    document.getElementById('um-bookmarks').innerHTML = '<div class="um-empty">불러오는 중...</div>';
+    document.getElementById('user-detail-modal').classList.add('show');
+
+    const [{ data: barReviews }, { data: cafeReviews }, { data: bookmarks }] = await Promise.all([
+      soolClient.from('reviews').select('*, drinks(name)').eq('user_id', userId).order('created_at', { ascending: false }),
+      soolClient.from('cafe_nolo_reviews').select('*, cafe_nolo_drinks(name)').eq('user_id', userId).order('created_at', { ascending: false }),
+      soolClient.from('bookmarks').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+    ]);
+
+    const reviews = [
+      ...(barReviews || []).map(r => ({ id: r.id, table: 'reviews', name: r.drinks?.name || '삭제된 술', rating: r.rating, content: r.content, created_at: r.created_at })),
+      ...(cafeReviews || []).map(r => ({ id: r.id, table: 'cafe_nolo_reviews', name: r.cafe_nolo_drinks?.name || '삭제된 음료', rating: r.rating, content: r.content, created_at: r.created_at })),
+    ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+    const reviewsEl = document.getElementById('um-reviews');
+    reviewsEl.innerHTML = reviews.length === 0 ? '<div class="um-empty">작성한 리뷰가 없어요</div>' : reviews.map(r => `
+      <div class="um-item">
+        <div class="um-item-head">
+          <span>${r.name} · ${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)} · ${timeAgoAdmin(r.created_at)}</span>
+          <span class="um-delete" onclick="deleteUserReview('${r.table}','${r.id}','${userId}','${(nickname||'').replace(/'/g, "\\'")}')">삭제</span>
+        </div>
+        <div class="um-item-body">${r.content || ''}</div>
+      </div>
+    `).join('');
+
+    const bmEl = document.getElementById('um-bookmarks');
+    bmEl.innerHTML = (!bookmarks || bookmarks.length === 0) ? '<div class="um-empty">저장한 즐겨찾기가 없어요</div>' : bookmarks.map(b => `
+      <div class="um-item">
+        <div class="um-item-head">
+          <span>${b.emoji || '⭐'} ${b.item_type} · ${timeAgoAdmin(b.created_at)}</span>
+          <span class="um-delete" onclick="deleteUserBookmark('${b.id}','${userId}','${(nickname||'').replace(/'/g, "\\'")}')">삭제</span>
+        </div>
+        <div class="um-item-body">${b.title}${b.subtitle ? ' · ' + b.subtitle : ''}</div>
+      </div>
+    `).join('');
+  }
+
+  function closeUserDetail() {
+    document.getElementById('user-detail-modal').classList.remove('show');
+  }
+
+  async function deleteUserReview(table, id, userId, nickname) {
+    if (!confirm('이 리뷰를 삭제할까요?')) return;
+    await soolClient.from(table).delete().eq('id', id);
+    openUserDetail(userId, nickname);
+  }
+
+  async function deleteUserBookmark(id, userId, nickname) {
+    if (!confirm('이 즐겨찾기를 삭제할까요?')) return;
+    await soolClient.from('bookmarks').delete().eq('id', id);
+    openUserDetail(userId, nickname);
+  }
+
+  // ── 팝업 광장 ─────────────────────────────────
+  async function loadPopupEvents() {
+    const { data, error } = await soolClient.from('popup_events').select('*').order('created_at', { ascending: false });
+    if (error || !data) return;
+    document.getElementById('popup-count').textContent = `총 ${data.length}개`;
+    const tbody = document.getElementById('popup-tbody');
+
+    if (data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="icon">🎪</div>등록된 이벤트가 없어요</div></td></tr>`;
+      return;
+    }
+    const typeLabel = { main: '진행중', small: '곧시작', calendar: '정기일정' };
+    const rows = await Promise.all(data.map(async (ev) => {
+      let period = '—';
+      if (ev.start_date && ev.end_date) period = `${ev.start_date} ~ ${ev.end_date}`;
+      else if (ev.end_date) period = `~ ${ev.end_date}`;
+      else if (ev.start_date) period = `${ev.start_date} ~`;
+      let participants = '—';
+      if (ev.event_type !== 'calendar') {
+        const { count } = await soolClient.from('popup_event_participants').select('id', { count: 'exact', head: true }).eq('event_id', ev.id);
+        participants = `${count || 0}명`;
+      }
+      return `
+        <tr>
+          <td>${ev.emoji || ''} ${typeLabel[ev.event_type] || ev.event_type}</td>
+          <td>${ev.title}</td>
+          <td>${period}</td>
+          <td>${participants}</td>
+          <td><button class="btn-danger" onclick="deletePopupEvent('${ev.id}')">삭제</button></td>
+        </tr>
+      `;
+    }));
+    tbody.innerHTML = rows.join('');
+  }
+
+  function clearPopupForm() {
+    ['p-emoji','p-title','p-desc','p-start','p-end','p-xp','p-recurrence'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('p-type').value = 'main';
+    document.getElementById('popup-msg').textContent = '';
+  }
+
+  async function addPopupEvent() {
+    const event_type = document.getElementById('p-type').value;
+    const title = document.getElementById('p-title').value.trim();
+    const msg = document.getElementById('popup-msg');
+    if (!title) { showMsg('popup-msg', 'error', '제목을 입력해주세요'); return; }
+
+    const payload = {
+      event_type,
+      title,
+      emoji: document.getElementById('p-emoji').value.trim() || null,
+      description: document.getElementById('p-desc').value.trim() || null,
+      start_date: document.getElementById('p-start').value || null,
+      end_date: document.getElementById('p-end').value || null,
+      xp_reward: parseInt(document.getElementById('p-xp').value) || 0,
+      recurrence_label: document.getElementById('p-recurrence').value.trim() || null,
+    };
+
+    const { error } = await soolClient.from('popup_events').insert(payload);
+    if (error) { console.error('등록 실패:', error); showMsg('popup-msg', 'error', '등록에 실패했어요'); return; }
+    showMsg('popup-msg', 'success', '이벤트가 등록됐어요!');
+    clearPopupForm();
+    loadPopupEvents();
+  }
+
+  async function deletePopupEvent(id) {
+    if (!confirm('이벤트를 삭제할까요?')) return;
+    await soolClient.from('popup_events').delete().eq('id', id);
+    loadPopupEvents();
   }
 
   init();

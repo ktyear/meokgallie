@@ -115,6 +115,7 @@
 
     panel.querySelector('#sool-chat-send').addEventListener('click', sendMessage);
     panel.querySelector('#sool-chat-input').addEventListener('keydown', (e) => {
+      e.stopPropagation();
       if (e.key === 'Enter') sendMessage();
     });
 

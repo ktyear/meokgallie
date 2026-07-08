@@ -111,11 +111,7 @@
       <button class="chat-tab" onclick="switchChat('dm',this)">💬 DM</button>
     </div>
     <div id="chat-messages">
-      <div class="chat-msg"><span class="chat-nick" style="color:#9966ff">바텐더K</span> 오늘 야마자키 12년 어때요? 🥃</div>
-      <div class="chat-msg"><span class="chat-nick" style="color:#44cc88">전통주러버</span> 저는 화요 41 강추합니다!</div>
-      <div class="chat-msg"><span class="chat-nick" style="color:#ff6699">위스키덕후</span> 날씨가 흐리니까 하이볼 생각나네요 ☁️</div>
-      <div class="chat-msg"><span class="chat-nick" style="color:#ffaa44">막걸리왕</span> 비 오는 날엔 막걸리+파전이죠 🌧️</div>
-      <div class="chat-msg system">🏘️ 지금 마을에 <strong>127명</strong>이 접속 중이에요</div>
+      <div class="chat-msg system">불러오는 중...</div>
     </div>
     <div id="chat-input-row">
       <input id="chat-input" type="text" placeholder="마을 사람들과 대화해보세요..." maxlength="100" />
@@ -157,18 +153,33 @@
     });
 
     // 채팅 탭 전환
+    let currentChatTab = 'world';
+    let worldMessagesLoaded = false;
+    let worldMessagesCache = [];
+
+    function esc(str) {
+      const d = document.createElement('div');
+      d.textContent = str || '';
+      return d.innerHTML;
+    }
+
     function switchChat(type, el) {
       document.querySelectorAll('.chat-tab').forEach(t => t.classList.remove('active'));
       el.classList.add('active');
+      currentChatTab = type;
       const msgs = document.getElementById('chat-messages');
+
+      if (type === 'world') {
+        if (!worldMessagesLoaded) {
+          msgs.innerHTML = '<div class="chat-msg system">불러오는 중...</div>';
+          loadWorldChat();
+        } else {
+          renderAllWorldMessages();
+        }
+        return;
+      }
+
       const dummy = {
-        world:    [
-          { nick:'바텐더K', color:'#9966ff', msg:'오늘 야마자키 12년 어때요? 🥃' },
-          { nick:'전통주러버', color:'#44cc88', msg:'저는 화요 41 강추합니다!' },
-          { nick:'위스키덕후', color:'#ff6699', msg:'날씨가 흐리니까 하이볼 생각나네요 ☁️' },
-          { nick:'막걸리왕', color:'#ffaa44', msg:'비 오는 날엔 막걸리+파전이죠 🌧️' },
-          { type:'system', msg:'🏘️ 지금 마을에 <strong>127명</strong>이 접속 중이에요' },
-        ],
         building: [
           { nick:'소믈리에견습', color:'#44aaff', msg:'술 바에 새 리뷰 올라왔어요!' },
           { nick:'바텐더K', color:'#9966ff', msg:'글렌피딕 18년 강추요 🥃' },
@@ -191,28 +202,101 @@
       msgs.scrollTop = msgs.scrollHeight;
     }
 
-    // 채팅 전송 (더미)
-    function sendChat() {
+    // ── 월드 채팅 (실제 DB 연동) ──────────────────────
+    function renderAllWorldMessages() {
+      const msgs = document.getElementById('chat-messages');
+      if (worldMessagesCache.length === 0) {
+        msgs.innerHTML = '<div class="chat-msg system">🏘️ 아직 메시지가 없어요. 첫 메시지를 남겨보세요!</div>';
+        return;
+      }
+      msgs.innerHTML = worldMessagesCache.map(m =>
+        `<div class="chat-msg"><span class="chat-nick" style="color:${m.color || '#9966ff'}">${esc(m.nickname)}</span> ${esc(m.content)}</div>`
+      ).join('');
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function pushWorldMessage(nickname, content, color) {
+      worldMessagesCache.push({ nickname, content, color });
+      if (currentChatTab === 'world') {
+        const msgs = document.getElementById('chat-messages');
+        const div = document.createElement('div');
+        div.className = 'chat-msg';
+        div.innerHTML = `<span class="chat-nick" style="color:${color || '#9966ff'}">${esc(nickname)}</span> ${esc(content)}`;
+        msgs.appendChild(div);
+        msgs.scrollTop = msgs.scrollHeight;
+      }
+    }
+
+    async function loadWorldChat() {
+      const { data, error } = await soolClient
+        .from('chat_messages')
+        .select('*, users(nickname)')
+        .eq('channel_key', 'world')
+        .order('created_at', { ascending: false })
+        .limit(30);
+
+      worldMessagesLoaded = true;
+      if (error) {
+        if (currentChatTab === 'world') document.getElementById('chat-messages').innerHTML = '<div class="chat-msg system">채팅을 불러오지 못했어요</div>';
+        return;
+      }
+      worldMessagesCache = (data || []).reverse().map(m => ({ nickname: m.users?.nickname || '익명', content: m.content }));
+      if (currentChatTab === 'world') renderAllWorldMessages();
+    }
+
+    function subscribeWorldChat() {
+      soolClient
+        .channel('chat:world')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: 'channel_key=eq.world' }, async (payload) => {
+          const row = payload.new;
+          let nickname = '익명';
+          if (row.user_id) {
+            const { data: u } = await soolClient.from('users').select('nickname').eq('id', row.user_id).single();
+            nickname = u?.nickname || '익명';
+          }
+          pushWorldMessage(nickname, row.content);
+        })
+        .subscribe();
+    }
+
+    // 채팅 전송
+    async function sendChat() {
       const input = document.getElementById('chat-input');
       const val   = input.value.trim();
       if (!val) return;
+
+      if (currentChatTab === 'world') {
+        if (!worldChatUser) { alert('로그인 후 채팅할 수 있어요'); location.href = 'auth.html'; return; }
+        input.value = '';
+        const { error } = await soolClient.from('chat_messages').insert({ channel_key: 'world', user_id: worldChatUser.id, content: val });
+        if (error) console.error('메시지 전송 실패:', error);
+        return;
+      }
+
+      // 건물/커뮤니티/DM 탭은 아직 더미
       const msgs = document.getElementById('chat-messages');
-      msgs.innerHTML += `<div class="chat-msg"><span class="chat-nick" style="color:#ccaaff">나</span> ${val}</div>`;
+      msgs.innerHTML += `<div class="chat-msg"><span class="chat-nick" style="color:#ccaaff">나</span> ${esc(val)}</div>`;
       msgs.scrollTop = msgs.scrollHeight;
       input.value = '';
     }
     document.addEventListener('DOMContentLoaded', () => {
       const inp = document.getElementById('chat-input');
-      if (inp) inp.addEventListener('keydown', e => { if(e.key==='Enter') sendChat(); });
+      if (inp) inp.addEventListener('keydown', e => {
+        e.stopPropagation();
+        if (e.key==='Enter') sendChat();
+      });
+      loadWorldChat();
+      subscribeWorldChat();
     });
 
     // 로그인 상태 확인 및 유저 정보 표시
+    let worldChatUser = null;
     async function initUserState() {
       const { data: { session } } = await soolClient.auth.getSession();
       if (session) {
         const { data: user } = await soolClient
           .from('users')
-          .select('nickname, level, is_admin')
+          .select('id, nickname, level, is_admin')
           .eq('id', session.user.id)
           .single();
         if (user) {
@@ -221,6 +305,7 @@
           document.getElementById('ui-user-loggedin').style.display = 'block';
           document.getElementById('ui-user-guest').style.display = 'none';
           if (user.is_admin) document.getElementById('ui-admin-btn').style.display = 'block';
+          worldChatUser = user;
         }
       }
     }
@@ -301,7 +386,5 @@
   <!-- 진입점 -->
   <script src="js/core/main.js"></script>
 
-<script src="js/ui/chat.js"></script>
-<script>initSoolChat({ channelKey: 'world', label: '월드 채팅', accentColor: '#9966FF' });</script>
 </body>
 </html>

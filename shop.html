@@ -12,26 +12,73 @@
   .nav-back{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-secondary);text-decoration:none;cursor:pointer;}.nav-back:hover{color:var(--green-400);}.nav-back svg{width:16px;height:16px;}
   .nav-logo{font-size:15px;font-weight:600;display:flex;align-items:center;gap:7px;}
   .nav-logo-dot{width:8px;height:8px;border-radius:50%;background:var(--green-200);}
-  .nav-spacer{width:80px;}
+  .nav-cart{position:relative;font-size:20px;cursor:pointer;background:none;border:none;}
+  .nav-cart-badge{position:absolute;top:-4px;right:-6px;background:#EF4444;color:#fff;font-size:10px;font-weight:700;border-radius:99px;min-width:16px;height:16px;display:flex;align-items:center;justify-content:center;padding:0 3px;}
   .hero{background:linear-gradient(135deg,#063318 0%,#1A6A38 100%);padding:32px 24px 28px;}
   .hero-inner{max-width:640px;margin:0 auto;}
   .hero-tag{display:inline-block;font-size:11px;font-weight:600;color:#B8EAC8;background:rgba(255,255,255,0.1);padding:3px 10px;border-radius:99px;margin-bottom:10px;}
   .hero-title{font-size:24px;font-weight:700;color:#fff;margin-bottom:6px;}
   .hero-sub{font-size:14px;color:rgba(255,255,255,0.7);line-height:1.65;}
   .section{padding:20px 24px;max-width:640px;margin:0 auto;}
-  .section-title{font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:14px;}
-  .tabs{background:var(--bg-card);border-bottom:0.5px solid var(--border);display:flex;overflow-x:auto;justify-content:center;}
+  .section-title{font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;}
+  .add-btn{font-size:12px;font-weight:600;color:var(--green-400);cursor:pointer;background:none;border:none;font-family:inherit;text-transform:none;letter-spacing:0;}
+  .tabs{background:var(--bg-card);border-bottom:0.5px solid var(--border);display:flex;overflow-x:auto;justify-content:center;position:sticky;top:47px;z-index:9;}
   .tabs::-webkit-scrollbar{display:none;}
-  .tab{padding:12px 18px;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.15s;}.tab.active{color:var(--green-400);border-bottom-color:var(--green-200);}
+  .tab{padding:12px 16px;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.15s;}.tab.active{color:var(--green-400);border-bottom-color:var(--green-200);}
   .tab-content{display:none;}.tab-content.active{display:block;}
-  .product-card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:border-color 0.15s;}.product-card:hover{border-color:var(--green-200);}
+  .product-card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;transition:border-color 0.15s;}.product-card:hover{border-color:var(--green-200);}
   .product-icon{font-size:32px;flex-shrink:0;}
   .product-name{font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:3px;}
   .product-desc{font-size:12px;color:var(--text-secondary);margin-bottom:6px;}
   .product-price{font-size:15px;font-weight:700;color:var(--green-600);}
   .product-tag{font-size:10px;background:var(--green-50);color:var(--green-600);padding:2px 7px;border-radius:99px;margin-left:6px;font-weight:500;}
-  .cart-btn{margin-left:auto;background:var(--green-200);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;transition:background 0.15s;}.cart-btn:hover{background:var(--green-400);}
+  .cart-add-btn{margin-left:auto;background:var(--green-200);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;transition:background 0.15s;}.cart-add-btn:hover{background:var(--green-400);}
   .notice{background:var(--green-50);border:0.5px solid var(--green-100);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:14px;}
+  .empty{text-align:center;padding:32px 20px;color:var(--text-muted);font-size:13px;}
+  /* 가격비교 */
+  .compare-card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px;cursor:pointer;}
+  .compare-head{display:flex;align-items:center;gap:12px;}
+  .compare-rows{margin-top:10px;padding-top:10px;border-top:0.5px solid var(--border);display:none;}
+  .compare-rows.show{display:block;}
+  .compare-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:var(--text-secondary);}
+  .compare-row.lowest{color:var(--green-600);font-weight:700;}
+  /* 공동구매 */
+  .gb-card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;}
+  .gb-title{font-size:14px;font-weight:600;margin-bottom:4px;}
+  .gb-desc{font-size:13px;color:var(--text-secondary);line-height:1.5;margin-bottom:10px;}
+  .progress-bar{height:6px;background:var(--green-50);border-radius:99px;overflow:hidden;margin-bottom:6px;}
+  .progress-fill{height:100%;background:var(--green-200);border-radius:99px;}
+  .progress-label{font-size:11px;color:var(--text-muted);}
+  .gb-join-btn{background:var(--green-200);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px;font-family:inherit;}
+  .gb-join-btn.joined{background:var(--green-50);color:var(--green-600);}
+  /* 외부구매 후기 (링크 미리보기 카드) */
+  .ext-card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:10px;cursor:pointer;transition:border-color 0.15s;}.ext-card:hover{border-color:var(--green-200);}
+  .ext-img{height:120px;background:var(--green-50);display:flex;align-items:center;justify-content:center;font-size:36px;background-size:cover;background-position:center;}
+  .ext-body{padding:14px 16px;}
+  .ext-title{font-size:14px;font-weight:600;margin-bottom:4px;}
+  .ext-desc{font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+  .ext-meta{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-muted);}
+  .ext-retailer{background:var(--green-50);color:var(--green-600);padding:2px 8px;border-radius:99px;font-weight:500;}
+  /* 모달 공통 */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:none;align-items:flex-end;justify-content:center;z-index:50;}
+  .modal-overlay.show{display:flex;}
+  .modal{background:#fff;border-radius:16px 16px 0 0;padding:20px 20px 24px;width:100%;max-width:640px;max-height:85vh;overflow-y:auto;}
+  .modal-title{font-size:16px;font-weight:700;margin-bottom:16px;}
+  .form-row{margin-bottom:12px;}
+  .form-label{font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px;display:block;}
+  .form-input,.form-textarea{width:100%;border:0.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;font-family:inherit;color:var(--text-primary);outline:none;}
+  .form-input:focus,.form-textarea:focus{border-color:var(--green-200);}
+  .form-textarea{resize:none;height:70px;}
+  .modal-actions{display:flex;gap:8px;margin-top:16px;}
+  .btn-cancel{flex:1;padding:12px;border-radius:8px;border:0.5px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text-secondary);}
+  .btn-submit{flex:2;padding:12px;border-radius:8px;border:none;background:var(--green-200);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+  .modal-msg{font-size:12px;color:var(--green-600);margin-bottom:8px;min-height:16px;}
+  /* 장바구니 */
+  .cart-item{display:flex;align-items:center;gap:12px;background:var(--bg);border:0.5px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;}
+  .cart-item-name{font-size:13px;font-weight:500;flex:1;}
+  .cart-item-price{font-size:12px;color:var(--text-muted);}
+  .qty-btn{width:22px;height:22px;border-radius:50%;border:0.5px solid var(--border);background:#fff;cursor:pointer;font-size:13px;}
+  .cart-total-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-top:0.5px solid var(--border);margin-top:8px;font-weight:700;}
   @media(max-width:480px){nav{padding:12px 16px;}.hero{padding:20px 16px 20px;}.section{padding:16px;}}
 </style>
 </head>
@@ -39,46 +86,120 @@
 <nav>
   <a class="nav-back" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>마을로 돌아가기</a>
   <div class="nav-logo"><div class="nav-logo-dot"></div>술향기마을</div>
-  <div class="nav-spacer"></div>
+  <button class="nav-cart" onclick="openCartModal()">🛒<span class="nav-cart-badge" id="cart-badge" style="display:none;">0</span></button>
 </nav>
 <div class="hero">
   <div class="hero-inner">
     <div class="hero-tag">주류 상점 · 쇼핑 & 스마트오더</div>
     <h1 class="hero-title">🛒 주류 상점</h1>
-    <p class="hero-sub">스마트오더로 원하는 술을 픽업.<br>한정판 알림, 가격 비교, 맞춤 추천까지.</p>
+    <p class="hero-sub">스마트오더로 원하는 술을 픽업.<br>한정판, 공동구매, 외부구매 후기까지.</p>
   </div>
 </div>
 <div class="tabs">
   <div class="tab active" onclick="switchTab('products',this)">상품</div>
   <div class="tab" onclick="switchTab('limited',this)">한정판</div>
   <div class="tab" onclick="switchTab('compare',this)">가격비교</div>
+  <div class="tab" onclick="switchTab('groupbuy',this)">공동구매</div>
+  <div class="tab" onclick="switchTab('external',this)">외부구매 후기</div>
 </div>
+
 <div id="tab-products" class="tab-content active">
   <div class="section">
-    <div class="notice">📦 스마트오더 — 주문 후 가까운 편의점·마트에서 픽업 (준비 중)</div>
-    <p class="section-title">추천 상품</p>
-    <div class="product-card"><div class="product-icon">🥃</div><div style="flex:1;"><div class="product-name">야마자키 12년 <span class="product-tag">인기</span></div><div class="product-desc">산토리 · 700ml · 43도</div><div class="product-price">₩89,000</div></div><button class="cart-btn" onclick="alert('장바구니 기능은 준비 중이에요!')">담기</button></div>
-    <div class="product-card"><div class="product-icon">🍶</div><div style="flex:1;"><div class="product-name">화요 41도 <span class="product-tag">베스트</span></div><div class="product-desc">화요 · 375ml · 41도</div><div class="product-price">₩28,000</div></div><button class="cart-btn" onclick="alert('장바구니 기능은 준비 중이에요!')">담기</button></div>
-    <div class="product-card"><div class="product-icon">🍷</div><div style="flex:1;"><div class="product-name">까시예로 델 디아블로 레드</div><div class="product-desc">콘차이토로 · 750ml · 13.5도</div><div class="product-price">₩18,000</div></div><button class="cart-btn" onclick="alert('장바구니 기능은 준비 중이에요!')">담기</button></div>
-    <div class="product-card"><div class="product-icon">🍺</div><div style="flex:1;"><div class="product-name">제주 위트에일</div><div class="product-desc">제주맥주 · 500ml · 5.3도</div><div class="product-price">₩3,800</div></div><button class="cart-btn" onclick="alert('장바구니 기능은 준비 중이에요!')">담기</button></div>
+    <div class="notice">📦 스마트오더 — 담은 상품은 장바구니에서 픽업 신청할 수 있어요</div>
+    <p class="section-title">전체 상품</p>
+    <div id="products-list"><div class="empty">불러오는 중...</div></div>
   </div>
 </div>
 <div id="tab-limited" class="tab-content">
   <div class="section">
     <p class="section-title">한정판 & 특가</p>
-    <div class="product-card"><div class="product-icon">🥃</div><div style="flex:1;"><div class="product-name">글렌피딕 21년 <span class="product-tag" style="background:#FFF3E0;color:#E65100;">한정</span></div><div class="product-desc">윌리엄그랜트 · 700ml · 40도</div><div class="product-price">₩320,000</div></div><button class="cart-btn" onclick="alert('장바구니 기능은 준비 중이에요!')">담기</button></div>
-    <div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px;">한정판 입고 알림을 받으려면 알림 설정을 켜주세요.</div>
+    <div id="limited-list"><div class="empty">불러오는 중...</div></div>
   </div>
 </div>
 <div id="tab-compare" class="tab-content">
   <div class="section">
-    <div style="background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:24px;text-align:center;">
-      <div style="font-size:36px;margin-bottom:12px;">📊</div>
-      <div style="font-size:14px;color:var(--text-secondary);line-height:1.6;">편의점·마트·면세점 가격을 한 번에 비교.<br>가격 비교 기능은 준비 중이에요.</div>
+    <p class="section-title">판매처별 가격 비교 (카드를 눌러 펼쳐보세요)</p>
+    <div id="compare-list"><div class="empty">불러오는 중...</div></div>
+  </div>
+</div>
+<div id="tab-groupbuy" class="tab-content">
+  <div class="section">
+    <p class="section-title">진행 중인 공동구매 <button class="add-btn" onclick="openGbModal()">+ 공동구매 제안</button></p>
+    <div id="gb-list"><div class="empty">불러오는 중...</div></div>
+  </div>
+</div>
+<div id="tab-external" class="tab-content">
+  <div class="section">
+    <p class="section-title">외부구매 후기 <button class="add-btn" onclick="openExtModal()">+ 후기 작성</button></p>
+    <div id="ext-list"><div class="empty">불러오는 중...</div></div>
+  </div>
+</div>
+
+<!-- 공동구매 제안 모달 -->
+<div class="modal-overlay" id="gb-modal">
+  <div class="modal">
+    <div class="modal-title">공동구매 제안하기</div>
+    <div class="modal-msg" id="gb-msg"></div>
+    <div class="form-row"><label class="form-label">이모지</label><input class="form-input" id="gb-emoji" placeholder="🍷" maxlength="4"></div>
+    <div class="form-row"><label class="form-label">제목</label><input class="form-input" id="gb-title" placeholder="예: 이탈리아 와인 6종 공동구매"></div>
+    <div class="form-row"><label class="form-label">설명</label><textarea class="form-textarea" id="gb-desc" placeholder="상품 설명을 적어주세요"></textarea></div>
+    <div class="form-row"><label class="form-label">목표 수량</label><input class="form-input" id="gb-target" type="number" placeholder="예: 20"></div>
+    <div class="form-row"><label class="form-label">1개당 가격</label><input class="form-input" id="gb-price" type="number" placeholder="예: 25000"></div>
+    <div class="form-row"><label class="form-label">마감일</label><input class="form-input" id="gb-deadline" type="date"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('gb-modal')">취소</button>
+      <button class="btn-submit" onclick="submitGb()">등록하기</button>
     </div>
   </div>
 </div>
+
+<!-- 외부구매 후기 작성 모달 -->
+<div class="modal-overlay" id="ext-modal">
+  <div class="modal">
+    <div class="modal-title">외부구매 후기 작성</div>
+    <div class="modal-msg" id="ext-msg"></div>
+    <div class="form-row"><label class="form-label">판매처</label><input class="form-input" id="ext-retailer" placeholder="예: 쿠팡, 이마트몰, 네이버쇼핑"></div>
+    <div class="form-row"><label class="form-label">제목</label><input class="form-input" id="ext-title" placeholder="예: 여기서 산 위스키 완전 만족"></div>
+    <div class="form-row"><label class="form-label">링크</label><input class="form-input" id="ext-url" placeholder="https://..."></div>
+    <div class="form-row"><label class="form-label">이미지 URL (선택)</label><input class="form-input" id="ext-image" placeholder="https://..."></div>
+    <div class="form-row"><label class="form-label">별점</label>
+      <div class="star-row" id="ext-star-row" style="display:flex;gap:4px;font-size:24px;cursor:pointer;">
+        <span class="star" data-v="1">★</span><span class="star" data-v="2">★</span><span class="star" data-v="3">★</span><span class="star" data-v="4">★</span><span class="star" data-v="5">★</span>
+      </div>
+    </div>
+    <div class="form-row"><label class="form-label">한줄 후기</label><textarea class="form-textarea" id="ext-desc" placeholder="어떤 점이 좋았는지 적어주세요"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('ext-modal')">취소</button>
+      <button class="btn-submit" onclick="submitExt()">등록하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 장바구니 모달 -->
+<div class="modal-overlay" id="cart-modal">
+  <div class="modal">
+    <div class="modal-title">장바구니</div>
+    <div id="cart-items-list"><div class="empty">불러오는 중...</div></div>
+    <div class="cart-total-row"><span>합계</span><span id="cart-total">₩0</span></div>
+    <div class="form-row"><label class="form-label">픽업 위치</label><input class="form-input" id="pickup-location" placeholder="예: GS25 강남점"></div>
+    <div class="modal-msg" id="cart-msg"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('cart-modal')">닫기</button>
+      <button class="btn-submit" onclick="checkout()">픽업 신청 (모의주문)</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/core/supabase.js"></script>
 <script>
+  let currentUser = null;
+  let extStar = 0;
+
+  function esc(str) { const d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML; }
+  function goBack() { location.href = 'index.html'; }
+  function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
   function switchTab(name, el) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -86,19 +207,287 @@
     el.classList.add('active');
     sessionStorage.setItem('shop_tab', name);
   }
-  function goBack() {
-    if (document.referrer && document.referrer.includes(location.hostname)) { history.back(); }
-    else { location.href = 'index.html'; }
-  }
-  // 복귀 시 탭 복원
-  document.addEventListener('DOMContentLoaded', () => {
+
+  async function init() {
+    const { data: { session } } = await soolClient.auth.getSession();
+    if (session) {
+      const { data: user } = await soolClient.from('users').select('id, nickname').eq('id', session.user.id).single();
+      currentUser = user;
+    }
+    await loadProducts();
+    await loadCompare();
+    await loadGroupBuys();
+    await loadExternalPosts();
+    await refreshCartBadge();
+
     const savedTab = sessionStorage.getItem('shop_tab');
     if (savedTab && savedTab !== 'products') {
-      const tabMap = {"products": 1, "limited": 2, "compare": 3};
+      const tabMap = { products: 1, limited: 2, compare: 3, groupbuy: 4, external: 5 };
       const tabEl = document.querySelector(`.tab:nth-child(${tabMap[savedTab]})`);
       if (tabEl) switchTab(savedTab, tabEl);
     }
+  }
+
+  // ── 상품 / 한정판 ──────────────────────
+  async function loadProducts() {
+    const { data, error } = await soolClient.from('shop_products').select('*').order('created_at', { ascending: false });
+    if (error || !data) { document.getElementById('products-list').innerHTML = '<div class="empty">불러오지 못했어요</div>'; return; }
+
+    const normal = data.filter(p => !p.is_limited);
+    const limited = data.filter(p => p.is_limited);
+
+    document.getElementById('products-list').innerHTML = normal.length === 0 ? '<div class="empty">등록된 상품이 없어요</div>' : normal.map(p => renderProductCard(p)).join('');
+    document.getElementById('limited-list').innerHTML = limited.length === 0 ? '<div class="empty">한정판 상품이 없어요</div>' : limited.map(p => renderProductCard(p, true)).join('');
+  }
+
+  function renderProductCard(p, isLimited) {
+    return `
+      <div class="product-card">
+        <div class="product-icon">${esc(p.emoji || '🍾')}</div>
+        <div style="flex:1;">
+          <div class="product-name">${esc(p.name)} ${p.tag ? `<span class="product-tag" ${isLimited ? 'style="background:#FFF3E0;color:#E65100;"' : ''}>${esc(p.tag)}</span>` : ''}</div>
+          <div class="product-desc">${esc(p.brand || '')} ${p.volume ? '· ' + esc(p.volume) : ''} ${p.abv ? '· ' + p.abv + '도' : ''}</div>
+          <div class="product-price">₩${(p.price || 0).toLocaleString()}</div>
+        </div>
+        <button class="cart-add-btn" onclick="addToCart('${p.id}')">담기</button>
+      </div>
+    `;
+  }
+
+  async function addToCart(productId) {
+    if (!currentUser) { alert('로그인 후 담을 수 있어요'); location.href = 'auth.html'; return; }
+    const { data: existing } = await soolClient.from('cart_items').select('*').eq('user_id', currentUser.id).eq('product_id', productId).single();
+    if (existing) {
+      await soolClient.from('cart_items').update({ quantity: existing.quantity + 1 }).eq('id', existing.id);
+    } else {
+      await soolClient.from('cart_items').insert({ user_id: currentUser.id, product_id: productId, quantity: 1 });
+    }
+    await refreshCartBadge();
+  }
+
+  async function refreshCartBadge() {
+    if (!currentUser) return;
+    const { data } = await soolClient.from('cart_items').select('quantity').eq('user_id', currentUser.id);
+    const total = (data || []).reduce((s, i) => s + i.quantity, 0);
+    const badge = document.getElementById('cart-badge');
+    if (total > 0) { badge.style.display = 'flex'; badge.textContent = total; } else { badge.style.display = 'none'; }
+  }
+
+  // ── 가격비교 ──────────────────────
+  async function loadCompare() {
+    const { data: products } = await soolClient.from('shop_products').select('*').order('created_at', { ascending: false });
+    const wrap = document.getElementById('compare-list');
+    if (!products || products.length === 0) { wrap.innerHTML = '<div class="empty">등록된 상품이 없어요</div>'; return; }
+
+    const cards = await Promise.all(products.map(async (p) => {
+      const { data: prices } = await soolClient.from('shop_product_prices').select('*').eq('product_id', p.id).order('price', { ascending: true });
+      if (!prices || prices.length === 0) return '';
+      const lowest = prices[0].price;
+      return `
+        <div class="compare-card" onclick="this.querySelector('.compare-rows').classList.toggle('show')">
+          <div class="compare-head">
+            <div class="product-icon">${esc(p.emoji || '🍾')}</div>
+            <div style="flex:1;">
+              <div class="product-name">${esc(p.name)}</div>
+              <div class="product-desc">최저가 ₩${lowest.toLocaleString()} · ${prices.length}곳 비교</div>
+            </div>
+          </div>
+          <div class="compare-rows">
+            ${prices.map(pr => `<div class="compare-row ${pr.price === lowest ? 'lowest' : ''}">${esc(pr.retailer)}<span>₩${pr.price.toLocaleString()}</span></div>`).join('')}
+          </div>
+        </div>
+      `;
+    }));
+    const filtered = cards.filter(Boolean);
+    wrap.innerHTML = filtered.length === 0 ? '<div class="empty">가격 비교 데이터가 없어요</div>' : filtered.join('');
+  }
+
+  // ── 공동구매 ──────────────────────
+  async function loadGroupBuys() {
+    const { data: buys, error } = await soolClient.from('group_buys').select('*, users(nickname)').order('created_at', { ascending: false });
+    const wrap = document.getElementById('gb-list');
+    if (error || !buys) { wrap.innerHTML = '<div class="empty">불러오지 못했어요</div>'; return; }
+    if (buys.length === 0) { wrap.innerHTML = '<div class="empty">진행 중인 공동구매가 없어요</div>'; return; }
+
+    let myJoins = [];
+    if (currentUser) {
+      const { data } = await soolClient.from('group_buy_participants').select('group_buy_id, quantity').eq('user_id', currentUser.id);
+      myJoins = data || [];
+    }
+
+    const cards = await Promise.all(buys.map(async (g) => {
+      const { data: participants } = await soolClient.from('group_buy_participants').select('quantity').eq('group_buy_id', g.id);
+      const totalQty = (participants || []).reduce((s, p) => s + p.quantity, 0);
+      const pct = Math.min(100, Math.round((totalQty / g.target_quantity) * 100));
+      const mine = myJoins.find(j => j.group_buy_id === g.id);
+      const dday = g.deadline ? Math.ceil((new Date(g.deadline) - new Date()) / 86400000) : null;
+      return `
+        <div class="gb-card">
+          <div class="gb-title">${esc(g.emoji || '🎁')} ${esc(g.title)}</div>
+          <div class="gb-desc">${esc(g.description || '')}</div>
+          <div class="gb-desc" style="font-weight:600;color:var(--green-600);">1개당 ₩${g.price_per_unit.toLocaleString()} ${g.user_id ? '· @' + esc(g.users?.nickname || '유저') + ' 제안' : '· 관리자 주최'}</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <div class="progress-label">${totalQty}/${g.target_quantity}개 (${pct}%) ${dday !== null ? (dday >= 0 ? `· D-${dday}` : '· 마감') : ''}</div>
+          <button class="gb-join-btn ${mine ? 'joined' : ''}" onclick="${mine ? '' : `joinGroupBuy('${g.id}')`}">${mine ? `참여 완료 (${mine.quantity}개) ✓` : '참여하기'}</button>
+        </div>
+      `;
+    }));
+    wrap.innerHTML = cards.join('');
+  }
+
+  function openGbModal() {
+    if (!currentUser) { alert('로그인 후 제안할 수 있어요'); location.href = 'auth.html'; return; }
+    ['gb-emoji','gb-title','gb-desc','gb-target','gb-price','gb-deadline'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('gb-msg').textContent = '';
+    document.getElementById('gb-modal').classList.add('show');
+  }
+
+  async function submitGb() {
+    const title = document.getElementById('gb-title').value.trim();
+    const target = parseInt(document.getElementById('gb-target').value);
+    const price = parseInt(document.getElementById('gb-price').value);
+    const msg = document.getElementById('gb-msg');
+    if (!title || !target || !price) { msg.textContent = '제목·목표수량·가격은 필수예요'; return; }
+
+    const { error } = await soolClient.from('group_buys').insert({
+      user_id: currentUser.id,
+      title, target_quantity: target, price_per_unit: price,
+      emoji: document.getElementById('gb-emoji').value.trim() || '🎁',
+      description: document.getElementById('gb-desc').value.trim() || null,
+      deadline: document.getElementById('gb-deadline').value || null,
+    });
+    if (error) { console.error(error); msg.textContent = '등록에 실패했어요'; return; }
+    closeModal('gb-modal');
+    await loadGroupBuys();
+  }
+
+  async function joinGroupBuy(id) {
+    if (!currentUser) { alert('로그인 후 참여할 수 있어요'); location.href = 'auth.html'; return; }
+    const qty = parseInt(prompt('몇 개 참여하시겠어요?', '1')) || 1;
+    const { error } = await soolClient.from('group_buy_participants').insert({ group_buy_id: id, user_id: currentUser.id, quantity: qty });
+    if (error) { console.error(error); return; }
+    await loadGroupBuys();
+  }
+
+  // ── 외부구매 후기 ──────────────────────
+  async function loadExternalPosts() {
+    const { data, error } = await soolClient.from('external_purchase_posts').select('*, users(nickname)').order('created_at', { ascending: false }).limit(50);
+    const wrap = document.getElementById('ext-list');
+    if (error || !data) { wrap.innerHTML = '<div class="empty">불러오지 못했어요</div>'; return; }
+    if (data.length === 0) { wrap.innerHTML = '<div class="empty">아직 등록된 후기가 없어요</div>'; return; }
+
+    wrap.innerHTML = data.map(p => `
+      <div class="ext-card" onclick="location.href='external-detail.html?id=${p.id}&from=shop.html'">
+        <div class="ext-img" ${p.image_url ? `style="background-image:url('${esc(p.image_url)}');"` : ''}>${p.image_url ? '' : '🔗'}</div>
+        <div class="ext-body">
+          <div class="ext-title">${esc(p.title)}</div>
+          <div class="ext-desc">${esc(p.description || '')}</div>
+          <div class="ext-meta">
+            <span class="ext-retailer">${esc(p.retailer)}</span>
+            ${p.rating ? `<span>${'★'.repeat(p.rating)}${'☆'.repeat(5 - p.rating)}</span>` : ''}
+            <span>👍 ${p.like_count || 0}</span>
+            <span>@${esc(p.users?.nickname || '익명')}</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function openExtModal() {
+    if (!currentUser) { alert('로그인 후 작성할 수 있어요'); location.href = 'auth.html'; return; }
+    ['ext-retailer','ext-title','ext-url','ext-image','ext-desc'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('ext-msg').textContent = '';
+    extStar = 0;
+    document.querySelectorAll('#ext-star-row .star').forEach(s => s.classList.remove('filled'));
+    document.getElementById('ext-modal').classList.add('show');
+  }
+  document.getElementById('ext-star-row').addEventListener('click', (e) => {
+    const star = e.target.closest('.star');
+    if (!star) return;
+    extStar = parseInt(star.dataset.v);
+    document.querySelectorAll('#ext-star-row .star').forEach(s => s.classList.toggle('filled', parseInt(s.dataset.v) <= extStar));
   });
+
+  async function submitExt() {
+    const retailer = document.getElementById('ext-retailer').value.trim();
+    const title = document.getElementById('ext-title').value.trim();
+    const external_url = document.getElementById('ext-url').value.trim();
+    const msg = document.getElementById('ext-msg');
+    if (!retailer || !title || !external_url) { msg.textContent = '판매처·제목·링크는 필수예요'; return; }
+
+    const { error } = await soolClient.from('external_purchase_posts').insert({
+      user_id: currentUser.id, retailer, title, external_url,
+      image_url: document.getElementById('ext-image').value.trim() || null,
+      description: document.getElementById('ext-desc').value.trim() || null,
+      rating: extStar || null,
+    });
+    if (error) { console.error(error); msg.textContent = '등록에 실패했어요'; return; }
+    closeModal('ext-modal');
+    await loadExternalPosts();
+  }
+
+  // ── 장바구니 ──────────────────────
+  async function openCartModal() {
+    if (!currentUser) { alert('로그인 후 이용할 수 있어요'); location.href = 'auth.html'; return; }
+    document.getElementById('cart-msg').textContent = '';
+    document.getElementById('cart-modal').classList.add('show');
+    await renderCart();
+  }
+
+  async function renderCart() {
+    const { data } = await soolClient.from('cart_items').select('*, shop_products(name, price, emoji)').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+    const wrap = document.getElementById('cart-items-list');
+    if (!data || data.length === 0) { wrap.innerHTML = '<div class="empty">장바구니가 비어있어요</div>'; document.getElementById('cart-total').textContent = '₩0'; return; }
+
+    let total = 0;
+    wrap.innerHTML = data.map(item => {
+      const price = item.shop_products?.price || 0;
+      total += price * item.quantity;
+      return `
+        <div class="cart-item">
+          <div style="font-size:20px;">${item.shop_products?.emoji || '🍾'}</div>
+          <div class="cart-item-name">${esc(item.shop_products?.name || '삭제된 상품')}<br><span class="cart-item-price">₩${price.toLocaleString()}</span></div>
+          <button class="qty-btn" onclick="changeQty('${item.id}', ${item.quantity - 1})">-</button>
+          <span>${item.quantity}</span>
+          <button class="qty-btn" onclick="changeQty('${item.id}', ${item.quantity + 1})">+</button>
+        </div>
+      `;
+    }).join('');
+    document.getElementById('cart-total').textContent = `₩${total.toLocaleString()}`;
+  }
+
+  async function changeQty(cartItemId, newQty) {
+    if (newQty <= 0) { await soolClient.from('cart_items').delete().eq('id', cartItemId); }
+    else { await soolClient.from('cart_items').update({ quantity: newQty }).eq('id', cartItemId); }
+    await renderCart();
+    await refreshCartBadge();
+  }
+
+  async function checkout() {
+    const location_ = document.getElementById('pickup-location').value.trim();
+    const msg = document.getElementById('cart-msg');
+    if (!location_) { msg.textContent = '픽업 위치를 입력해주세요'; return; }
+
+    const { data: items } = await soolClient.from('cart_items').select('*, shop_products(name, price)').eq('user_id', currentUser.id);
+    if (!items || items.length === 0) { msg.textContent = '장바구니가 비어있어요'; return; }
+
+    const total = items.reduce((s, i) => s + (i.shop_products?.price || 0) * i.quantity, 0);
+    const { data: order, error } = await soolClient.from('orders').insert({ user_id: currentUser.id, pickup_location: location_, total_price: total }).select().single();
+    if (error || !order) { msg.textContent = '주문에 실패했어요'; return; }
+
+    const orderItems = items.map(i => ({ order_id: order.id, product_id: i.product_id, name: i.shop_products?.name || '삭제된 상품', price: i.shop_products?.price || 0, quantity: i.quantity }));
+    await soolClient.from('order_items').insert(orderItems);
+    await soolClient.from('cart_items').delete().eq('user_id', currentUser.id);
+
+    msg.style.color = 'var(--green-600)';
+    msg.textContent = `픽업 신청이 완료됐어요! (모의주문, 실제 결제 아님)`;
+    await renderCart();
+    await refreshCartBadge();
+  }
+
+  init();
 </script>
+<script src="js/ui/chat.js"></script>
+<script>initSoolChat({ channelKey: 'building:shop', label: '상점 채팅', accentColor: '#22AA44' });</script>
 </body>
 </html>

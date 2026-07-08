@@ -316,6 +316,7 @@
   <button class="admin-tab" onclick="switchTab('pairing', this)">🍽️ 마리아주</button>
   <button class="admin-tab" onclick="switchTab('cafe', this)">🌿 소버카페</button>
   <button class="admin-tab" onclick="switchTab('popup', this)">🎪 팝업광장</button>
+  <button class="admin-tab" onclick="switchTab('shop', this)">🛒 상점</button>
 </div>
 
 <!-- 콘텐츠 -->
@@ -773,6 +774,125 @@
     </table>
   </div>
 
+  <!-- 상점 탭 -->
+  <div class="tab-panel" id="panel-shop">
+    <!-- 상품 등록 -->
+    <div class="form-card">
+      <h3>🛒 새 상품 등록</h3>
+      <div class="msg" id="shop-product-msg"></div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">이름 *</label>
+          <input class="form-input" id="sp-name" placeholder="예) 야마자키 12년" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">브랜드</label>
+          <input class="form-input" id="sp-brand" placeholder="예) 산토리" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">용량</label>
+          <input class="form-input" id="sp-volume" placeholder="예) 700ml" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">도수(%)</label>
+          <input class="form-input" id="sp-abv" type="number" step="0.1" placeholder="예) 43" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">가격 *</label>
+          <input class="form-input" id="sp-price" type="number" placeholder="예) 89000" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">이모지</label>
+          <input class="form-input" id="sp-emoji" placeholder="예) 🥃" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">태그</label>
+          <input class="form-input" id="sp-tag" placeholder="예) 인기, 베스트, 한정" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">한정판 여부</label>
+          <select class="form-select" id="sp-limited">
+            <option value="false">일반</option>
+            <option value="true">한정판</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-primary" onclick="addShopProduct()">등록하기</button>
+        <button class="btn-sm" onclick="clearShopProductForm()">초기화</button>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <div class="section-title">등록된 상품 목록</div>
+      <div class="section-count" id="shop-products-count"></div>
+    </div>
+    <table class="data-table">
+      <thead><tr><th>이름</th><th>브랜드</th><th>가격</th><th>구분</th><th></th></tr></thead>
+      <tbody id="shop-products-tbody">
+        <tr><td colspan="5"><div class="empty-state"><div class="icon">🛒</div>로딩 중...</div></td></tr>
+      </tbody>
+    </table>
+
+    <!-- 가격비교 등록 -->
+    <div class="form-card" style="margin-top:24px;">
+      <h3>📊 판매처 가격 등록</h3>
+      <div class="msg" id="shop-price-msg"></div>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label class="form-label">상품 선택 *</label>
+          <select class="form-select" id="sp-price-product"><option value="">선택</option></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">판매처 *</label>
+          <input class="form-input" id="sp-price-retailer" placeholder="예) GS25, 이마트" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">가격 *</label>
+          <input class="form-input" id="sp-price-value" type="number" placeholder="예) 87000" />
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-primary" onclick="addShopPrice()">등록하기</button>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <div class="section-title">등록된 판매처 가격</div>
+      <div class="section-count" id="shop-prices-count"></div>
+    </div>
+    <table class="data-table">
+      <thead><tr><th>상품</th><th>판매처</th><th>가격</th><th></th></tr></thead>
+      <tbody id="shop-prices-tbody">
+        <tr><td colspan="4"><div class="empty-state"><div class="icon">📊</div>로딩 중...</div></td></tr>
+      </tbody>
+    </table>
+
+    <!-- 공동구매 목록 -->
+    <div class="section-header" style="margin-top:24px;">
+      <div class="section-title">공동구매 현황</div>
+      <div class="section-count" id="shop-gb-count"></div>
+    </div>
+    <table class="data-table">
+      <thead><tr><th>제목</th><th>주최</th><th>진행률</th><th>마감</th><th></th></tr></thead>
+      <tbody id="shop-gb-tbody">
+        <tr><td colspan="5"><div class="empty-state"><div class="icon">🎁</div>로딩 중...</div></td></tr>
+      </tbody>
+    </table>
+
+    <!-- 외부구매 후기 목록 -->
+    <div class="section-header" style="margin-top:24px;">
+      <div class="section-title">외부구매 후기</div>
+      <div class="section-count" id="shop-ext-count"></div>
+    </div>
+    <table class="data-table">
+      <thead><tr><th>판매처</th><th>제목</th><th>작성자</th><th>👍</th><th>💬</th><th></th></tr></thead>
+      <tbody id="shop-ext-tbody">
+        <tr><td colspan="6"><div class="empty-state"><div class="icon">🔗</div>로딩 중...</div></td></tr>
+      </tbody>
+    </table>
+  </div>
+
 </div>
 
 <!-- 유저 상세보기 모달 -->
@@ -825,6 +945,10 @@
     loadCafePicks();
     loadCafeChallenges();
     loadPopupEvents();
+    loadShopProducts();
+    loadShopPrices();
+    loadShopGroupBuys();
+    loadShopExternalPosts();
   }
 
   function showAccessDenied() {
@@ -1424,6 +1548,157 @@
     if (!confirm('이벤트를 삭제할까요?')) return;
     await soolClient.from('popup_events').delete().eq('id', id);
     loadPopupEvents();
+  }
+
+  // ── 상점: 상품 ─────────────────────────────────
+  function clearShopProductForm() {
+    ['sp-name','sp-brand','sp-volume','sp-abv','sp-price','sp-emoji','sp-tag'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('sp-limited').value = 'false';
+    document.getElementById('shop-product-msg').textContent = '';
+  }
+
+  async function addShopProduct() {
+    const name = document.getElementById('sp-name').value.trim();
+    const price = parseInt(document.getElementById('sp-price').value);
+    if (!name || !price) { showMsg('shop-product-msg', 'error', '이름과 가격은 필수예요'); return; }
+
+    const payload = {
+      name,
+      brand: document.getElementById('sp-brand').value.trim() || null,
+      volume: document.getElementById('sp-volume').value.trim() || null,
+      abv: parseFloat(document.getElementById('sp-abv').value) || null,
+      price,
+      emoji: document.getElementById('sp-emoji').value.trim() || null,
+      tag: document.getElementById('sp-tag').value.trim() || null,
+      is_limited: document.getElementById('sp-limited').value === 'true',
+    };
+    const { error } = await soolClient.from('shop_products').insert(payload);
+    if (error) { console.error(error); showMsg('shop-product-msg', 'error', '등록에 실패했어요'); return; }
+    showMsg('shop-product-msg', 'success', '상품이 등록됐어요!');
+    clearShopProductForm();
+    loadShopProducts();
+    loadShopPrices();
+  }
+
+  let shopProductsCache = [];
+  async function loadShopProducts() {
+    const { data, error } = await soolClient.from('shop_products').select('*').order('created_at', { ascending: false });
+    if (error || !data) return;
+    shopProductsCache = data;
+    document.getElementById('shop-products-count').textContent = `총 ${data.length}개`;
+    const tbody = document.getElementById('shop-products-tbody');
+    tbody.innerHTML = data.length === 0 ? `<tr><td colspan="5"><div class="empty-state"><div class="icon">🛒</div>등록된 상품이 없어요</div></td></tr>` : data.map(p => `
+      <tr>
+        <td>${p.emoji || ''} ${p.name}</td>
+        <td>${p.brand || '—'}</td>
+        <td>₩${p.price.toLocaleString()}</td>
+        <td>${p.is_limited ? '한정판' : '일반'}</td>
+        <td><button class="btn-danger" onclick="deleteShopProduct('${p.id}')">삭제</button></td>
+      </tr>
+    `).join('');
+
+    const sel = document.getElementById('sp-price-product');
+    sel.innerHTML = '<option value="">선택</option>' + data.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+  }
+
+  async function deleteShopProduct(id) {
+    if (!confirm('상품을 삭제할까요? (가격비교 데이터도 함께 삭제돼요)')) return;
+    await soolClient.from('shop_products').delete().eq('id', id);
+    loadShopProducts();
+    loadShopPrices();
+  }
+
+  // ── 상점: 가격비교 ─────────────────────────────
+  async function addShopPrice() {
+    const product_id = document.getElementById('sp-price-product').value;
+    const retailer = document.getElementById('sp-price-retailer').value.trim();
+    const price = parseInt(document.getElementById('sp-price-value').value);
+    if (!product_id || !retailer || !price) { showMsg('shop-price-msg', 'error', '전부 입력해주세요'); return; }
+
+    const { error } = await soolClient.from('shop_product_prices').insert({ product_id, retailer, price });
+    if (error) { console.error(error); showMsg('shop-price-msg', 'error', '등록에 실패했어요'); return; }
+    showMsg('shop-price-msg', 'success', '가격이 등록됐어요!');
+    document.getElementById('sp-price-retailer').value = '';
+    document.getElementById('sp-price-value').value = '';
+    loadShopPrices();
+  }
+
+  async function loadShopPrices() {
+    const { data, error } = await soolClient.from('shop_product_prices').select('*, shop_products(name)').order('created_at', { ascending: false });
+    if (error || !data) return;
+    document.getElementById('shop-prices-count').textContent = `총 ${data.length}개`;
+    const tbody = document.getElementById('shop-prices-tbody');
+    tbody.innerHTML = data.length === 0 ? `<tr><td colspan="4"><div class="empty-state"><div class="icon">📊</div>등록된 가격 정보가 없어요</div></td></tr>` : data.map(pr => `
+      <tr>
+        <td>${pr.shop_products?.name || '삭제된 상품'}</td>
+        <td>${pr.retailer}</td>
+        <td>₩${pr.price.toLocaleString()}</td>
+        <td><button class="btn-danger" onclick="deleteShopPrice('${pr.id}')">삭제</button></td>
+      </tr>
+    `).join('');
+  }
+
+  async function deleteShopPrice(id) {
+    if (!confirm('삭제할까요?')) return;
+    await soolClient.from('shop_product_prices').delete().eq('id', id);
+    loadShopPrices();
+  }
+
+  // ── 상점: 공동구매 현황 ─────────────────────────
+  async function loadShopGroupBuys() {
+    const { data, error } = await soolClient.from('group_buys').select('*, users(nickname)').order('created_at', { ascending: false });
+    if (error || !data) return;
+    document.getElementById('shop-gb-count').textContent = `총 ${data.length}개`;
+    const tbody = document.getElementById('shop-gb-tbody');
+    if (data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="icon">🎁</div>등록된 공동구매가 없어요</div></td></tr>`;
+      return;
+    }
+    const rows = await Promise.all(data.map(async (g) => {
+      const { data: participants } = await soolClient.from('group_buy_participants').select('quantity').eq('group_buy_id', g.id);
+      const totalQty = (participants || []).reduce((s, p) => s + p.quantity, 0);
+      const pct = Math.min(100, Math.round((totalQty / g.target_quantity) * 100));
+      return `
+        <tr>
+          <td>${g.emoji || ''} ${g.title}</td>
+          <td>${g.user_id ? (g.users?.nickname || '—') : '관리자'}</td>
+          <td>${totalQty}/${g.target_quantity} (${pct}%)</td>
+          <td>${g.deadline || '—'}</td>
+          <td><button class="btn-danger" onclick="deleteShopGroupBuy('${g.id}')">삭제</button></td>
+        </tr>
+      `;
+    }));
+    tbody.innerHTML = rows.join('');
+  }
+
+  async function deleteShopGroupBuy(id) {
+    if (!confirm('공동구매를 삭제할까요?')) return;
+    await soolClient.from('group_buys').delete().eq('id', id);
+    loadShopGroupBuys();
+  }
+
+  // ── 상점: 외부구매 후기 ─────────────────────────
+  async function loadShopExternalPosts() {
+    const { data, error } = await soolClient.from('external_purchase_posts').select('*, users(nickname)').order('created_at', { ascending: false });
+    if (error || !data) return;
+    document.getElementById('shop-ext-count').textContent = `총 ${data.length}개`;
+    const tbody = document.getElementById('shop-ext-tbody');
+    tbody.innerHTML = data.length === 0 ? `<tr><td colspan="6"><div class="empty-state"><div class="icon">🔗</div>등록된 후기가 없어요</div></td></tr>` : data.map(p => `
+      <tr style="cursor:pointer;" onclick="location.href='external-detail.html?id=${p.id}&from=admin.html'">
+        <td>${p.retailer}</td>
+        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.title}</td>
+        <td>${p.users?.nickname || '—'}</td>
+        <td>${p.like_count || 0}</td>
+        <td>${p.comment_count || 0}</td>
+        <td><button class="btn-danger" onclick="event.stopPropagation();deleteShopExternalPost('${p.id}')">삭제</button></td>
+      </tr>
+    `).join('');
+  }
+
+  async function deleteShopExternalPost(id) {
+    if (!confirm('후기를 삭제할까요?')) return;
+    await soolClient.from('external_purchase_posts').delete().eq('id', id);
+    loadShopExternalPosts();
   }
 
   init();

@@ -90,6 +90,61 @@ Unity 전환 이후 간단한 도트 수준의 존재 표시만 검토.
 
 ---
 
+## [v1.6.11] — 2026-07-06 · 주류 상점 구현 (상품 · 가격비교 · 공동구매 · 외부구매 후기)
+
+### Supabase DB 변경
+
+#### shop_products 테이블 신규 생성
+- id / name / brand / volume / abv / price / emoji / tag / is_limited / created_at
+- 관리자 등록 전용 (drinks 테이블과 별도 — drinks는 위키·리뷰용, shop_products는 실제 판매 상품용)
+
+#### shop_product_prices 테이블 신규 생성 (가격비교)
+- product_id (FK) / retailer / price / created_at
+
+#### cart_items 테이블 신규 생성 (장바구니)
+- user_id (FK) / product_id (FK) / quantity, UNIQUE(user_id, product_id)
+
+#### orders / order_items 테이블 신규 생성 (모의 주문)
+- orders: user_id / pickup_location / total_price / status(픽업대기·픽업완료·취소)
+- order_items: order_id / product_id / name / price / quantity (상품 삭제돼도 주문내역 보존)
+- 실제 결제 연동 없음 — 픽업 신청 기록만 남기는 모의(mock) 주문
+
+#### group_buys / group_buy_participants 테이블 신규 생성 (공동구매)
+- group_buys: user_id(null=관리자 주최) / title / description / emoji / target_quantity / price_per_unit / deadline
+- group_buy_participants: group_buy_id / user_id / quantity, UNIQUE(group_buy_id, user_id)
+- 진행률(%)은 참여자 수량 합계 ÷ 목표수량으로 실시간 계산
+
+#### external_purchase_posts / _likes / _comments 테이블 신규 생성 (외부구매 후기)
+- posts: user_id / title / retailer / external_url / description / image_url / rating(1~5) / like_count / comment_count
+- 메신저 링크 미리보기 카드 형태 — 유저가 직접 제목·이미지·설명 입력 (자동 OG 스크래핑은 미구현)
+- likes/comments: 양조장·마리아주와 동일한 좋아요·댓글 구조
+
+### 신규 파일
+
+#### external-detail.html
+- 외부구매 후기 상세 페이지, 미리보기 카드 클릭 시 새 탭으로 외부 링크 이동
+- 별점·좋아요·댓글 (양조장 패턴과 동일)
+
+### 변경 파일
+
+#### shop.html
+- 상품 · 한정판 탭: shop_products 실데이터 연동, "담기" → cart_items 저장
+- 가격비교 탭: 상품 클릭 시 판매처별 가격 펼쳐보기, 최저가 강조 표시
+- 공동구매 탭 신규: 유저도 직접 제안 가능("+ 공동구매 제안"), 진행률 실시간 표시
+- 외부구매 후기 탭 신규: 링크 미리보기 카드 목록, "+ 후기 작성"
+- 장바구니 모달 신규: 수량 조절, "픽업 신청" 시 orders·order_items 생성 (실결제 없는 모의주문)
+- 마을로 돌아가기 → index.html 고정
+
+#### admin.html
+- 🛒 상점 탭 신규 — 상품 등록/삭제, 판매처 가격 등록/삭제, 공동구매 현황 조회/삭제, 외부구매 후기 조회/삭제
+
+### 기술 결정
+- "외부 상점을 술향기마을 계정으로 구매"는 실제 판매처와의 API 제휴가 필요해 구현 범위 밖으로 판단, 대신 유저가 직접 작성하는 링크 미리보기 후기 방식으로 대체
+- 스마트오더·결제는 실제 카드결제 연동 없이 모의(mock) 주문 기록으로만 구현 (픽업 신청 개념)
+- shop_products를 drinks와 분리한 이유: drinks는 위키·리뷰 목적 데이터, shop_products는 가격·재고 등 실제 판매 목적 데이터로 성격이 달라 별도 관리가 안전
+
+---
+
 ## [v1.6.10] — 2026-07-06 · 팝업 광장 & 내 공간 구현
 
 ### Supabase DB 변경

@@ -970,6 +970,13 @@
   }
 
   // ── 술 DB ────────────────────────────────────
+  // XSS 방지
+  function esc(str) {
+    const d = document.createElement('div');
+    d.textContent = str == null ? '' : String(str);
+    return d.innerHTML;
+  }
+
   async function loadDrinks() {
     const { data, error } = await soolClient
       .from('drinks')
@@ -988,9 +995,9 @@
 
     tbody.innerHTML = data.map(d => `
       <tr style="cursor:pointer;" onclick="location.href='drink-detail.html?id=${d.id}&from=admin.html'">
-        <td>${d.name}</td>
-        <td>${d.category}</td>
-        <td>${d.brand || '—'}</td>
+        <td>${esc(d.name)}</td>
+        <td>${esc(d.category)}</td>
+        <td>${esc(d.brand) || '—'}</td>
         <td>${d.alcohol_degree ? d.alcohol_degree + '%' : '—'}</td>
         <td>${d.avg_rating ? '★ ' + d.avg_rating : '—'}</td>
         <td>${d.review_count}</td>
@@ -1055,8 +1062,8 @@
 
     tbody.innerHTML = data.map(u => `
       <tr style="cursor:pointer;" onclick="openUserDetail('${u.id}', '${(u.nickname || '').replace(/'/g, "\\'")}')">
-        <td>${u.nickname}</td>
-        <td>${u.email}</td>
+        <td>${esc(u.nickname)}</td>
+        <td>${esc(u.email)}</td>
         <td>Lv.${u.level}</td>
         <td>${u.xp} XP</td>
         <td>
@@ -1087,10 +1094,10 @@
 
     tbody.innerHTML = data.map(r => `
       <tr style="cursor:pointer;" onclick="location.href='drink-detail.html?id=${r.drink_id}&from=admin.html'">
-        <td>${r.drinks?.name || '—'}</td>
-        <td>${r.users?.nickname || '—'}</td>
+        <td>${esc(r.drinks?.name) || '—'}</td>
+        <td>${esc(r.users?.nickname) || '—'}</td>
         <td>${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</td>
-        <td>${r.content ? r.content.slice(0, 30) + (r.content.length > 30 ? '...' : '') : '—'}</td>
+        <td>${r.content ? esc(r.content.slice(0, 30)) + (r.content.length > 30 ? '...' : '') : '—'}</td>
         <td>${new Date(r.created_at).toLocaleDateString('ko-KR')}</td>
         <td><button class="btn-danger" onclick="event.stopPropagation();deleteReview('${r.id}')">삭제</button></td>
       </tr>
@@ -1120,9 +1127,9 @@
     }
     tbody.innerHTML = data.map(p => `
       <tr style="cursor:pointer;" onclick="location.href='post-detail.html?id=${p.id}&from=admin.html'">
-        <td>${p.category}</td>
-        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.title}</td>
-        <td>${p.users?.nickname || '—'}</td>
+        <td>${esc(p.category)}</td>
+        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(p.title)}</td>
+        <td>${esc(p.users?.nickname) || '—'}</td>
         <td>${p.like_count}</td>
         <td>${p.comment_count}</td>
         <td>${new Date(p.created_at).toLocaleDateString('ko-KR')}</td>
@@ -1162,8 +1169,8 @@
 
     tbody.innerHTML = data.map(u => `
       <tr>
-        <td>${u.nickname}</td>
-        <td>${u.email}</td>
+        <td>${esc(u.nickname)}</td>
+        <td>${esc(u.email)}</td>
         <td>${courseCounts[u.id] || 0}개</td>
         <td>${new Date(u.created_at).toLocaleDateString('ko-KR')}</td>
         <td><button class="btn-danger" onclick="revokeInstructorById('${u.id}')">인증 취소</button></td>
@@ -1195,9 +1202,9 @@
       ? `<tr><td colspan="7"><div class="empty-state"><div class="icon">📚</div>공개된 강의가 없어요</div></td></tr>`
       : published.map(c => `
         <tr style="cursor:pointer;" onclick="location.href='course-detail.html?id=${c.id}&from=admin.html'">
-          <td>${c.title}</td>
+          <td>${esc(c.title)}</td>
           <td>${typeLabel[c.type] || '—'}</td>
-          <td>${c.category || '—'}</td>
+          <td>${esc(c.category) || '—'}</td>
           <td>${c.is_free ? '무료' : '유료'}</td>
           <td><span style="color:#16a34a;">공개</span></td>
           <td>${new Date(c.created_at).toLocaleDateString('ko-KR')}</td>
@@ -1211,8 +1218,8 @@
       ? `<tr><td colspan="5"><div class="empty-state"><div class="icon">✅</div>대기 중인 강의가 없어요</div></td></tr>`
       : pending.map(c => `
         <tr>
-          <td>${c.title}</td>
-          <td>${c.users?.nickname || '관리자'}</td>
+          <td>${esc(c.title)}</td>
+          <td>${esc(c.users?.nickname) || '관리자'}</td>
           <td>${typeLabel[c.type] || '—'}</td>
           <td>${new Date(c.created_at).toLocaleDateString('ko-KR')}</td>
           <td>
@@ -1309,10 +1316,10 @@
     const typeLabel = { pairing: '페어링', recipe: '레시피' };
     tbody.innerHTML = data.map(p => `
       <tr style="cursor:pointer;" onclick="location.href='pairing-detail.html?id=${p.id}&from=admin.html'">
-        <td>${typeLabel[p.type] || p.type}</td>
-        <td>${p.category}</td>
-        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.title}</td>
-        <td>${p.user_id ? (p.users?.nickname || '—') : '관리자'}</td>
+        <td>${typeLabel[p.type] || esc(p.type)}</td>
+        <td>${esc(p.category)}</td>
+        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(p.title)}</td>
+        <td>${p.user_id ? (esc(p.users?.nickname) || '—') : '관리자'}</td>
         <td>${p.like_count || 0}</td>
         <td>${p.comment_count || 0}</td>
         <td>${new Date(p.created_at).toLocaleDateString('ko-KR')}</td>
@@ -1344,9 +1351,9 @@
     }
     tbody.innerHTML = data.map(d => `
       <tr style="cursor:pointer;" onclick="location.href='cafe-detail.html?type=nolo&id=${d.id}&from=admin.html'">
-        <td>${d.category}</td>
-        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.name}</td>
-        <td>${d.user_id ? (d.users?.nickname || '—') : '관리자'}</td>
+        <td>${esc(d.category)}</td>
+        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(d.name)}</td>
+        <td>${d.user_id ? (esc(d.users?.nickname) || '—') : '관리자'}</td>
         <td>${d.avg_rating || 0}</td>
         <td>${d.review_count || 0}</td>
         <td>${new Date(d.created_at).toLocaleDateString('ko-KR')}</td>
@@ -1378,8 +1385,8 @@
     }
     tbody.innerHTML = data.map(d => `
       <tr style="cursor:pointer;" onclick="location.href='cafe-detail.html?type=pick&id=${d.id}&from=admin.html'">
-        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.title}</td>
-        <td>${d.user_id ? (d.users?.nickname || '—') : '관리자'}</td>
+        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(d.title)}</td>
+        <td>${d.user_id ? (esc(d.users?.nickname) || '—') : '관리자'}</td>
         <td>${d.user_id ? '유저 추천' : '공식'}</td>
         <td>${new Date(d.created_at).toLocaleDateString('ko-KR')}</td>
         <td><button class="btn-danger" onclick="event.stopPropagation();deleteCafePick('${d.id}')">삭제</button></td>
@@ -1408,7 +1415,7 @@
       const { count } = await soolClient.from('challenge_participants').select('id', { count: 'exact', head: true }).eq('challenge_id', c.id);
       return `
         <tr>
-          <td>${c.emoji || '🌙'} ${c.title}</td>
+          <td>${esc(c.emoji) || '🌙'} ${esc(c.title)}</td>
           <td>${c.duration_days}일</td>
           <td>${count || 0}명</td>
         </tr>
@@ -1444,10 +1451,10 @@
     reviewsEl.innerHTML = reviews.length === 0 ? '<div class="um-empty">작성한 리뷰가 없어요</div>' : reviews.map(r => `
       <div class="um-item">
         <div class="um-item-head">
-          <span>${r.name} · ${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)} · ${timeAgoAdmin(r.created_at)}</span>
+          <span>${esc(r.name)} · ${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)} · ${timeAgoAdmin(r.created_at)}</span>
           <span class="um-delete" onclick="deleteUserReview('${r.table}','${r.id}','${userId}','${(nickname||'').replace(/'/g, "\\'")}')">삭제</span>
         </div>
-        <div class="um-item-body">${r.content || ''}</div>
+        <div class="um-item-body">${esc(r.content || '')}</div>
       </div>
     `).join('');
 
@@ -1455,10 +1462,10 @@
     bmEl.innerHTML = (!bookmarks || bookmarks.length === 0) ? '<div class="um-empty">저장한 즐겨찾기가 없어요</div>' : bookmarks.map(b => `
       <div class="um-item">
         <div class="um-item-head">
-          <span>${b.emoji || '⭐'} ${b.item_type} · ${timeAgoAdmin(b.created_at)}</span>
+          <span>${esc(b.emoji) || '⭐'} ${esc(b.item_type)} · ${timeAgoAdmin(b.created_at)}</span>
           <span class="um-delete" onclick="deleteUserBookmark('${b.id}','${userId}','${(nickname||'').replace(/'/g, "\\'")}')">삭제</span>
         </div>
-        <div class="um-item-body">${b.title}${b.subtitle ? ' · ' + b.subtitle : ''}</div>
+        <div class="um-item-body">${esc(b.title)}${b.subtitle ? ' · ' + esc(b.subtitle) : ''}</div>
       </div>
     `).join('');
   }
@@ -1503,8 +1510,8 @@
       }
       return `
         <tr>
-          <td>${ev.emoji || ''} ${typeLabel[ev.event_type] || ev.event_type}</td>
-          <td>${ev.title}</td>
+          <td>${esc(ev.emoji) || ''} ${typeLabel[ev.event_type] || esc(ev.event_type)}</td>
+          <td>${esc(ev.title)}</td>
           <td>${period}</td>
           <td>${participants}</td>
           <td><button class="btn-danger" onclick="deletePopupEvent('${ev.id}')">삭제</button></td>
@@ -1589,8 +1596,8 @@
     const tbody = document.getElementById('shop-products-tbody');
     tbody.innerHTML = data.length === 0 ? `<tr><td colspan="5"><div class="empty-state"><div class="icon">🛒</div>등록된 상품이 없어요</div></td></tr>` : data.map(p => `
       <tr>
-        <td>${p.emoji || ''} ${p.name}</td>
-        <td>${p.brand || '—'}</td>
+        <td>${esc(p.emoji) || ''} ${esc(p.name)}</td>
+        <td>${esc(p.brand) || '—'}</td>
         <td>₩${p.price.toLocaleString()}</td>
         <td>${p.is_limited ? '한정판' : '일반'}</td>
         <td><button class="btn-danger" onclick="deleteShopProduct('${p.id}')">삭제</button></td>
@@ -1598,7 +1605,7 @@
     `).join('');
 
     const sel = document.getElementById('sp-price-product');
-    sel.innerHTML = '<option value="">선택</option>' + data.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    sel.innerHTML = '<option value="">선택</option>' + data.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('');
   }
 
   async function deleteShopProduct(id) {
@@ -1630,8 +1637,8 @@
     const tbody = document.getElementById('shop-prices-tbody');
     tbody.innerHTML = data.length === 0 ? `<tr><td colspan="4"><div class="empty-state"><div class="icon">📊</div>등록된 가격 정보가 없어요</div></td></tr>` : data.map(pr => `
       <tr>
-        <td>${pr.shop_products?.name || '삭제된 상품'}</td>
-        <td>${pr.retailer}</td>
+        <td>${esc(pr.shop_products?.name) || '삭제된 상품'}</td>
+        <td>${esc(pr.retailer)}</td>
         <td>₩${pr.price.toLocaleString()}</td>
         <td><button class="btn-danger" onclick="deleteShopPrice('${pr.id}')">삭제</button></td>
       </tr>
@@ -1660,8 +1667,8 @@
       const pct = Math.min(100, Math.round((totalQty / g.target_quantity) * 100));
       return `
         <tr>
-          <td>${g.emoji || ''} ${g.title}</td>
-          <td>${g.user_id ? (g.users?.nickname || '—') : '관리자'}</td>
+          <td>${esc(g.emoji) || ''} ${esc(g.title)}</td>
+          <td>${g.user_id ? (esc(g.users?.nickname) || '—') : '관리자'}</td>
           <td>${totalQty}/${g.target_quantity} (${pct}%)</td>
           <td>${g.deadline || '—'}</td>
           <td><button class="btn-danger" onclick="deleteShopGroupBuy('${g.id}')">삭제</button></td>
@@ -1685,9 +1692,9 @@
     const tbody = document.getElementById('shop-ext-tbody');
     tbody.innerHTML = data.length === 0 ? `<tr><td colspan="6"><div class="empty-state"><div class="icon">🔗</div>등록된 후기가 없어요</div></td></tr>` : data.map(p => `
       <tr style="cursor:pointer;" onclick="location.href='external-detail.html?id=${p.id}&from=admin.html'">
-        <td>${p.retailer}</td>
-        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.title}</td>
-        <td>${p.users?.nickname || '—'}</td>
+        <td>${esc(p.retailer)}</td>
+        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(p.title)}</td>
+        <td>${esc(p.users?.nickname) || '—'}</td>
         <td>${p.like_count || 0}</td>
         <td>${p.comment_count || 0}</td>
         <td><button class="btn-danger" onclick="event.stopPropagation();deleteShopExternalPost('${p.id}')">삭제</button></td>

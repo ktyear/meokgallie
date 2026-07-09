@@ -132,6 +132,10 @@
     </div>
   </div>
 
+  <!-- ── Supabase CDN (인라인 스크립트에서 soolClient를 사용하므로 먼저 로드) ── -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/core/supabase.js"></script>
+
   <!-- ── 인라인 스크립트 ── -->
   <script>
     // 건물 숏컷 토글
@@ -332,6 +336,10 @@
     };
 
     function moveToBuilding(x, z, buildingId) {
+      if (!window.SoolControls || typeof SoolControls.moveTo !== 'function') {
+        console.warn('SoolControls가 아직 준비되지 않았어요. 잠시 후 다시 시도해주세요.');
+        return;
+      }
       const theta = BUILDING_THETA[buildingId];
       SoolControls.moveTo(x, z, theta);
       // 카메라 이동 후 팝업 표시 (이동 애니메이션 후)
@@ -349,10 +357,6 @@
     });
 
   </script>
-
-  <!-- ── Supabase CDN ── -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/core/supabase.js"></script>
 
   <!-- ── Three.js CDN ── -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>

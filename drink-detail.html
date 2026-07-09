@@ -476,6 +476,13 @@
   const drinkId = params.get('id');
 
   let currentUser = null;
+
+  // XSS 방지
+  function esc(str) {
+    const d = document.createElement('div');
+    d.textContent = str == null ? '' : String(str);
+    return d.innerHTML;
+  }
   let selectedStar = 0;
   let selectedTags = [];
   let drinkData = null;
@@ -567,8 +574,8 @@
       el.innerHTML = items.map(item => `
         <div class="contrib-item">
           <div style="flex:1;">
-            <div class="contrib-text">${item.content}</div>
-            <div class="contrib-meta">@${item.users?.nickname || '익명'}</div>
+            <div class="contrib-text">${esc(item.content)}</div>
+            <div class="contrib-meta">@${esc(item.users?.nickname) || '익명'}</div>
           </div>
           <button class="contrib-vote ${isMyContrib(item) ? 'voted' : ''}" onclick="voteContrib('${item.id}', this)">
             👍 ${item.like_count}
@@ -627,11 +634,15 @@
     const allOptions = [...new Set([...SERVE_OPTIONS, ...Object.keys(votes)])];
     const myVote = currentUser ? (data || []).find(d => d.user_id === currentUser.id)?.content : null;
 
-    el.innerHTML = allOptions.map(opt => `
-      <span class="serve-tag ${myVote === opt ? 'voted' : ''}" onclick="voteServe('${opt}', this)">
-        ${opt} ${votes[opt] ? `<span style="font-size:10px;color:var(--text-muted);">${votes[opt]}</span>` : ''}
-      </span>
-    `).join('');
+    const el = document.getElementById('serve-tags');
+    el.innerHTML = '';
+    allOptions.forEach(opt => {
+      const span = document.createElement('span');
+      span.className = 'serve-tag' + (myVote === opt ? ' voted' : '');
+      span.textContent = opt + (votes[opt] ? ` ${votes[opt]}` : '');
+      span.addEventListener('click', () => voteServe(opt, span));
+      el.appendChild(span);
+    });
   }
 
   async function voteServe(option, el) {
@@ -734,15 +745,15 @@
       const likes = r.review_reactions?.filter(rx => rx.reaction === 'like').length || 0;
       const dislikes = r.review_reactions?.filter(rx => rx.reaction === 'dislike').length || 0;
       const myReaction = currentUser ? r.review_reactions?.find(rx => rx.user_id === currentUser.id)?.reaction : null;
-      const tags = r.taste_tags ? r.taste_tags.map(t => `<span class="review-tag">${t}</span>`).join('') : '';
+      const tags = r.taste_tags ? r.taste_tags.map(t => `<span class="review-tag">${esc(t)}</span>`).join('') : '';
       return `
         <div class="review-card">
           <div class="review-top">
-            <span class="review-nick">${r.users?.nickname || '익명'}</span>
+            <span class="review-nick">${esc(r.users?.nickname) || '익명'}</span>
             <span class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
             <span class="review-date">${timeAgo(r.created_at)}</span>
           </div>
-          ${r.content ? `<div class="review-body">${r.content}</div>` : ''}
+          ${r.content ? `<div class="review-body">${esc(r.content)}</div>` : ''}
           ${tags ? `<div class="review-tags">${tags}</div>` : ''}
           <div class="review-reactions">
             <button class="reaction-btn ${myReaction === 'like' ? 'liked' : ''}" onclick="react('${r.id}', 'like', this)">👍 ${likes}</button>

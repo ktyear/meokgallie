@@ -233,11 +233,11 @@
       <div class="drink-card" onclick="location.href='drink-detail.html?id=${d.id}&from=bar.html'">
         <div class="drink-icon">${categoryEmoji[d.category] || '🍾'}</div>
         <div class="drink-name-row">
-          <span class="drink-name">${d.name}</span>
+          <span class="drink-name">${esc(d.name)}</span>
           ${d.alcohol_degree ? `<span class="drink-abv">${d.alcohol_degree}%</span>` : ''}
         </div>
-        <div class="drink-category">${d.category}${d.subcategory ? ' · ' + d.subcategory : ''}</div>
-        <div class="drink-desc">${d.description || ''}</div>
+        <div class="drink-category">${esc(d.category)}${d.subcategory ? ' · ' + esc(d.subcategory) : ''}</div>
+        <div class="drink-desc">${esc(d.description || '')}</div>
         <div class="drink-rating">${d.avg_rating ? '★ ' + d.avg_rating + ' · ' : ''}리뷰 ${d.review_count}개</div>
       </div>
     `).join('');
@@ -260,13 +260,13 @@
       <div class="review-card" onclick="location.href='drink-detail.html?id=${r.drink_id}&from=bar.html'">
         <div class="review-header">
           <div class="review-emoji">${categoryEmoji[r.drinks?.category] || '🍾'}</div>
-          <div class="review-name">${r.drinks?.name || '—'}</div>
+          <div class="review-name">${esc(r.drinks?.name || '—')}</div>
           <div class="review-rating">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
         </div>
-        <div class="review-body">${r.content || ''}</div>
+        <div class="review-body">${esc(r.content || '')}</div>
         <div class="review-meta">
-          <span class="tag">${r.drinks?.category || '—'}</span>
-          <span class="tag">@${r.users?.nickname || '익명'}</span>
+          <span class="tag">${esc(r.drinks?.category || '—')}</span>
+          <span class="tag">@${esc(r.users?.nickname || '익명')}</span>
           <span class="review-date">${timeAgo(r.created_at)}</span>
         </div>
       </div>
@@ -279,6 +279,15 @@
   let selectedDrinkId = null;
   let searchTimer = null;
 
+  // XSS 방지
+  function esc(str) {
+    const d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+  }
+
+  let lastSearchResults = [];
+
   // 술 검색
   async function searchDrinks(query) {
     clearTimeout(searchTimer);
@@ -288,14 +297,21 @@
       const { data } = await soolClient.from('drinks').select('id, name, category, subcategory, alcohol_degree')
         .ilike('name', `%${query}%`).limit(8);
       if (!data || data.length === 0) { results.style.display = 'none'; return; }
+      lastSearchResults = data;
       results.style.display = 'block';
       results.innerHTML = data.map(d => `
-        <div class="search-item" onclick="selectDrink('${d.id}', '${d.name.replace(/'/g, "\'")}', '${d.category}', '${d.alcohol_degree || ''}')">
-          <div class="search-item-name">${d.name}</div>
-          <div class="search-item-sub">${d.category}${d.subcategory ? ' · ' + d.subcategory : ''}${d.alcohol_degree ? ' · ' + d.alcohol_degree + '%' : ''}</div>
+        <div class="search-item" onclick="selectDrinkById('${d.id}')">
+          <div class="search-item-name">${esc(d.name)}</div>
+          <div class="search-item-sub">${esc(d.category)}${d.subcategory ? ' · ' + esc(d.subcategory) : ''}${d.alcohol_degree ? ' · ' + d.alcohol_degree + '%' : ''}</div>
         </div>
       `).join('');
     }, 300);
+  }
+
+  function selectDrinkById(id) {
+    const d = lastSearchResults.find(x => String(x.id) === String(id));
+    if (!d) return;
+    selectDrink(d.id, d.name, d.category, d.alcohol_degree);
   }
 
   function selectDrink(id, name, category, abv) {
@@ -359,6 +375,9 @@
         document.querySelectorAll('#write-tags .taste-tag').forEach(t => t.classList.remove('selected'));
         document.getElementById('write-content').value = '';
         loadReviews();
+        // 등록 완료 후 최신 리뷰 탭으로 이동
+        const reviewsTab = document.querySelector('.tab:nth-child(1)');
+        if (reviewsTab) switchTab('reviews', reviewsTab);
       }, 1500);
     }
   }

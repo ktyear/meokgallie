@@ -140,6 +140,17 @@
 
   let communitiesData = [];
 
+  // XSS 방지 (텍스트 노드용)
+  function esc(str) {
+    const d = document.createElement('div');
+    d.textContent = str == null ? '' : String(str);
+    return d.innerHTML;
+  }
+  // XSS 방지 (HTML 속성값용 - 따옴표까지 처리)
+  function escAttr(str) {
+    return esc(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
   function timeAgo(dateStr) {
     const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
     if (diff < 60) return '방금 전';
@@ -172,10 +183,10 @@
     const list = document.getElementById('communities-list');
     list.innerHTML = data.map(c => `
       <div class="community-card" onclick="location.href='community-posts.html?id=${c.id}&name=${encodeURIComponent(c.name)}&icon=${encodeURIComponent(c.icon)}'">
-        <div class="community-icon">${c.icon}</div>
+        <div class="community-icon">${esc(c.icon)}</div>
         <div>
-          <div class="community-name">${c.name}</div>
-          <div class="community-desc">${c.description || ''}</div>
+          <div class="community-name">${esc(c.name)}</div>
+          <div class="community-desc">${esc(c.description || '')}</div>
         </div>
       </div>
     `).join('');
@@ -208,14 +219,14 @@
     list.innerHTML = data.map(p => `
       <div class="post-card" onclick="location.href='post-detail.html?id=${p.id}&from=community.html'">
         <div class="post-header">
-          <div class="post-avatar">${p.communities?.icon || '💬'}</div>
-          <div class="post-author">${p.users?.nickname || '익명'}</div>
-          <span class="post-cat">${p.communities?.name || '—'}</span>
+          <div class="post-avatar">${esc(p.communities?.icon) || '💬'}</div>
+          <div class="post-author">${esc(p.users?.nickname) || '익명'}</div>
+          <span class="post-cat">${esc(p.communities?.name) || '—'}</span>
           <div class="post-time">${timeAgo(p.created_at)}</div>
         </div>
-        <div class="post-title">${p.title}</div>
-        <div class="post-body">${p.content.slice(0, 80)}${p.content.length > 80 ? '...' : ''}</div>
-        ${p.image_url ? `<img src="${p.image_url}" style="width:100%;border-radius:8px;margin-top:8px;max-height:160px;object-fit:cover;" onerror="this.style.display='none'" />` : ''}
+        <div class="post-title">${esc(p.title)}</div>
+        <div class="post-body">${esc(p.content.slice(0, 80))}${p.content.length > 80 ? '...' : ''}</div>
+        ${p.image_url ? `<img src="${escAttr(p.image_url)}" style="width:100%;border-radius:8px;margin-top:8px;max-height:160px;object-fit:cover;" onerror="this.style.display='none'" />` : ''}
         <div class="post-footer">
           <span class="post-stat">👍 ${p.like_count}</span>
           <span class="post-stat">💬 ${p.comment_count}</span>

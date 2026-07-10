@@ -58,6 +58,7 @@
   .modal-actions{display:flex;gap:8px;margin-top:16px;}
   .btn-cancel{flex:1;padding:12px;border-radius:8px;border:0.5px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text-secondary);}
   .btn-submit{flex:2;padding:12px;border-radius:8px;border:none;background:var(--orange-200);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+  .btn-submit:disabled{opacity:0.5;cursor:not-allowed;}
   .modal-msg{font-size:12px;color:var(--orange-600);margin-bottom:8px;min-height:16px;}
   @media(max-width:480px){nav{padding:12px 16px;}.hero{padding:20px 16px 20px;}.section{padding:16px;}}
 </style>
@@ -129,11 +130,11 @@
     </div>
     <div class="form-row">
       <label class="form-label">제목</label>
-      <input class="form-input" id="write-title" placeholder="예: 위스키 × 치즈">
+      <input class="form-input" id="write-title" placeholder="예: 위스키 × 치즈" maxlength="100">
     </div>
     <div class="form-row">
       <label class="form-label" id="write-content-label">설명</label>
-      <textarea class="form-textarea" id="write-content" placeholder="어떤 조합인지, 왜 잘 어울리는지 적어주세요"></textarea>
+      <textarea class="form-textarea" id="write-content" placeholder="어떤 조합인지, 왜 잘 어울리는지 적어주세요" maxlength="3000"></textarea>
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeWriteModal()">취소</button>
@@ -182,6 +183,24 @@
     sessionStorage.setItem('restaurant_tab', name);
   }
 
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  function openModalCommon(id, focusId) {
+    document.getElementById(id).classList.add('show');
+    document.body.style.overflow = 'hidden';
+    if (focusId) setTimeout(() => document.getElementById(focusId)?.focus(), 50);
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(overlay.id); });
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.show').forEach(o => closeModal(o.id));
+    });
+  });
+
   async function init() {
     const { data: { session } } = await soolClient.auth.getSession();
     if (session) {
@@ -189,8 +208,7 @@
       currentUser = user;
     }
     renderCatGrid();
-    await loadPairings();
-    await loadRecipes();
+    await Promise.all([loadPairings(), loadRecipes()]);
 
     const savedTab = sessionStorage.getItem('restaurant_tab');
     if (savedTab && savedTab !== 'pairings') {
@@ -248,16 +266,16 @@
 
   function renderCatGrid() {
     document.getElementById('cat-grid').innerHTML = categories.map(c => `
-      <div class="cat-item" id="cat-${c.key}" onclick="filterByCategory('${c.key}')">
+      <div class="cat-item" data-category="${esc(c.key)}" onclick="filterByCategory('${c.key}', this)">
         <div class="cat-emoji">${c.emoji}</div>
         <div class="cat-name">${c.key}</div>
       </div>
     `).join('');
   }
 
-  async function filterByCategory(key) {
-    document.querySelectorAll('.cat-item').forEach(el => el.classList.remove('active'));
-    document.getElementById('cat-' + key).classList.add('active');
+  async function filterByCategory(key, el) {
+    document.querySelectorAll('.cat-item').forEach(item => item.classList.remove('active'));
+    el.classList.add('active');
     activeCategory = key;
 
     const results = document.getElementById('search-results');
@@ -269,6 +287,9 @@
       .eq('category', key)
       .order('created_at', { ascending: false })
       .limit(50);
+
+    // 응답 도착 전에 다른 카테고리로 바뀌었으면 이 결과는 버림 (요청 순서 역전 방지)
+    if (activeCategory !== key) return;
 
     if (error) { results.innerHTML = '<div class="empty">불러오지 못했어요</div>'; return; }
     if (!data || data.length === 0) { results.innerHTML = `<div class="empty">'${esc(key)}' 관련 안주 콘텐츠가 아직 없어요</div>`; return; }
@@ -288,10 +309,10 @@
   // ── 글쓰기 모달 ──────────────────────
   function openWriteModal() {
     if (!currentUser) { alert('로그인 후 글을 작성할 수 있어요'); location.href = 'auth.html'; return; }
-    document.getElementById('write-modal').classList.add('show');
+    openModalCommon('write-modal', 'write-title');
   }
   function closeWriteModal() {
-    document.getElementById('write-modal').classList.remove('show');
+    closeModal('write-modal');
     document.getElementById('write-msg').textContent = '';
     document.getElementById('write-title').value = '';
     document.getElementById('write-content').value = '';
@@ -309,33 +330,45 @@
       : '재료: ...\n1. ...\n2. ...';
   }
 
+  let isSubmittingPost = false;
   async function submitPost() {
-    if (!currentUser) return;
+    if (!currentUser || isSubmittingPost) return;
     const category = document.getElementById('write-category').value;
     const title = document.getElementById('write-title').value.trim();
     const content = document.getElementById('write-content').value.trim();
     const msg = document.getElementById('write-msg');
 
     if (!title || !content) { msg.textContent = '제목과 내용을 입력해주세요'; return; }
+    if (title.length > 100) { msg.textContent = '제목은 100자 이내로 입력해주세요'; return; }
+    if (content.length > 3000) { msg.textContent = '내용은 3000자 이내로 입력해주세요'; return; }
 
-    const payload = {
-      type: writeType,
-      category,
-      title,
-      content,
-      user_id: currentUser.id,
-    };
-    if (writeType === 'pairing') {
-      payload.emoji_drink = document.getElementById('write-emoji-drink').value.trim() || '🥃';
-      payload.emoji_food = document.getElementById('write-emoji-food').value.trim() || '🍽️';
-      payload.tag = category;
+    isSubmittingPost = true;
+    const btn = document.querySelector('#write-modal .btn-submit');
+    if (btn) btn.disabled = true;
+
+    try {
+      const payload = {
+        type: writeType,
+        category,
+        title,
+        content,
+        user_id: currentUser.id,
+      };
+      if (writeType === 'pairing') {
+        payload.emoji_drink = document.getElementById('write-emoji-drink').value.trim() || '🥃';
+        payload.emoji_food = document.getElementById('write-emoji-food').value.trim() || '🍽️';
+        payload.tag = category;
+      }
+
+      const { error } = await soolClient.from('pairing_posts').insert(payload);
+      if (error) { console.error('등록 실패:', error); msg.textContent = '등록에 실패했어요. 다시 시도해주세요'; return; }
+
+      closeWriteModal();
+      if (writeType === 'pairing') { await loadPairings(); } else { await loadRecipes(); }
+    } finally {
+      isSubmittingPost = false;
+      if (btn) btn.disabled = false;
     }
-
-    const { error } = await soolClient.from('pairing_posts').insert(payload);
-    if (error) { console.error('등록 실패:', error); msg.textContent = '등록에 실패했어요. 다시 시도해주세요'; return; }
-
-    closeWriteModal();
-    if (writeType === 'pairing') { await loadPairings(); } else { await loadRecipes(); }
   }
 
   init();

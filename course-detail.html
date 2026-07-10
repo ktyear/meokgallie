@@ -167,10 +167,22 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/core/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
 <script>
   const params = new URLSearchParams(location.search);
   const courseId = params.get('id');
   let currentUser = null;
+
+  // XSS 방지 (텍스트 노드용)
+  function esc(str) {
+    const d = document.createElement('div');
+    d.textContent = str == null ? '' : String(str);
+    return d.innerHTML;
+  }
+  // XSS 방지 (HTML 속성값용 - 따옴표까지 처리)
+  function escAttr(str) {
+    return esc(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
   let courseData = null;
 
   const typeLabel = { text: '📝 텍스트 강의', video: '🎬 동영상 강의', audio: '🎙️ 음성 강의', live: '🔴 실시간 강의' };
@@ -187,6 +199,28 @@
       if (u.hostname === 'youtu.be') return u.pathname.slice(1);
     } catch(e) {}
     return null;
+  }
+
+  function getVimeoId(url) {
+    try {
+      const u = new URL(url);
+      if (u.hostname.replace(/^www\./, '') === 'vimeo.com') {
+        const id = u.pathname.split('/').filter(Boolean)[0];
+        if (id && /^\d+$/.test(id)) return id;
+      }
+    } catch(e) {}
+    return null;
+  }
+
+  // http/https만 허용 (javascript: 등 위험한 스킴 차단)
+  function isSafeUrl(url) {
+    if (!url) return false;
+    try {
+      const u = new URL(url);
+      return ['http:', 'https:'].includes(u.protocol);
+    } catch {
+      return false;
+    }
   }
 
   async function init() {
@@ -223,26 +257,41 @@
     // 콘텐츠 렌더링
     const contentEl = document.getElementById('c-content');
     if (data.type === 'text') {
-      contentEl.innerHTML = `<div class="content-text">${data.content_text || '내용이 없어요.'}</div>`;
+      const safeHtml = data.content_text
+        ? DOMPurify.sanitize(data.content_text, {
+            ALLOWED_TAGS: ['b','strong','i','em','u','p','br','ul','ol','li','a','img','h1','h2','h3','h4','blockquote','code','pre','span','div'],
+            ALLOWED_ATTR: ['href','src','alt','title','target','rel'],
+          })
+        : '내용이 없어요.';
+      contentEl.innerHTML = `<div class="content-text">${safeHtml}</div>`;
     } else if (data.type === 'video' && data.content_url) {
       const ytId = getYoutubeId(data.content_url);
+      const vimeoId = getVimeoId(data.content_url);
       if (ytId) {
-        contentEl.innerHTML = `<div class="video-wrap"><iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe></div>`;
+        contentEl.innerHTML = `<div class="video-wrap"><iframe src="https://www.youtube.com/embed/${escAttr(ytId)}" allowfullscreen></iframe></div>`;
+      } else if (vimeoId) {
+        contentEl.innerHTML = `<div class="video-wrap"><iframe src="https://player.vimeo.com/video/${escAttr(vimeoId)}" allowfullscreen></iframe></div>`;
       } else {
-        contentEl.innerHTML = `<div class="video-wrap"><iframe src="${data.content_url}" allowfullscreen></iframe></div>`;
+        contentEl.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px;">지원하지 않는 영상 링크예요. (유튜브/Vimeo만 지원)</div>';
       }
-    } else if (data.type === 'audio' && data.content_url) {
-      contentEl.innerHTML = `<div class="audio-wrap">🎙️ <audio controls style="flex:1;"><source src="${data.content_url}">브라우저가 오디오를 지원하지 않아요.</audio></div>`;
+    } else if (data.type === 'audio' && data.content_url && isSafeUrl(data.content_url)) {
+      contentEl.innerHTML = `<div class="audio-wrap">🎙️ <audio controls style="flex:1;"><source src="${escAttr(data.content_url)}">브라우저가 오디오를 지원하지 않아요.</audio></div>`;
+    } else if (data.type === 'audio') {
+      contentEl.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px;">올바르지 않은 음성 링크예요.</div>';
     } else if (data.type === 'live') {
       const liveTime = data.live_at ? new Date(data.live_at).toLocaleString('ko-KR') : '일정 미정';
       const isLive = data.live_at && new Date(data.live_at) <= new Date();
+      const canJoin = data.content_url && isLive && isSafeUrl(data.content_url);
       contentEl.innerHTML = `
         <div class="live-wrap">
           <div style="font-size:32px;margin-bottom:8px;">🔴</div>
           <div style="font-size:16px;font-weight:700;margin-bottom:8px;">실시간 강의</div>
           <div class="live-time">예정 시간: ${liveTime}</div>
-          ${data.content_url && isLive ? `<button class="live-btn" onclick="window.open('${data.content_url}', '_blank')">강의 참여하기</button>` : '<div style="font-size:13px;color:rgba(255,255,255,0.6);">강의 시작 전이에요</div>'}
+          ${canJoin ? `<button class="live-btn" id="live-join-btn">강의 참여하기</button>` : '<div style="font-size:13px;color:rgba(255,255,255,0.6);">강의 시작 전이에요</div>'}
         </div>`;
+      if (canJoin) {
+        document.getElementById('live-join-btn').addEventListener('click', () => window.open(data.content_url, '_blank'));
+      }
     } else {
       contentEl.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px;">콘텐츠가 없어요.</div>';
     }
@@ -263,8 +312,9 @@
       return;
     }
 
-    const { data } = await soolClient.from('course_enrollments')
-      .select('*').eq('user_id', currentUser.id).eq('course_id', courseId).single();
+    const { data, error } = await soolClient.from('course_enrollments')
+      .select('*').eq('user_id', currentUser.id).eq('course_id', courseId).maybeSingle();
+    if (error) { console.error('수강 상태 확인 실패:', error); return; }
 
     if (data) {
       if (data.completed) {
@@ -278,8 +328,10 @@
     }
   }
 
+  let isEnrolling = false;
   async function enroll() {
     if (!currentUser) { location.href = 'auth.html'; return; }
+    if (isEnrolling) return;
 
     // 레벨 체크
     if (courseData.required_level > (currentUser.level || 1)) {
@@ -289,29 +341,51 @@
       return;
     }
 
-    const { error } = await soolClient.from('course_enrollments').insert({
-      user_id: currentUser.id, course_id: courseId
-    });
+    isEnrolling = true;
+    const btn = document.getElementById('enroll-btn');
+    if (btn) btn.disabled = true;
 
-    if (error) {
-      document.getElementById('enroll-msg').className = 'msg error';
-      document.getElementById('enroll-msg').textContent = '이미 수강 신청된 강의예요.';
-      document.getElementById('enroll-msg').style.display = 'block';
-    } else {
-      await checkEnrollment();
+    try {
+      const { error } = await soolClient.from('course_enrollments').insert({
+        user_id: currentUser.id, course_id: courseId
+      });
+
+      if (error) {
+        document.getElementById('enroll-msg').className = 'msg error';
+        document.getElementById('enroll-msg').textContent = '이미 수강 신청된 강의예요.';
+        document.getElementById('enroll-msg').style.display = 'block';
+      } else {
+        await checkEnrollment();
+      }
+    } finally {
+      isEnrolling = false;
+      if (btn) btn.disabled = false;
     }
   }
 
+  let isCompletingCourse = false;
   async function completeCourse() {
-    await soolClient.from('course_enrollments').update({
-      completed: true, progress: 100, completed_at: new Date().toISOString()
-    }).eq('user_id', currentUser.id).eq('course_id', courseId);
+    if (isCompletingCourse) return;
+    isCompletingCourse = true;
+    const btn = document.querySelector('.complete-btn');
+    if (btn) btn.disabled = true;
 
-    // XP 추가
-    const { data: user } = await soolClient.from('users').select('xp').eq('id', currentUser.id).single();
-    await soolClient.from('users').update({ xp: (user?.xp || 0) + 200 }).eq('id', currentUser.id);
-
-    await checkEnrollment();
+    try {
+      // 수료 처리 + XP 지급을 RPC로 한 번에 (원자적 처리)
+      const { error } = await soolClient.rpc('complete_course', {
+        p_user_id: currentUser.id, p_course_id: courseId, p_xp_reward: 200
+      });
+      if (error) {
+        console.error('수료 처리 실패:', error);
+        const msg = document.getElementById('enroll-msg');
+        if (msg) { msg.className = 'msg error'; msg.textContent = '수료 처리 중 오류가 발생했어요.'; msg.style.display = 'block'; }
+        return;
+      }
+      await checkEnrollment();
+    } finally {
+      isCompletingCourse = false;
+      if (btn) btn.disabled = false;
+    }
   }
 
   // ── 수정 모달 ────────────────────────────────
@@ -335,29 +409,41 @@
   function closeEditModal() { document.getElementById('edit-modal-bg').classList.remove('show'); }
   function closeEditModalBg(e) { if (e.target === document.getElementById('edit-modal-bg')) closeEditModal(); }
 
+  let isSavingEdit = false;
   async function saveEdit() {
+    if (isSavingEdit) return;
     const title = document.getElementById('e-title').value.trim();
     const type = document.getElementById('e-type').value;
     if (!title || !type) {
       const el = document.getElementById('edit-msg');
       el.className = 'edit-msg error'; el.textContent = '제목과 유형은 필수예요!'; return;
     }
-    const { error } = await soolClient.from('courses').update({
-      title,
-      type,
-      category: document.getElementById('e-category').value || null,
-      duration_min: parseInt(document.getElementById('e-duration').value) || 0,
-      is_free: document.getElementById('e-free').value === 'true',
-      required_level: parseInt(document.getElementById('e-level').value) || 1,
-      description: document.getElementById('e-desc').value.trim() || null,
-      content_url: document.getElementById('e-url').value.trim() || null,
-      content_text: document.getElementById('e-text').value.trim() || null,
-      live_at: document.getElementById('e-liveat').value || null,
-    }).eq('id', courseId);
 
-    const el = document.getElementById('edit-msg');
-    if (error) { el.className = 'edit-msg error'; el.textContent = '저장 중 오류가 발생했어요.'; }
-    else { el.className = 'edit-msg success'; el.textContent = '저장됐어요! ✅'; setTimeout(() => { closeEditModal(); loadCourse(); }, 1000); }
+    isSavingEdit = true;
+    const btn = document.querySelector('.edit-btn');
+    if (btn) btn.disabled = true;
+
+    try {
+      const { error } = await soolClient.from('courses').update({
+        title,
+        type,
+        category: document.getElementById('e-category').value || null,
+        duration_min: parseInt(document.getElementById('e-duration').value) || 0,
+        is_free: document.getElementById('e-free').value === 'true',
+        required_level: parseInt(document.getElementById('e-level').value) || 1,
+        description: document.getElementById('e-desc').value.trim() || null,
+        content_url: document.getElementById('e-url').value.trim() || null,
+        content_text: document.getElementById('e-text').value.trim() || null,
+        live_at: document.getElementById('e-liveat').value || null,
+      }).eq('id', courseId);
+
+      const el = document.getElementById('edit-msg');
+      if (error) { el.className = 'edit-msg error'; el.textContent = '저장 중 오류가 발생했어요.'; }
+      else { el.className = 'edit-msg success'; el.textContent = '저장됐어요! ✅'; setTimeout(() => { closeEditModal(); loadCourse(); }, 1000); }
+    } finally {
+      isSavingEdit = false;
+      if (btn) btn.disabled = false;
+    }
   }
 
   init();

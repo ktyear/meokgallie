@@ -101,9 +101,22 @@
   let postData = null;
   let isLiked = false;
   let isTogglingLike = false;
+  let isSubmittingComment = false;
 
   function esc(str) { const d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML; }
-  function goBack() { const from = params.get('from'); location.href = from || 'shop.html'; }
+
+  function goBack() {
+    const from = params.get('from');
+    location.href = from === 'shop.html' ? from : 'shop.html';
+  }
+
+  function isSafeUrl(value) {
+    if (!value) return false;
+    try {
+      const u = new URL(value);
+      return ['http:', 'https:'].includes(u.protocol);
+    } catch { return false; }
+  }
 
   function timeAgo(dateStr) {
     const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
@@ -114,20 +127,25 @@
   }
 
   function goToExternal() {
-    if (postData?.external_url) window.open(postData.external_url, '_blank', 'noopener');
+    if (postData?.external_url && isSafeUrl(postData.external_url)) window.open(postData.external_url, '_blank', 'noopener');
   }
 
   async function init() {
     if (!postId) { location.href = 'shop.html'; return; }
-    const { data: { session } } = await soolClient.auth.getSession();
-    if (session) {
-      const { data: user } = await soolClient.from('users').select('id, nickname').eq('id', session.user.id).single();
-      currentUser = user;
-    } else {
-      document.getElementById('comment-form-wrap').innerHTML = `<div class="empty"><a href="auth.html" style="color:var(--green-400);text-decoration:none;">로그인</a> 후 댓글을 작성할 수 있어요</div>`;
+    try {
+      const { data: { session } } = await soolClient.auth.getSession();
+      if (session) {
+        const { data: user } = await soolClient.from('users').select('id, nickname').eq('id', session.user.id).single();
+        currentUser = user;
+      } else {
+        document.getElementById('comment-form-wrap').innerHTML = `<div class="empty"><a href="auth.html" style="color:var(--green-400);text-decoration:none;">로그인</a> 후 댓글을 작성할 수 있어요</div>`;
+      }
+      await loadPost();
+    } catch (error) {
+      console.error('초기화 실패:', error);
+    } finally {
+      document.getElementById('page-loading').classList.add('hide');
     }
-    await loadPost();
-    document.getElementById('page-loading').classList.add('hide');
   }
 
   async function loadPost() {
@@ -139,23 +157,25 @@
     document.getElementById('ext-preview-card').onclick = goToExternal;
     document.getElementById('p-retailer').textContent = data.retailer;
     document.getElementById('p-title').textContent = data.title;
-    document.getElementById('p-url').textContent = `${data.retailer}에서 구매하러 가기 →`;
-    if (data.image_url) {
-      document.getElementById('p-img').style.backgroundImage = `url('${data.image_url}')`;
+    document.getElementById('p-url').textContent = isSafeUrl(data.external_url) ? `${data.retailer}에서 구매하러 가기 →` : '링크를 열 수 없어요';
+    if (data.image_url && isSafeUrl(data.image_url)) {
+      document.getElementById('p-img').style.backgroundImage = `url("${data.image_url}")`;
       document.getElementById('p-img').textContent = '';
     }
     document.getElementById('p-body').textContent = data.description || '';
     document.getElementById('p-meta').textContent = `@${data.users?.nickname || '익명'} · ${timeAgo(data.created_at)}`;
     document.getElementById('like-count').textContent = data.like_count || 0;
 
-    if (data.rating) {
+    const rating = Math.min(5, Math.max(0, Number(data.rating) || 0));
+    if (rating > 0) {
       const ratingEl = document.getElementById('p-rating');
       ratingEl.style.display = 'block';
-      ratingEl.textContent = '★'.repeat(data.rating) + '☆'.repeat(5 - data.rating);
+      ratingEl.textContent = '★'.repeat(rating) + '☆'.repeat(5 - rating);
     }
 
     if (currentUser) {
-      const { data: liked } = await soolClient.from('external_purchase_likes').select('id').eq('post_id', postId).eq('user_id', currentUser.id).single();
+      const { data: liked, error: likeErr } = await soolClient.from('external_purchase_likes').select('id').eq('post_id', postId).eq('user_id', currentUser.id).maybeSingle();
+      if (likeErr) console.error('좋아요 상태 확인 실패:', likeErr);
       if (liked) { isLiked = true; document.getElementById('like-btn').classList.add('liked'); }
     }
 
@@ -167,28 +187,37 @@
     if (isTogglingLike) return;
     isTogglingLike = true;
     const btn = document.getElementById('like-btn');
+    btn.disabled = true;
     const countEl = document.getElementById('like-count');
-    const count = parseInt(countEl.textContent);
+    const count = parseInt(countEl.textContent) || 0;
 
-    if (isLiked) {
-      await soolClient.from('external_purchase_likes').delete().eq('post_id', postId).eq('user_id', currentUser.id);
-      await soolClient.from('external_purchase_posts').update({ like_count: count - 1 }).eq('id', postId);
-      countEl.textContent = count - 1;
-      btn.classList.remove('liked');
-      isLiked = false;
-    } else {
-      await soolClient.from('external_purchase_likes').insert({ post_id: postId, user_id: currentUser.id });
-      await soolClient.from('external_purchase_posts').update({ like_count: count + 1 }).eq('id', postId);
-      countEl.textContent = count + 1;
-      btn.classList.add('liked');
-      isLiked = true;
+    try {
+      if (isLiked) {
+        const { error } = await soolClient.from('external_purchase_likes').delete().eq('post_id', postId).eq('user_id', currentUser.id);
+        if (error) throw error;
+        // like_count는 DB 트리거가 자동 갱신
+        countEl.textContent = Math.max(0, count - 1);
+        btn.classList.remove('liked');
+        isLiked = false;
+      } else {
+        const { error } = await soolClient.from('external_purchase_likes').insert({ post_id: postId, user_id: currentUser.id });
+        if (error) throw error;
+        countEl.textContent = count + 1;
+        btn.classList.add('liked');
+        isLiked = true;
+      }
+    } catch (error) {
+      console.error('좋아요 처리 실패:', error);
+    } finally {
+      isTogglingLike = false;
+      btn.disabled = false;
     }
-    isTogglingLike = false;
   }
 
   async function loadComments() {
-    const { data } = await soolClient.from('external_purchase_comments').select('*, users(nickname)').eq('post_id', postId).order('created_at', { ascending: true });
+    const { data, error } = await soolClient.from('external_purchase_comments').select('*, users(nickname)').eq('post_id', postId).order('created_at', { ascending: true }).limit(100);
     const list = document.getElementById('comments-list');
+    if (error) { console.error('댓글 로드 실패:', error); list.innerHTML = '<div class="empty">댓글을 불러오지 못했어요.</div>'; return; }
     document.getElementById('comment-count').textContent = (data?.length || 0) + '개';
     if (!data || data.length === 0) { list.innerHTML = '<div class="empty">아직 댓글이 없어요. 첫 댓글을 남겨보세요!</div>'; return; }
     list.innerHTML = data.map(c => `
@@ -200,15 +229,23 @@
   }
 
   async function submitComment() {
-    if (!currentUser) return;
+    if (!currentUser || isSubmittingComment) return;
     const content = document.getElementById('comment-input').value.trim();
     if (!content) return;
-    const { error } = await soolClient.from('external_purchase_comments').insert({ post_id: postId, user_id: currentUser.id, content });
-    if (error) { console.error(error); return; }
-    await soolClient.from('external_purchase_posts').update({ comment_count: (postData?.comment_count || 0) + 1 }).eq('id', postId);
-    if (postData) postData.comment_count = (postData.comment_count || 0) + 1;
-    document.getElementById('comment-input').value = '';
-    loadComments();
+
+    isSubmittingComment = true;
+    const btn = document.querySelector('.comment-submit');
+    if (btn) btn.disabled = true;
+    try {
+      const { error } = await soolClient.from('external_purchase_comments').insert({ post_id: postId, user_id: currentUser.id, content });
+      if (error) { console.error('댓글 등록 실패:', error); return; }
+      // comment_count는 DB 트리거가 자동 갱신
+      document.getElementById('comment-input').value = '';
+      await loadComments();
+    } finally {
+      isSubmittingComment = false;
+      if (btn) btn.disabled = false;
+    }
   }
 
   init();

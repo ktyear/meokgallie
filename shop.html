@@ -73,6 +73,8 @@
   .btn-cancel{flex:1;padding:12px;border-radius:8px;border:0.5px solid var(--border);background:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text-secondary);}
   .btn-submit{flex:2;padding:12px;border-radius:8px;border:none;background:var(--green-200);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
   .modal-msg{font-size:12px;color:var(--green-600);margin-bottom:8px;min-height:16px;}
+  .star{color:#cbd5c0;transition:color 0.1s;}
+  .star.filled{color:var(--green-400);}
   /* 장바구니 */
   .cart-item{display:flex;align-items:center;gap:12px;background:var(--bg);border:0.5px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;}
   .cart-item-name{font-size:13px;font-weight:500;flex:1;}
@@ -198,7 +200,32 @@
 
   function esc(str) { const d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML; }
   function goBack() { location.href = 'index.html'; }
-  function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  function openModalCommon(id, focusId) {
+    document.getElementById(id).classList.add('show');
+    document.body.style.overflow = 'hidden';
+    if (focusId) setTimeout(() => document.getElementById(focusId)?.focus(), 50);
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(overlay.id); });
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.show').forEach(o => closeModal(o.id));
+    });
+  });
+
+  // http/https만 허용 (javascript: 등 위험한 스킴 차단)
+  function isSafeUrl(value) {
+    if (!value) return false;
+    try {
+      const u = new URL(value);
+      return ['http:', 'https:'].includes(u.protocol);
+    } catch { return false; }
+  }
 
   function switchTab(name, el) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -214,11 +241,14 @@
       const { data: user } = await soolClient.from('users').select('id, nickname').eq('id', session.user.id).single();
       currentUser = user;
     }
-    await loadProducts();
+    await Promise.all([
+      loadProducts(),
+      loadGroupBuys(),
+      loadExternalPosts(),
+      refreshCartBadge(),
+    ]);
+    // 가격비교는 상품 데이터가 필요해서 loadProducts 이후 별도 호출 (내부에서 캐시 재사용)
     await loadCompare();
-    await loadGroupBuys();
-    await loadExternalPosts();
-    await refreshCartBadge();
 
     const savedTab = sessionStorage.getItem('shop_tab');
     if (savedTab && savedTab !== 'products') {
@@ -229,9 +259,11 @@
   }
 
   // ── 상품 / 한정판 ──────────────────────
+  let shopProductsCache = [];
   async function loadProducts() {
     const { data, error } = await soolClient.from('shop_products').select('*').order('created_at', { ascending: false });
     if (error || !data) { document.getElementById('products-list').innerHTML = '<div class="empty">불러오지 못했어요</div>'; return; }
+    shopProductsCache = data;
 
     const normal = data.filter(p => !p.is_limited);
     const limited = data.filter(p => p.is_limited);
@@ -249,25 +281,32 @@
           <div class="product-desc">${esc(p.brand || '')} ${p.volume ? '· ' + esc(p.volume) : ''} ${p.abv ? '· ' + p.abv + '도' : ''}</div>
           <div class="product-price">₩${(p.price || 0).toLocaleString()}</div>
         </div>
-        <button class="cart-add-btn" onclick="addToCart('${p.id}')">담기</button>
+        <button class="cart-add-btn" onclick="addToCart('${p.id}', this)">담기</button>
       </div>
     `;
   }
 
-  async function addToCart(productId) {
+  let isAddingToCart = false;
+  async function addToCart(productId, btn) {
     if (!currentUser) { alert('로그인 후 담을 수 있어요'); location.href = 'auth.html'; return; }
-    const { data: existing } = await soolClient.from('cart_items').select('*').eq('user_id', currentUser.id).eq('product_id', productId).single();
-    if (existing) {
-      await soolClient.from('cart_items').update({ quantity: existing.quantity + 1 }).eq('id', existing.id);
-    } else {
-      await soolClient.from('cart_items').insert({ user_id: currentUser.id, product_id: productId, quantity: 1 });
+    if (isAddingToCart) return;
+    isAddingToCart = true;
+    if (btn) btn.disabled = true;
+    try {
+      // DB RPC로 원자적 담기 (동시 클릭에도 중복 행 안 생김)
+      const { error } = await soolClient.rpc('add_to_cart', { p_user_id: currentUser.id, p_product_id: productId });
+      if (error) { console.error('담기 실패:', error); alert('담기에 실패했어요'); return; }
+      await refreshCartBadge();
+    } finally {
+      isAddingToCart = false;
+      if (btn) btn.disabled = false;
     }
-    await refreshCartBadge();
   }
 
   async function refreshCartBadge() {
     if (!currentUser) return;
-    const { data } = await soolClient.from('cart_items').select('quantity').eq('user_id', currentUser.id);
+    const { data, error } = await soolClient.from('cart_items').select('quantity').eq('user_id', currentUser.id);
+    if (error) { console.error('장바구니 뱃지 갱신 실패:', error); return; }
     const total = (data || []).reduce((s, i) => s + i.quantity, 0);
     const badge = document.getElementById('cart-badge');
     if (total > 0) { badge.style.display = 'flex'; badge.textContent = total; } else { badge.style.display = 'none'; }
@@ -275,13 +314,20 @@
 
   // ── 가격비교 ──────────────────────
   async function loadCompare() {
-    const { data: products } = await soolClient.from('shop_products').select('*').order('created_at', { ascending: false });
     const wrap = document.getElementById('compare-list');
+    const products = shopProductsCache;
     if (!products || products.length === 0) { wrap.innerHTML = '<div class="empty">등록된 상품이 없어요</div>'; return; }
 
-    const cards = await Promise.all(products.map(async (p) => {
-      const { data: prices } = await soolClient.from('shop_product_prices').select('*').eq('product_id', p.id).order('price', { ascending: true });
-      if (!prices || prices.length === 0) return '';
+    // N+1 없이 한 번에 조회 (관계 조회)
+    const { data: priceRows, error } = await soolClient
+      .from('shop_products')
+      .select('id, name, emoji, shop_product_prices(retailer, price)')
+      .order('created_at', { ascending: false });
+    if (error) { wrap.innerHTML = '<div class="empty">불러오지 못했어요</div>'; return; }
+
+    const cards = (priceRows || []).map(p => {
+      const prices = (p.shop_product_prices || []).slice().sort((a, b) => a.price - b.price);
+      if (prices.length === 0) return '';
       const lowest = prices[0].price;
       return `
         <div class="compare-card" onclick="this.querySelector('.compare-rows').classList.toggle('show')">
@@ -297,14 +343,14 @@
           </div>
         </div>
       `;
-    }));
+    });
     const filtered = cards.filter(Boolean);
     wrap.innerHTML = filtered.length === 0 ? '<div class="empty">가격 비교 데이터가 없어요</div>' : filtered.join('');
   }
 
   // ── 공동구매 ──────────────────────
   async function loadGroupBuys() {
-    const { data: buys, error } = await soolClient.from('group_buys').select('*, users(nickname)').order('created_at', { ascending: false });
+    const { data: buys, error } = await soolClient.from('group_buys').select('*, users(nickname)').order('created_at', { ascending: false }).limit(30);
     const wrap = document.getElementById('gb-list');
     if (error || !buys) { wrap.innerHTML = '<div class="empty">불러오지 못했어요</div>'; return; }
     if (buys.length === 0) { wrap.innerHTML = '<div class="empty">진행 중인 공동구매가 없어요</div>'; return; }
@@ -315,23 +361,43 @@
       myJoins = data || [];
     }
 
-    const cards = await Promise.all(buys.map(async (g) => {
-      const { data: participants } = await soolClient.from('group_buy_participants').select('quantity').eq('group_buy_id', g.id);
-      const totalQty = (participants || []).reduce((s, p) => s + p.quantity, 0);
-      const pct = Math.min(100, Math.round((totalQty / g.target_quantity) * 100));
+    // 참여자 수를 N+1 없이 한 번에 조회
+    const buyIds = buys.map(b => b.id);
+    const { data: allParticipants } = await soolClient.from('group_buy_participants').select('group_buy_id, quantity').in('group_buy_id', buyIds);
+    const totalsByBuy = {};
+    (allParticipants || []).forEach(p => { totalsByBuy[p.group_buy_id] = (totalsByBuy[p.group_buy_id] || 0) + p.quantity; });
+
+    const cards = buys.map((g) => {
+      const totalQty = totalsByBuy[g.id] || 0;
+      const targetQty = Math.max(1, Number(g.target_quantity) || 1);
+      const pct = Math.min(100, Math.max(0, Math.round((totalQty / targetQty) * 100)));
       const mine = myJoins.find(j => j.group_buy_id === g.id);
       const dday = g.deadline ? Math.ceil((new Date(g.deadline) - new Date()) / 86400000) : null;
+      const isExpired = g.deadline && new Date(g.deadline) < new Date();
+      const isFull = totalQty >= targetQty;
+
+      let btnHtml;
+      if (mine) {
+        btnHtml = `<button class="gb-join-btn joined" disabled>참여 완료 (${mine.quantity}개) ✓</button>`;
+      } else if (isExpired) {
+        btnHtml = `<button class="gb-join-btn" disabled>마감된 공동구매</button>`;
+      } else if (isFull) {
+        btnHtml = `<button class="gb-join-btn" disabled>목표 수량 달성</button>`;
+      } else {
+        btnHtml = `<button class="gb-join-btn" onclick="joinGroupBuy('${g.id}', this)">참여하기</button>`;
+      }
+
       return `
         <div class="gb-card">
           <div class="gb-title">${esc(g.emoji || '🎁')} ${esc(g.title)}</div>
           <div class="gb-desc">${esc(g.description || '')}</div>
-          <div class="gb-desc" style="font-weight:600;color:var(--green-600);">1개당 ₩${g.price_per_unit.toLocaleString()} ${g.user_id ? '· @' + esc(g.users?.nickname || '유저') + ' 제안' : '· 관리자 주최'}</div>
+          <div class="gb-desc" style="font-weight:600;color:var(--green-600);">1개당 ₩${(g.price_per_unit || 0).toLocaleString()} ${g.user_id ? '· @' + esc(g.users?.nickname || '유저') + ' 제안' : '· 관리자 주최'}</div>
           <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-          <div class="progress-label">${totalQty}/${g.target_quantity}개 (${pct}%) ${dday !== null ? (dday >= 0 ? `· D-${dday}` : '· 마감') : ''}</div>
-          <button class="gb-join-btn ${mine ? 'joined' : ''}" onclick="${mine ? '' : `joinGroupBuy('${g.id}')`}">${mine ? `참여 완료 (${mine.quantity}개) ✓` : '참여하기'}</button>
+          <div class="progress-label">${totalQty}/${targetQty}개 (${pct}%) ${dday !== null ? (dday >= 0 ? `· D-${dday}` : '· 마감') : ''}</div>
+          ${btnHtml}
         </div>
       `;
-    }));
+    });
     wrap.innerHTML = cards.join('');
   }
 
@@ -339,34 +405,60 @@
     if (!currentUser) { alert('로그인 후 제안할 수 있어요'); location.href = 'auth.html'; return; }
     ['gb-emoji','gb-title','gb-desc','gb-target','gb-price','gb-deadline'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('gb-msg').textContent = '';
-    document.getElementById('gb-modal').classList.add('show');
+    openModalCommon('gb-modal', 'gb-title');
   }
 
+  let isSubmittingGb = false;
   async function submitGb() {
+    if (isSubmittingGb) return;
     const title = document.getElementById('gb-title').value.trim();
-    const target = parseInt(document.getElementById('gb-target').value);
-    const price = parseInt(document.getElementById('gb-price').value);
+    const target = Number.parseInt(document.getElementById('gb-target').value, 10);
+    const price = Number.parseInt(document.getElementById('gb-price').value, 10);
     const msg = document.getElementById('gb-msg');
-    if (!title || !target || !price) { msg.textContent = '제목·목표수량·가격은 필수예요'; return; }
+    if (!title) { msg.textContent = '제목을 입력해주세요'; return; }
+    if (!Number.isInteger(target) || target < 1) { msg.textContent = '목표 수량은 1개 이상이어야 해요'; return; }
+    if (!Number.isInteger(price) || price < 0) { msg.textContent = '올바른 가격을 입력해주세요'; return; }
 
-    const { error } = await soolClient.from('group_buys').insert({
-      user_id: currentUser.id,
-      title, target_quantity: target, price_per_unit: price,
-      emoji: document.getElementById('gb-emoji').value.trim() || '🎁',
-      description: document.getElementById('gb-desc').value.trim() || null,
-      deadline: document.getElementById('gb-deadline').value || null,
-    });
-    if (error) { console.error(error); msg.textContent = '등록에 실패했어요'; return; }
-    closeModal('gb-modal');
-    await loadGroupBuys();
+    isSubmittingGb = true;
+    const btn = document.querySelector('#gb-modal .btn-submit');
+    if (btn) btn.disabled = true;
+    try {
+      const { error } = await soolClient.from('group_buys').insert({
+        user_id: currentUser.id,
+        title, target_quantity: target, price_per_unit: price,
+        emoji: document.getElementById('gb-emoji').value.trim() || '🎁',
+        description: document.getElementById('gb-desc').value.trim() || null,
+        deadline: document.getElementById('gb-deadline').value || null,
+      });
+      if (error) { console.error(error); msg.textContent = '등록에 실패했어요'; return; }
+      closeModal('gb-modal');
+      await loadGroupBuys();
+    } finally {
+      isSubmittingGb = false;
+      if (btn) btn.disabled = false;
+    }
   }
 
-  async function joinGroupBuy(id) {
+  let isJoiningGb = false;
+  async function joinGroupBuy(id, btn) {
     if (!currentUser) { alert('로그인 후 참여할 수 있어요'); location.href = 'auth.html'; return; }
-    const qty = parseInt(prompt('몇 개 참여하시겠어요?', '1')) || 1;
-    const { error } = await soolClient.from('group_buy_participants').insert({ group_buy_id: id, user_id: currentUser.id, quantity: qty });
-    if (error) { console.error(error); return; }
-    await loadGroupBuys();
+    if (isJoiningGb) return;
+
+    const input = prompt('몇 개 참여하시겠어요?', '1');
+    if (input === null) return;
+    const qty = Number.parseInt(input, 10);
+    if (!Number.isInteger(qty) || qty < 1) { alert('1개 이상의 수량을 입력해주세요.'); return; }
+
+    isJoiningGb = true;
+    if (btn) btn.disabled = true;
+    try {
+      const { error } = await soolClient.from('group_buy_participants').insert({ group_buy_id: id, user_id: currentUser.id, quantity: qty });
+      if (error) { console.error(error); alert('참여에 실패했어요'); return; }
+      await loadGroupBuys();
+    } finally {
+      isJoiningGb = false;
+      if (btn) btn.disabled = false;
+    }
   }
 
   // ── 외부구매 후기 ──────────────────────
@@ -376,21 +468,30 @@
     if (error || !data) { wrap.innerHTML = '<div class="empty">불러오지 못했어요</div>'; return; }
     if (data.length === 0) { wrap.innerHTML = '<div class="empty">아직 등록된 후기가 없어요</div>'; return; }
 
-    wrap.innerHTML = data.map(p => `
+    wrap.innerHTML = data.map(p => {
+      const rating = Math.min(5, Math.max(0, Number(p.rating) || 0));
+      const safeImg = p.image_url && isSafeUrl(p.image_url) ? p.image_url : null;
+      return `
       <div class="ext-card" onclick="location.href='external-detail.html?id=${p.id}&from=shop.html'">
-        <div class="ext-img" ${p.image_url ? `style="background-image:url('${esc(p.image_url)}');"` : ''}>${p.image_url ? '' : '🔗'}</div>
+        <div class="ext-img" data-img="${safeImg ? esc(safeImg) : ''}">${safeImg ? '' : '🔗'}</div>
         <div class="ext-body">
           <div class="ext-title">${esc(p.title)}</div>
           <div class="ext-desc">${esc(p.description || '')}</div>
           <div class="ext-meta">
             <span class="ext-retailer">${esc(p.retailer)}</span>
-            ${p.rating ? `<span>${'★'.repeat(p.rating)}${'☆'.repeat(5 - p.rating)}</span>` : ''}
+            ${rating ? `<span>${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}</span>` : ''}
             <span>👍 ${p.like_count || 0}</span>
             <span>@${esc(p.users?.nickname || '익명')}</span>
           </div>
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
+    // 배경 이미지는 DOM 속성으로 지정 (스타일 문자열 조합 대신)
+    wrap.querySelectorAll('.ext-img[data-img]').forEach(el => {
+      const url = el.dataset.img;
+      if (url) el.style.backgroundImage = `url("${url}")`;
+    });
   }
 
   function openExtModal() {
@@ -399,7 +500,7 @@
     document.getElementById('ext-msg').textContent = '';
     extStar = 0;
     document.querySelectorAll('#ext-star-row .star').forEach(s => s.classList.remove('filled'));
-    document.getElementById('ext-modal').classList.add('show');
+    openModalCommon('ext-modal', 'ext-retailer');
   }
   document.getElementById('ext-star-row').addEventListener('click', (e) => {
     const star = e.target.closest('.star');
@@ -408,35 +509,49 @@
     document.querySelectorAll('#ext-star-row .star').forEach(s => s.classList.toggle('filled', parseInt(s.dataset.v) <= extStar));
   });
 
+  let isSubmittingExt = false;
   async function submitExt() {
+    if (isSubmittingExt) return;
     const retailer = document.getElementById('ext-retailer').value.trim();
     const title = document.getElementById('ext-title').value.trim();
     const external_url = document.getElementById('ext-url').value.trim();
+    const image_url = document.getElementById('ext-image').value.trim();
     const msg = document.getElementById('ext-msg');
     if (!retailer || !title || !external_url) { msg.textContent = '판매처·제목·링크는 필수예요'; return; }
+    if (!isSafeUrl(external_url)) { msg.textContent = '올바른 링크(http/https)를 입력해주세요'; return; }
+    if (image_url && !isSafeUrl(image_url)) { msg.textContent = '올바른 이미지 URL을 입력해주세요'; return; }
 
-    const { error } = await soolClient.from('external_purchase_posts').insert({
-      user_id: currentUser.id, retailer, title, external_url,
-      image_url: document.getElementById('ext-image').value.trim() || null,
-      description: document.getElementById('ext-desc').value.trim() || null,
-      rating: extStar || null,
-    });
-    if (error) { console.error(error); msg.textContent = '등록에 실패했어요'; return; }
-    closeModal('ext-modal');
-    await loadExternalPosts();
+    isSubmittingExt = true;
+    const btn = document.querySelector('#ext-modal .btn-submit');
+    if (btn) btn.disabled = true;
+    try {
+      const { error } = await soolClient.from('external_purchase_posts').insert({
+        user_id: currentUser.id, retailer, title, external_url,
+        image_url: image_url || null,
+        description: document.getElementById('ext-desc').value.trim() || null,
+        rating: extStar || null,
+      });
+      if (error) { console.error(error); msg.textContent = '등록에 실패했어요'; return; }
+      closeModal('ext-modal');
+      await loadExternalPosts();
+    } finally {
+      isSubmittingExt = false;
+      if (btn) btn.disabled = false;
+    }
   }
 
   // ── 장바구니 ──────────────────────
   async function openCartModal() {
     if (!currentUser) { alert('로그인 후 이용할 수 있어요'); location.href = 'auth.html'; return; }
     document.getElementById('cart-msg').textContent = '';
-    document.getElementById('cart-modal').classList.add('show');
+    openModalCommon('cart-modal');
     await renderCart();
   }
 
   async function renderCart() {
-    const { data } = await soolClient.from('cart_items').select('*, shop_products(name, price, emoji)').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+    const { data, error } = await soolClient.from('cart_items').select('*, shop_products(name, price, emoji)').eq('user_id', currentUser.id).order('created_at', { ascending: false });
     const wrap = document.getElementById('cart-items-list');
+    if (error) { wrap.innerHTML = '<div class="empty">불러오지 못했어요</div>'; return; }
     if (!data || data.length === 0) { wrap.innerHTML = '<div class="empty">장바구니가 비어있어요</div>'; document.getElementById('cart-total').textContent = '₩0'; return; }
 
     let total = 0;
@@ -445,44 +560,62 @@
       total += price * item.quantity;
       return `
         <div class="cart-item">
-          <div style="font-size:20px;">${item.shop_products?.emoji || '🍾'}</div>
+          <div style="font-size:20px;">${esc(item.shop_products?.emoji || '🍾')}</div>
           <div class="cart-item-name">${esc(item.shop_products?.name || '삭제된 상품')}<br><span class="cart-item-price">₩${price.toLocaleString()}</span></div>
-          <button class="qty-btn" onclick="changeQty('${item.id}', ${item.quantity - 1})">-</button>
+          <button class="qty-btn" onclick="changeQty('${item.id}', ${item.quantity - 1}, this)">-</button>
           <span>${item.quantity}</span>
-          <button class="qty-btn" onclick="changeQty('${item.id}', ${item.quantity + 1})">+</button>
+          <button class="qty-btn" onclick="changeQty('${item.id}', ${item.quantity + 1}, this)">+</button>
         </div>
       `;
     }).join('');
     document.getElementById('cart-total').textContent = `₩${total.toLocaleString()}`;
   }
 
-  async function changeQty(cartItemId, newQty) {
-    if (newQty <= 0) { await soolClient.from('cart_items').delete().eq('id', cartItemId); }
-    else { await soolClient.from('cart_items').update({ quantity: newQty }).eq('id', cartItemId); }
-    await renderCart();
-    await refreshCartBadge();
+  let isChangingQty = false;
+  async function changeQty(cartItemId, newQty, btn) {
+    if (isChangingQty) return;
+    isChangingQty = true;
+    if (btn) btn.disabled = true;
+    try {
+      let error;
+      if (newQty <= 0) {
+        ({ error } = await soolClient.from('cart_items').delete().eq('id', cartItemId));
+      } else {
+        ({ error } = await soolClient.from('cart_items').update({ quantity: newQty }).eq('id', cartItemId));
+      }
+      if (error) { console.error('수량 변경 실패:', error); alert('수량 변경에 실패했어요.'); return; }
+      await renderCart();
+      await refreshCartBadge();
+    } finally {
+      isChangingQty = false;
+      if (btn) btn.disabled = false;
+    }
   }
 
+  let isCheckingOut = false;
   async function checkout() {
+    if (isCheckingOut) return;
     const location_ = document.getElementById('pickup-location').value.trim();
     const msg = document.getElementById('cart-msg');
     if (!location_) { msg.textContent = '픽업 위치를 입력해주세요'; return; }
 
-    const { data: items } = await soolClient.from('cart_items').select('*, shop_products(name, price)').eq('user_id', currentUser.id);
-    if (!items || items.length === 0) { msg.textContent = '장바구니가 비어있어요'; return; }
+    isCheckingOut = true;
+    const btn = document.querySelector('#cart-modal .btn-submit');
+    if (btn) btn.disabled = true;
+    try {
+      // 주문 생성 + 상품 저장 + 장바구니 비우기를 RPC 하나로 원자적 처리
+      // (총액도 서버가 현재 상품 가격 기준으로 재계산 — 브라우저 값을 신뢰하지 않음)
+      const { error } = await soolClient.rpc('checkout_cart', { p_user_id: currentUser.id, p_pickup_location: location_ });
+      if (error) { console.error('주문 실패:', error); msg.textContent = '주문에 실패했어요'; return; }
 
-    const total = items.reduce((s, i) => s + (i.shop_products?.price || 0) * i.quantity, 0);
-    const { data: order, error } = await soolClient.from('orders').insert({ user_id: currentUser.id, pickup_location: location_, total_price: total }).select().single();
-    if (error || !order) { msg.textContent = '주문에 실패했어요'; return; }
-
-    const orderItems = items.map(i => ({ order_id: order.id, product_id: i.product_id, name: i.shop_products?.name || '삭제된 상품', price: i.shop_products?.price || 0, quantity: i.quantity }));
-    await soolClient.from('order_items').insert(orderItems);
-    await soolClient.from('cart_items').delete().eq('user_id', currentUser.id);
-
-    msg.style.color = 'var(--green-600)';
-    msg.textContent = `픽업 신청이 완료됐어요! (모의주문, 실제 결제 아님)`;
-    await renderCart();
-    await refreshCartBadge();
+      msg.style.color = 'var(--green-600)';
+      msg.textContent = `픽업 신청이 완료됐어요! (모의주문, 실제 결제 아님)`;
+      await renderCart();
+      await refreshCartBadge();
+    } finally {
+      isCheckingOut = false;
+      if (btn) btn.disabled = false;
+    }
   }
 
   init();

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>글쓰기 — 양조장 · 술향기마을</title>
+<style>
+  :root{--brown-50:#FDF5E8;--brown-100:#F0D89A;--brown-200:#D4A040;--brown-400:#A87820;--brown-600:#7A5410;--brown-900:#3A2404;--bg:#FAF4E8;--bg-card:#fff;--text-primary:#1a0e04;--text-secondary:#5a3e18;--text-muted:#a08050;--border:rgba(0,0,0,0.07);}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;}
+  nav{background:var(--bg-card);border-bottom:0.5px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+  .nav-back{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-secondary);text-decoration:none;cursor:pointer;background:none;border:none;font-family:inherit;}
+  .nav-back:hover{color:var(--brown-400);}.nav-back svg{width:16px;height:16px;}
+  .nav-logo{font-size:15px;font-weight:600;display:flex;align-items:center;gap:7px;}
+  .nav-logo-dot{width:8px;height:8px;border-radius:50%;background:var(--brown-200);}
+  .nav-spacer{width:80px;}
+  .hero{background:linear-gradient(135deg,#3A2404 0%,#7A4A10 100%);padding:28px 24px 24px;}
+  .hero-inner{max-width:640px;margin:0 auto;}
+  .hero-tag{display:inline-block;font-size:11px;font-weight:600;color:#F0D89A;background:rgba(255,255,255,0.1);padding:3px 10px;border-radius:99px;margin-bottom:10px;}
+  .hero-title{font-size:20px;font-weight:700;color:#fff;}
+  .section{padding:20px 24px;max-width:640px;margin:0 auto;}
+  .type-toggle{display:flex;gap:8px;margin-bottom:16px;}
+  .type-btn{flex:1;padding:10px;border:0.5px solid var(--border);border-radius:8px;text-align:center;font-size:13px;font-weight:500;cursor:pointer;color:var(--text-muted);background:var(--bg-card);}
+  .type-btn.active{border-color:var(--brown-200);background:var(--brown-50);color:var(--brown-600);}
+  .form-row{margin-bottom:14px;}
+  .form-label{font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px;display:block;}
+  .form-input,.form-textarea{width:100%;border:0.5px solid var(--border);border-radius:8px;padding:12px 14px;font-size:14px;font-family:inherit;color:var(--text-primary);outline:none;background:var(--bg-card);}
+  .form-input:focus,.form-textarea:focus{border-color:var(--brown-200);}
+  .form-textarea{resize:none;height:220px;line-height:1.6;}
+  .submit-btn{width:100%;background:var(--brown-200);color:#fff;border:none;border-radius:8px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px;}
+  .submit-btn:disabled{opacity:0.6;cursor:default;}
+  .msg{font-size:12px;color:var(--brown-600);margin-bottom:8px;min-height:16px;}
+  .msg.error{color:#dc2626;}
+  @media(max-width:480px){nav{padding:12px 16px;}.hero{padding:20px 16px;}.section{padding:16px;}}
+</style>
+</head>
+<body>
+<nav>
+  <button class="nav-back" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>뒤로가기</button>
+  <div class="nav-logo"><div class="nav-logo-dot"></div>술향기마을</div>
+  <div class="nav-spacer"></div>
+</nav>
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-tag">양조장 · 글쓰기</div>
+    <h1 class="hero-title" id="hero-title">✏️ 양조 이야기 쓰기</h1>
+  </div>
+</div>
+<div class="section">
+  <div class="type-toggle" id="type-toggle">
+    <div class="type-btn" data-type="story">🍶 양조 이야기</div>
+    <div class="type-btn" data-type="brewery">🏭 양조장 소개</div>
+    <div class="type-btn" data-type="method">⚗️ 양조 방법</div>
+  </div>
+
+  <div class="msg" id="msg"></div>
+
+  <div class="form-row">
+    <label class="form-label">제목</label>
+    <input class="form-input" id="w-title" placeholder="제목을 입력해주세요" maxlength="100">
+  </div>
+  <div class="form-row">
+    <label class="form-label">내용</label>
+    <textarea class="form-textarea" id="w-content" placeholder="내용을 자유롭게 적어주세요"></textarea>
+  </div>
+
+  <button class="submit-btn" id="submit-btn" onclick="submitPost()">등록하기</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/core/supabase.js"></script>
+<script>
+  const params = new URLSearchParams(location.search);
+  // brewery.html 탭 이름(복수형) -> 실제 DB 타입(단수형) 매핑
+  const typeMap = { stories: 'story', breweries: 'brewery', types: 'method', story: 'story', brewery: 'brewery', method: 'method' };
+  const typeTitle = { story: '🍶 양조 이야기 쓰기', brewery: '🏭 양조장 소개 쓰기', method: '⚗️ 양조 방법 쓰기' };
+  let currentType = typeMap[params.get('type')] || 'story';
+  let currentUser = null;
+
+  function goBack() {
+    const from = params.get('from');
+    const allowedPages = ['brewery.html', 'index.html'];
+    location.href = allowedPages.includes(from) ? from : 'brewery.html';
+  }
+
+  function setType(type) {
+    currentType = type;
+    document.querySelectorAll('.type-btn').forEach(b => b.classList.toggle('active', b.dataset.type === type));
+    document.getElementById('hero-title').textContent = typeTitle[type];
+  }
+
+  document.getElementById('type-toggle').addEventListener('click', (e) => {
+    const btn = e.target.closest('.type-btn');
+    if (btn) setType(btn.dataset.type);
+  });
+
+  function showMsg(text, isError) {
+    const el = document.getElementById('msg');
+    el.textContent = text;
+    el.className = isError ? 'msg error' : 'msg';
+  }
+
+  async function init() {
+    const { data: { session } } = await soolClient.auth.getSession();
+    if (!session) {
+      alert('로그인 후 글을 작성할 수 있어요');
+      location.href = 'auth.html';
+      return;
+    }
+    const { data: user } = await soolClient.from('users').select('id, nickname').eq('id', session.user.id).single();
+    currentUser = user;
+    setType(currentType);
+  }
+
+  async function submitPost() {
+    const title = document.getElementById('w-title').value.trim();
+    const content = document.getElementById('w-content').value.trim();
+    if (!title || !content) { showMsg('제목과 내용을 모두 입력해주세요', true); return; }
+    if (!currentUser) { showMsg('로그인이 필요해요', true); return; }
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = '등록 중...';
+
+    const { error } = await soolClient.from('brewery_posts').insert({
+      type: currentType,
+      title,
+      content,
+      user_id: currentUser.id,
+    });
+
+    if (error) {
+      console.error('등록 실패:', error);
+      showMsg('등록에 실패했어요. 다시 시도해주세요', true);
+      btn.disabled = false;
+      btn.textContent = '등록하기';
+      return;
+    }
+
+    showMsg('등록됐어요! 목록으로 이동할게요', false);
+    setTimeout(() => { location.href = 'brewery.html'; }, 800);
+  }
+
+  init();
+</script>
+</body>
+</html>

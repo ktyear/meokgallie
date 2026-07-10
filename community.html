@@ -119,6 +119,7 @@
     </div>
   </div>
 </div>
+<script src="community-shared.js"></script>
 <script>
   function switchTab(name, el) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -140,33 +141,12 @@
 
   let communitiesData = [];
 
-  // XSS 방지 (텍스트 노드용)
-  function esc(str) {
-    const d = document.createElement('div');
-    d.textContent = str == null ? '' : String(str);
-    return d.innerHTML;
-  }
-  // XSS 방지 (HTML 속성값용 - 따옴표까지 처리)
-  function escAttr(str) {
-    return esc(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-  }
-
   function timeAgo(dateStr) {
     const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
     if (diff < 60) return '방금 전';
     if (diff < 3600) return Math.floor(diff/60) + '분 전';
     if (diff < 86400) return Math.floor(diff/3600) + '시간 전';
     return Math.floor(diff/86400) + '일 전';
-  }
-
-  // 유튜브 URL → 임베드 ID 추출
-  function getYoutubeId(url) {
-    try {
-      const u = new URL(url);
-      if (u.hostname.includes("youtube.com")) return u.searchParams.get("v");
-      if (u.hostname === "youtu.be") return u.pathname.slice(1);
-    } catch(e) {}
-    return null;
   }
 
   // 커뮤니티 목록 로드
@@ -176,13 +156,21 @@
       .select('*')
       .order('sort_order', { ascending: true });
 
-    if (error || !data) return;
+    const list = document.getElementById('communities-list');
+    if (error) {
+      console.error('커뮤니티 로드 실패:', error);
+      list.innerHTML = '<div class="empty">커뮤니티를 불러오지 못했어요.</div>';
+      return;
+    }
+    if (!data || data.length === 0) {
+      list.innerHTML = '<div class="empty">등록된 커뮤니티가 없어요.</div>';
+      return;
+    }
     communitiesData = data;
 
     // 커뮤니티 탭 목록 표시
-    const list = document.getElementById('communities-list');
     list.innerHTML = data.map(c => `
-      <div class="community-card" onclick="location.href='community-posts.html?id=${c.id}&name=${encodeURIComponent(c.name)}&icon=${encodeURIComponent(c.icon)}'">
+      <div class="community-card" onclick="location.href='community-posts.html?id=${encodeURIComponent(c.id)}'">
         <div class="community-icon">${esc(c.icon)}</div>
         <div>
           <div class="community-name">${esc(c.name)}</div>
@@ -191,9 +179,10 @@
       </div>
     `).join('');
 
-    // 글쓰기 커뮤니티 선택 옵션 채우기
+    // 글쓰기 커뮤니티 선택 옵션 채우기 (재호출 시 중복 방지)
     const select = document.getElementById('post-community');
     if (select) {
+      select.innerHTML = '<option value="">커뮤니티 선택</option>';
       data.forEach(c => {
         const opt = document.createElement('option');
         opt.value = c.id;
@@ -212,7 +201,12 @@
       .limit(30);
 
     const list = document.getElementById('posts-list');
-    if (error || !data || data.length === 0) {
+    if (error) {
+      console.error('게시글 로드 실패:', error);
+      list.innerHTML = '<div class="empty">게시글을 불러오지 못했어요.</div>';
+      return;
+    }
+    if (!data || data.length === 0) {
       list.innerHTML = '<div class="empty">아직 게시글이 없어요. 첫 글을 작성해보세요! ✍️</div>';
       return;
     }
@@ -225,7 +219,7 @@
           <div class="post-time">${timeAgo(p.created_at)}</div>
         </div>
         <div class="post-title">${esc(p.title)}</div>
-        <div class="post-body">${esc(p.content.slice(0, 80))}${p.content.length > 80 ? '...' : ''}</div>
+        <div class="post-body">${esc(safeSlice(p.content, 80))}</div>
         ${p.image_url ? `<img src="${escAttr(p.image_url)}" style="width:100%;border-radius:8px;margin-top:8px;max-height:160px;object-fit:cover;" onerror="this.style.display='none'" />` : ''}
         <div class="post-footer">
           <span class="post-stat">👍 ${p.like_count}</span>
@@ -236,7 +230,9 @@
     `).join('');
   }
 
+  let isSubmittingPost = false;
   async function submitPost() {
+    if (isSubmittingPost) return;
     const { data: { session } } = await soolClient.auth.getSession();
     if (!session) { location.href = 'auth.html'; return; }
 
@@ -249,28 +245,39 @@
     if (!communityId) { showMsg('커뮤니티를 선택해주세요!', 'error'); return; }
     if (!title) { showMsg('제목을 입력해주세요!', 'error'); return; }
     if (!content) { showMsg('내용을 입력해주세요!', 'error'); return; }
+    if (!isAllowedUrl(imageUrl)) { showMsg('올바른 이미지 URL을 입력해주세요.', 'error'); return; }
+    if (!isAllowedUrl(embedUrl)) { showMsg('올바른 외부 링크를 입력해주세요.', 'error'); return; }
 
-    const { error } = await soolClient.from('posts').insert({
-      user_id: session.user.id,
-      community_id: communityId,
-      title, content,
-      image_url: imageUrl || null,
-      embed_url: embedUrl || null,
-      category: communitiesData.find(c => c.id === communityId)?.name || ''
-    });
+    isSubmittingPost = true;
+    const btn = document.querySelector('.write-btn');
+    if (btn) btn.disabled = true;
 
-    if (error) { showMsg('등록 중 오류가 발생했어요.', 'error'); }
-    else {
-      showMsg('게시글이 등록됐어요! +30 XP 🎉', 'success');
-      ['post-community','post-title','post-content','post-image','post-embed'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
+    try {
+      const { error } = await soolClient.from('posts').insert({
+        user_id: session.user.id,
+        community_id: communityId,
+        title, content,
+        image_url: imageUrl || null,
+        embed_url: embedUrl || null,
+        category: communitiesData.find(c => String(c.id) === String(communityId))?.name || ''
       });
-      setTimeout(() => {
-        loadPosts();
-        const postTab = document.querySelector('.tab:nth-child(2)');
-        if (postTab) switchTab('posts', postTab);
-      }, 1500);
+
+      if (error) { showMsg('등록 중 오류가 발생했어요.', 'error'); }
+      else {
+        showMsg('게시글이 등록됐어요! +30 XP 🎉', 'success');
+        ['post-community','post-title','post-content','post-image','post-embed'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.value = '';
+        });
+        setTimeout(() => {
+          loadPosts();
+          const postTab = document.querySelector('.tab:nth-child(2)');
+          if (postTab) switchTab('posts', postTab);
+        }, 1500);
+      }
+    } finally {
+      isSubmittingPost = false;
+      if (btn) btn.disabled = false;
     }
   }
 

@@ -111,11 +111,13 @@
 
   function goBack() {
     const from = params.get('from');
-    location.href = from || 'restaurant.html';
+    location.href = from === 'restaurant.html' ? from : 'restaurant.html';
   }
 
   function timeAgo(dateStr) {
-    const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+    const timestamp = new Date(dateStr).getTime();
+    if (!Number.isFinite(timestamp)) return '';
+    const diff = Math.max(0, Math.floor((Date.now() - timestamp) / 1000));
     if (diff < 60) return '방금 전';
     if (diff < 3600) return Math.floor(diff/60) + '분 전';
     if (diff < 86400) return Math.floor(diff/3600) + '시간 전';
@@ -125,26 +127,29 @@
   async function init() {
     if (!postId) { location.href = 'restaurant.html'; return; }
 
-    const { data: { session } } = await soolClient.auth.getSession();
-    if (session) {
-      const { data: user } = await soolClient.from('users').select('id, nickname').eq('id', session.user.id).single();
-      currentUser = user;
-    } else {
-      document.getElementById('comment-form-wrap').innerHTML = `<div class="empty"><a href="auth.html" style="color:var(--orange-400);text-decoration:none;">로그인</a> 후 댓글을 작성할 수 있어요</div>`;
+    try {
+      const { data: { session } } = await soolClient.auth.getSession();
+      if (session) {
+        const { data: user } = await soolClient.from('users').select('id, nickname').eq('id', session.user.id).single();
+        currentUser = user;
+      } else {
+        document.getElementById('comment-form-wrap').innerHTML = `<div class="empty"><a href="auth.html" style="color:var(--orange-400);text-decoration:none;">로그인</a> 후 댓글을 작성할 수 있어요</div>`;
+      }
+      await loadRealPost();
+    } catch (error) {
+      console.error('초기화 실패:', error);
+    } finally {
+      document.getElementById('page-loading').classList.add('hide');
     }
-
-    await loadRealPost();
-    document.getElementById('page-loading').classList.add('hide');
   }
 
   async function loadRealPost() {
     const { data, error } = await soolClient.from('pairing_posts').select('*, users(nickname)').eq('id', postId).single();
-    if (error) { console.error('게시글 로드 실패:', error); }
-    if (!data) { location.href = 'restaurant.html'; return; }
+    if (error || !data) { location.href = 'restaurant.html'; return; }
     postData = data;
 
-    // 조회수 증가
-    await soolClient.from('pairing_posts').update({ view_count: (data.view_count || 0) + 1 }).eq('id', postId);
+    // 조회수 증가 (원자적 RPC)
+    await soolClient.rpc('increment_pairing_view', { post_id_input: postId });
 
     document.title = data.title + ' — 술향기마을';
     document.getElementById('p-type').textContent = typeLabels[data.type] || '마리아주';
@@ -164,12 +169,13 @@
 
     // 좋아요 상태 확인
     if (currentUser) {
-      const { data: liked } = await soolClient
+      const { data: liked, error: likeErr } = await soolClient
         .from('pairing_likes')
         .select('id')
         .eq('post_id', postId)
         .eq('user_id', currentUser.id)
-        .single();
+        .maybeSingle();
+      if (likeErr) console.error('좋아요 상태 확인 실패:', likeErr);
       if (liked) {
         isLiked = true;
         document.getElementById('like-btn').classList.add('liked');
@@ -180,35 +186,45 @@
   }
 
   async function toggleLike() {
-    if (!currentUser || !postId) return;
+    if (!postId) return;
+    if (!currentUser) { alert('로그인 후 좋아요를 누를 수 있어요'); location.href = 'auth.html'; return; }
     if (isTogglingLike) return; // 중복 클릭 방지
     isTogglingLike = true;
     const btn = document.getElementById('like-btn');
+    btn.disabled = true;
     const countEl = document.getElementById('like-count');
-    const count = parseInt(countEl.textContent);
+    const count = parseInt(countEl.textContent) || 0;
 
-    if (isLiked) {
-      await soolClient.from('pairing_likes').delete().eq('post_id', postId).eq('user_id', currentUser.id);
-      await soolClient.from('pairing_posts').update({ like_count: count - 1 }).eq('id', postId);
-      countEl.textContent = count - 1;
-      btn.classList.remove('liked');
-      isLiked = false;
-    } else {
-      await soolClient.from('pairing_likes').insert({ post_id: postId, user_id: currentUser.id });
-      await soolClient.from('pairing_posts').update({ like_count: count + 1 }).eq('id', postId);
-      countEl.textContent = count + 1;
-      btn.classList.add('liked');
-      isLiked = true;
+    try {
+      if (isLiked) {
+        const { error } = await soolClient.from('pairing_likes').delete().eq('post_id', postId).eq('user_id', currentUser.id);
+        if (error) throw error;
+        // like_count는 DB 트리거가 자동 갱신
+        countEl.textContent = Math.max(0, count - 1);
+        btn.classList.remove('liked');
+        isLiked = false;
+      } else {
+        const { error } = await soolClient.from('pairing_likes').insert({ post_id: postId, user_id: currentUser.id });
+        if (error) throw error;
+        countEl.textContent = count + 1;
+        btn.classList.add('liked');
+        isLiked = true;
+      }
+    } catch (error) {
+      console.error('좋아요 처리 실패:', error);
+    } finally {
+      isTogglingLike = false; // 완료 후 해제
+      btn.disabled = false;
     }
-    isTogglingLike = false; // 완료 후 해제
   }
 
   async function loadComments() {
     if (!postId) return;
-    const { data } = await soolClient.from('pairing_comments')
-      .select('*, users(nickname)').eq('post_id', postId).order('created_at', { ascending: true });
+    const { data, error } = await soolClient.from('pairing_comments')
+      .select('*, users(nickname)').eq('post_id', postId).order('created_at', { ascending: true }).limit(200);
 
     const list = document.getElementById('comments-list');
+    if (error) { console.error('댓글 로드 실패:', error); list.innerHTML = '<div class="empty">댓글을 불러오지 못했어요</div>'; return; }
     document.getElementById('comment-count').textContent = (data?.length || 0) + '개';
 
     if (!data || data.length === 0) {
@@ -226,17 +242,26 @@
     `).join('');
   }
 
+  let isSubmittingComment = false;
   async function submitComment() {
-    if (!currentUser || !postId) return;
+    if (!currentUser || !postId || isSubmittingComment) return;
     const content = document.getElementById('comment-input').value.trim();
     if (!content) return;
 
-    const { error: commentError } = await soolClient.from('pairing_comments').insert({ post_id: postId, user_id: currentUser.id, content });
-    if (commentError) { console.error('댓글 등록 실패:', commentError); return; }
-    await soolClient.from('pairing_posts').update({ comment_count: (postData?.comment_count || 0) + 1 }).eq('id', postId);
-    if (postData) postData.comment_count = (postData.comment_count || 0) + 1;
-    document.getElementById('comment-input').value = '';
-    loadComments();
+    isSubmittingComment = true;
+    const btn = document.querySelector('.comment-submit');
+    if (btn) btn.disabled = true;
+
+    try {
+      const { error: commentError } = await soolClient.from('pairing_comments').insert({ post_id: postId, user_id: currentUser.id, content });
+      if (commentError) { console.error('댓글 등록 실패:', commentError); return; }
+      // comment_count는 DB 트리거가 자동 갱신
+      document.getElementById('comment-input').value = '';
+      await loadComments();
+    } finally {
+      isSubmittingComment = false;
+      if (btn) btn.disabled = false;
+    }
   }
 
   init();

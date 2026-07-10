@@ -121,13 +121,13 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/core/supabase.js"></script>
+<script src="community-shared.js"></script>
 <script>
   const params = new URLSearchParams(location.search);
   const communityId = params.get('id');
-  const communityName = params.get('name') || '커뮤니티';
-  const communityIcon = params.get('icon') || '💬';
   let currentUser = null;
   let communityData = null;
+  let isSubmittingPost = false;
 
   function timeAgo(dateStr) {
     const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
@@ -137,63 +137,75 @@
     return Math.floor(diff/86400) + '일 전';
   }
 
-  function getYoutubeId(url) {
-    const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
-    return match ? match[1] : null;
-  }
-
   async function init() {
     if (!communityId) { location.href = 'community.html'; return; }
 
-    // 커뮤니티 정보
-    const { data: comm } = await soolClient.from('communities').select('*').eq('id', communityId).single();
-    if (comm) {
+    try {
+      // 커뮤니티 정보 (없거나 오류면 목록으로 돌려보냄)
+      const { data: comm, error: commError } = await soolClient
+        .from('communities').select('*').eq('id', communityId).maybeSingle();
+      if (commError || !comm) { location.href = 'community.html'; return; }
+
       communityData = comm;
       document.title = comm.name + ' — 술향기마을';
       document.getElementById('c-icon').textContent = comm.icon;
       document.getElementById('c-name').textContent = comm.name;
       document.getElementById('c-desc').textContent = comm.description || '';
-    }
 
-    // 로그인 확인
-    const { data: { session } } = await soolClient.auth.getSession();
-    if (session) {
-      const { data: user } = await soolClient.from('users').select('id, nickname').eq('id', session.user.id).single();
-      currentUser = user;
-    } else {
-      document.getElementById('write-fab').style.display = 'none';
-    }
+      // 로그인 확인
+      const { data: { session } } = await soolClient.auth.getSession();
+      if (session) {
+        const { data: user } = await soolClient.from('users').select('id, nickname').eq('id', session.user.id).single();
+        currentUser = user;
+      } else {
+        document.getElementById('write-fab').style.display = 'none';
+      }
 
-    await loadPosts();
-    document.getElementById('page-loading').classList.add('hide');
+      await loadPosts();
+    } catch (error) {
+      console.error('초기화 실패:', error);
+    } finally {
+      document.getElementById('page-loading').classList.add('hide');
+    }
   }
 
   async function loadPosts() {
-    const { data } = await soolClient
+    const { data, error } = await soolClient
       .from('posts')
       .select('*, users(nickname)')
       .eq('community_id', communityId)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(30);
 
     const list = document.getElementById('posts-list');
+    if (error) {
+      console.error('게시글 로드 실패:', error);
+      list.innerHTML = '<div class="empty">게시글을 불러오지 못했어요.</div>';
+      return;
+    }
     if (!data || data.length === 0) {
       list.innerHTML = '<div class="empty">아직 게시글이 없어요.<br>첫 글을 작성해보세요! ✍️</div>';
       return;
     }
 
+    // 복귀 URL은 커뮤니티 id만 있으면 충분 (이름/아이콘은 DB에서 다시 조회)
+    const returnUrl = `community-posts.html?id=${encodeURIComponent(communityId)}`;
+
     list.innerHTML = data.map(p => {
       const ytId = p.embed_url ? getYoutubeId(p.embed_url) : null;
+      const hasPlainLink = p.embed_url && !ytId && isAllowedUrl(p.embed_url);
+      const detailUrl = `post-detail.html?id=${encodeURIComponent(p.id)}&from=${encodeURIComponent(returnUrl)}`;
       return `
-        <div class="post-card" onclick="location.href='post-detail.html?id=${p.id}&from=community-posts.html%3Fid%3D${communityId}%26name%3D${encodeURIComponent(communityName)}%26icon%3D${encodeURIComponent(communityIcon)}'">
+        <div class="post-card" onclick="location.href='${detailUrl}'">
           <div class="post-header">
-            <div class="post-author">@${p.users?.nickname || '익명'}</div>
+            <div class="post-author">@${esc(p.users?.nickname || '익명')}</div>
             <div class="post-time">${timeAgo(p.created_at)}</div>
           </div>
-          <div class="post-title">${p.title}</div>
-          <div class="post-body">${p.content.slice(0, 100)}${p.content.length > 100 ? '...' : ''}</div>
-          ${p.image_url ? `<img class="post-image" src="${p.image_url}" onerror="this.style.display='none'" />` : ''}
-          ${ytId ? `<iframe class="post-embed" src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe>` : ''}
-          ${p.embed_url && !ytId ? `<div style="font-size:12px;color:var(--purple-400);margin-top:6px;">🔗 ${p.embed_url}</div>` : ''}
+          <div class="post-title">${esc(p.title)}</div>
+          <div class="post-body">${esc(safeSlice(p.content, 100))}</div>
+          ${p.image_url ? `<img class="post-image" src="${escAttr(p.image_url)}" onerror="this.style.display='none'" />` : ''}
+          ${ytId ? `<iframe class="post-embed" src="https://www.youtube.com/embed/${escAttr(ytId)}" allowfullscreen></iframe>` : ''}
+          ${hasPlainLink ? `<a href="${escAttr(p.embed_url)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" style="font-size:12px;color:var(--purple-400);margin-top:6px;display:inline-block;">🔗 외부 링크 열기</a>` : ''}
           <div class="post-footer">
             <span class="post-stat">👍 ${p.like_count}</span>
             <span class="post-stat">💬 ${p.comment_count}</span>
@@ -206,17 +218,25 @@
   function openModal() {
     if (!currentUser) { location.href = 'auth.html'; return; }
     document.getElementById('modal-bg').classList.add('show');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('post-title')?.focus(), 50);
   }
 
   function closeModal() {
     document.getElementById('modal-bg').classList.remove('show');
+    document.body.style.overflow = '';
   }
 
   function closeModalBg(e) {
     if (e.target === document.getElementById('modal-bg')) closeModal();
   }
 
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && document.getElementById('modal-bg').classList.contains('show')) closeModal();
+  });
+
   async function submitPost() {
+    if (isSubmittingPost) return;
     const title = document.getElementById('post-title').value.trim();
     const content = document.getElementById('post-content').value.trim();
     const imageUrl = document.getElementById('post-image').value.trim();
@@ -224,23 +244,34 @@
 
     if (!title) { showMsg('제목을 입력해주세요!', 'error'); return; }
     if (!content) { showMsg('내용을 입력해주세요!', 'error'); return; }
+    if (!isAllowedUrl(imageUrl)) { showMsg('올바른 이미지 URL을 입력해주세요.', 'error'); return; }
+    if (!isAllowedUrl(embedUrl)) { showMsg('올바른 외부 링크를 입력해주세요.', 'error'); return; }
 
-    const { error } = await soolClient.from('posts').insert({
-      user_id: currentUser.id,
-      community_id: communityId,
-      category: communityData?.name || '',
-      title, content,
-      image_url: imageUrl || null,
-      embed_url: embedUrl || null,
-    });
+    isSubmittingPost = true;
+    const btn = document.querySelector('.write-btn');
+    if (btn) btn.disabled = true;
 
-    if (error) { showMsg('등록 중 오류가 발생했어요.', 'error'); }
-    else {
-      showMsg('등록됐어요! +30 XP 🎉', 'success');
-      ['post-title','post-content','post-image','post-embed'].forEach(id => {
-        document.getElementById(id).value = '';
+    try {
+      const { error } = await soolClient.from('posts').insert({
+        user_id: currentUser.id,
+        community_id: communityId,
+        category: communityData?.name || '',
+        title, content,
+        image_url: imageUrl || null,
+        embed_url: embedUrl || null,
       });
-      setTimeout(() => { closeModal(); loadPosts(); }, 1200);
+
+      if (error) { showMsg('등록 중 오류가 발생했어요.', 'error'); }
+      else {
+        showMsg('등록됐어요! +30 XP 🎉', 'success');
+        ['post-title','post-content','post-image','post-embed'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
+        setTimeout(() => { closeModal(); loadPosts(); }, 1200);
+      }
+    } finally {
+      isSubmittingPost = false;
+      if (btn) btn.disabled = false;
     }
   }
 

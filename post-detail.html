@@ -99,7 +99,10 @@
 
   function goBack() {
     const from = params.get('from');
-    location.href = from || 'community.html';
+    // 외부 URL(스킴, 프로토콜 상대경로) 차단하고, 허용된 내부 페이지로 시작할 때만 사용
+    const allowedPrefixes = ['community.html', 'community-posts.html', 'library.html', 'admin.html'];
+    const isSafe = from && !from.includes('://') && !from.startsWith('//') && allowedPrefixes.some(p => from.startsWith(p));
+    location.href = isSafe ? from : 'community.html';
   }
 
   function timeAgo(dateStr) {

@@ -90,6 +90,13 @@
   </div>
 </div>
 <script>
+  // XSS 방지
+  function esc(str) {
+    const d = document.createElement('div');
+    d.textContent = str == null ? '' : String(str);
+    return d.innerHTML;
+  }
+
   function switchTab(name, el) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -121,27 +128,35 @@
   }
 
   async function init() {
-    await loadCourses();
-    await loadCommunityPosts();
     const { data: { session } } = await soolClient.auth.getSession();
     if (session) {
-      await loadMyCourses(session.user.id);
-      await loadCerts(session.user.id);
+      await Promise.all([
+        loadCourses(),
+        loadCommunityPosts(),
+        loadMyCourses(session.user.id),
+        loadCerts(session.user.id),
+      ]);
     } else {
       document.getElementById('my-courses-list').innerHTML = '<div class="empty"><a href="auth.html" style="color:var(--blue-400);text-decoration:none;">로그인</a> 후 수강 내역을 확인할 수 있어요</div>';
       document.getElementById('certs-list').innerHTML = '<div class="empty"><a href="auth.html" style="color:var(--blue-400);text-decoration:none;">로그인</a> 후 수료증을 확인할 수 있어요</div>';
+      await Promise.all([loadCourses(), loadCommunityPosts()]);
     }
   }
 
   // 강의 목록
   async function loadCourses() {
-    const { data } = await soolClient
+    const { data, error } = await soolClient
       .from('courses')
       .select('*, users(nickname)')
       .eq('is_published', true)
       .order('created_at', { ascending: false });
 
     const list = document.getElementById('courses-list');
+    if (error) {
+      console.error('강의 목록 로드 실패:', error);
+      list.innerHTML = '<div class="empty">강의 목록을 불러오지 못했어요.</div>';
+      return;
+    }
     if (!data || data.length === 0) {
       list.innerHTML = '<div class="empty">등록된 강의가 없어요. 곧 오픈될 예정이에요! 📚</div>';
       return;
@@ -150,14 +165,14 @@
       <div class="course-card" onclick="location.href='course-detail.html?id=${c.id}&from=library.html'">
         <div class="course-icon">${typeIcon[c.type] || '📚'}</div>
         <div style="flex:1;">
-          <div class="course-title">${c.title}</div>
-          <div class="course-desc">${c.description || ''}</div>
+          <div class="course-title">${esc(c.title)}</div>
+          <div class="course-desc">${esc(c.description || '')}</div>
           <div class="course-meta">
             <span class="badge ${c.is_free ? 'badge-free' : 'badge-lv'}">${c.is_free ? '무료' : '유료'}</span>
             ${c.required_level > 1 ? `<span class="badge badge-lv">Lv.${c.required_level} 이상</span>` : ''}
             <span style="font-size:11px;color:var(--text-muted);">${typeLabel[c.type] || ''}</span>
             ${c.duration_min ? `<span style="font-size:11px;color:var(--text-muted);">${c.duration_min}분</span>` : ''}
-            <span style="font-size:11px;color:var(--text-muted);">강사: ${c.users?.nickname || '관리자'}</span>
+            <span style="font-size:11px;color:var(--text-muted);">강사: ${esc(c.users?.nickname) || '관리자'}</span>
           </div>
         </div>
       </div>
@@ -177,7 +192,7 @@
     }
 
     const ids = communities.map(c => c.id);
-    const { data } = await soolClient
+    const { data, error } = await soolClient
       .from('posts')
       .select('*, users(nickname), communities(name, icon)')
       .in('community_id', ids)
@@ -185,21 +200,26 @@
       .limit(5);
 
     const list = document.getElementById('community-posts-list');
+    if (error) {
+      console.error('커뮤니티 자료 로드 실패:', error);
+      list.innerHTML = '<div class="empty">자료를 불러오지 못했어요.</div>';
+      return;
+    }
     if (!data || data.length === 0) {
       list.innerHTML = '<div class="empty">아직 자료가 없어요.</div>';
       return;
     }
     list.innerHTML = data.map(p => `
       <div class="community-post-card" onclick="location.href='post-detail.html?id=${p.id}&from=library.html'">
-        <div class="community-post-title">${p.communities?.icon || ''} ${p.title}</div>
-        <div class="community-post-meta">@${p.users?.nickname || '익명'} · ${p.communities?.name || ''} · ${timeAgo(p.created_at)}</div>
+        <div class="community-post-title">${esc(p.communities?.icon) || ''} ${esc(p.title)}</div>
+        <div class="community-post-meta">@${esc(p.users?.nickname) || '익명'} · ${esc(p.communities?.name) || ''} · ${timeAgo(p.created_at)}</div>
       </div>
     `).join('');
   }
 
   // 내 수강 목록
   async function loadMyCourses(userId) {
-    const { data } = await soolClient
+    const { data, error } = await soolClient
       .from('course_enrollments')
       .select('*, courses(title, type, duration_min)')
       .eq('user_id', userId)
@@ -207,25 +227,33 @@
       .order('created_at', { ascending: false });
 
     const list = document.getElementById('my-courses-list');
+    if (error) {
+      console.error('수강 목록 로드 실패:', error);
+      list.innerHTML = '<div class="empty">수강 내역을 불러오지 못했어요.</div>';
+      return;
+    }
     if (!data || data.length === 0) {
       list.innerHTML = '<div class="empty">수강 중인 강의가 없어요.<br>강의 목록에서 수강 신청해보세요!</div>';
       return;
     }
-    list.innerHTML = data.map(e => `
+    list.innerHTML = data.map(e => {
+      const progress = Math.min(100, Math.max(0, e.progress || 0));
+      return `
       <div class="course-card" onclick="location.href='course-detail.html?id=${e.course_id}&from=library.html'">
         <div class="course-icon">${typeIcon[e.courses?.type] || '📚'}</div>
         <div style="flex:1;">
-          <div class="course-title">${e.courses?.title || '—'}</div>
-          <div class="progress-bar"><div class="progress-fill" style="width:${e.progress}%"></div></div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">${e.progress}% 완료</div>
+          <div class="course-title">${esc(e.courses?.title) || '—'}</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">${progress}% 완료</div>
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
   }
 
   // 수료증
   async function loadCerts(userId) {
-    const { data } = await soolClient
+    const { data, error } = await soolClient
       .from('course_enrollments')
       .select('*, courses(title, category)')
       .eq('user_id', userId)
@@ -233,6 +261,11 @@
       .order('completed_at', { ascending: false });
 
     const list = document.getElementById('certs-list');
+    if (error) {
+      console.error('수료증 로드 실패:', error);
+      list.innerHTML = '<div class="empty">수료증을 불러오지 못했어요.</div>';
+      return;
+    }
     if (!data || data.length === 0) {
       list.innerHTML = `<div style="background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:24px;text-align:center;"><div style="font-size:40px;margin-bottom:12px;">🎓</div><div style="font-size:14px;color:var(--text-secondary);line-height:1.6;">강의를 수료하면 수료증이 발급돼요.<br>수료증은 프로필에 표시됩니다.</div></div>`;
       return;
@@ -240,7 +273,7 @@
     list.innerHTML = data.map(e => `
       <div class="cert-card">
         <div class="cert-badge">🎓</div>
-        <div class="cert-title">${e.courses?.title || '—'} 수료증</div>
+        <div class="cert-title">${esc(e.courses?.title) || '—'} 수료증</div>
         <div class="cert-date">수료일: ${e.completed_at ? new Date(e.completed_at).toLocaleDateString('ko-KR') : '—'}</div>
       </div>
     `).join('');

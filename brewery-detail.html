@@ -110,7 +110,8 @@
 
   function goBack() {
     const from = params.get('from');
-    location.href = from || 'brewery.html';
+    const allowedPages = ['brewery.html', 'index.html'];
+    location.href = allowedPages.includes(from) ? from : 'brewery.html';
   }
 
   function timeAgo(dateStr) {
@@ -138,12 +139,18 @@
 
   async function loadRealPost() {
     const { data, error } = await soolClient.from('brewery_posts').select('*, users(nickname)').eq('id', postId).single();
-    if (error) { console.error('게시글 로드 실패:', error); }
+    if (error) {
+      console.error('게시글 로드 실패:', error);
+      document.getElementById('page-loading').classList.add('hide');
+      document.getElementById('p-title').textContent = '불러오지 못했어요';
+      document.getElementById('p-body').textContent = '잠시 후 다시 시도해주세요.';
+      return;
+    }
     if (!data) { location.href = 'brewery.html'; return; }
     postData = data;
 
-    // 조회수 증가
-    await soolClient.from('brewery_posts').update({ view_count: (data.view_count || 0) + 1 }).eq('id', postId);
+    // 조회수 증가 (원자적 RPC)
+    await soolClient.rpc('increment_brewery_view', { post_id_input: postId });
 
     document.title = data.title + ' — 술향기마을';
     document.getElementById('p-type').textContent = typeLabels[data.type] || '양조장';
@@ -154,12 +161,13 @@
 
     // 좋아요 상태 확인
     if (currentUser) {
-      const { data: liked } = await soolClient
+      const { data: liked, error: likeCheckError } = await soolClient
         .from('brewery_likes')
         .select('id')
         .eq('post_id', postId)
         .eq('user_id', currentUser.id)
-        .single();
+        .maybeSingle();
+      if (likeCheckError) console.error('좋아요 상태 확인 실패:', likeCheckError);
       if (liked) {
         isLiked = true;
         document.getElementById('like-btn').classList.add('liked');
@@ -174,23 +182,32 @@
     if (isTogglingLike) return; // 중복 클릭 방지
     isTogglingLike = true;
     const btn = document.getElementById('like-btn');
+    btn.disabled = true;
     const countEl = document.getElementById('like-count');
     const count = parseInt(countEl.textContent);
 
-    if (isLiked) {
-      await soolClient.from('brewery_likes').delete().eq('post_id', postId).eq('user_id', currentUser.id);
-      await soolClient.from('brewery_posts').update({ like_count: count - 1 }).eq('id', postId);
-      countEl.textContent = count - 1;
-      btn.classList.remove('liked');
-      isLiked = false;
-    } else {
-      await soolClient.from('brewery_likes').insert({ post_id: postId, user_id: currentUser.id });
-      await soolClient.from('brewery_posts').update({ like_count: count + 1 }).eq('id', postId);
-      countEl.textContent = count + 1;
-      btn.classList.add('liked');
-      isLiked = true;
+    try {
+      if (isLiked) {
+        await soolClient.from('brewery_likes').delete().eq('post_id', postId).eq('user_id', currentUser.id);
+        // like_count는 DB 트리거가 자동으로 -1 처리
+        const newCount = Math.max(0, count - 1);
+        countEl.textContent = newCount;
+        btn.classList.remove('liked');
+        isLiked = false;
+      } else {
+        await soolClient.from('brewery_likes').insert({ post_id: postId, user_id: currentUser.id });
+        // like_count는 DB 트리거가 자동으로 +1 처리
+        const newCount = count + 1;
+        countEl.textContent = newCount;
+        btn.classList.add('liked');
+        isLiked = true;
+      }
+    } catch (error) {
+      console.error('좋아요 처리 실패:', error);
+    } finally {
+      isTogglingLike = false;
+      btn.disabled = false;
     }
-    isTogglingLike = false; // 완료 후 해제
   }
 
   async function loadComments() {
@@ -208,10 +225,10 @@
     list.innerHTML = data.map(c => `
       <div class="comment-item">
         <div class="comment-header">
-          <span class="comment-nick">@${c.users?.nickname || '익명'}</span>
+          <span class="comment-nick">@${esc(c.users?.nickname || '익명')}</span>
           <span class="comment-time">${timeAgo(c.created_at)}</span>
         </div>
-        <div class="comment-body">${c.content}</div>
+        <div class="comment-body">${esc(c.content)}</div>
       </div>
     `).join('');
   }
@@ -223,8 +240,7 @@
 
     const { error: commentError } = await soolClient.from('brewery_comments').insert({ post_id: postId, user_id: currentUser.id, content });
     if (commentError) { console.error('댓글 등록 실패:', commentError); return; }
-    // 4. 카운트 +1 방식으로 효율 개선
-    await soolClient.from('brewery_posts').update({ comment_count: (postData?.comment_count || 0) + 1 }).eq('id', postId);
+    // comment_count는 DB 트리거가 자동으로 +1 처리
     if (postData) postData.comment_count = (postData.comment_count || 0) + 1;
     document.getElementById('comment-input').value = '';
     loadComments();

@@ -104,7 +104,8 @@
 
   function goBack() {
     const from = params.get('from');
-    location.href = from || 'cafe.html';
+    const allowedPages = ['cafe.html', 'index.html'];
+    location.href = allowedPages.includes(from) ? from : 'cafe.html';
   }
 
   function timeAgo(dateStr) {
@@ -116,16 +117,21 @@
   }
 
   async function init() {
-    if (!itemId || !itemType) { location.href = 'cafe.html'; return; }
+    if (!itemId || !['nolo', 'pick'].includes(itemType)) { location.href = 'cafe.html'; return; }
 
-    const { data: { session } } = await soolClient.auth.getSession();
-    if (session) {
-      const { data: user } = await soolClient.from('users').select('id, nickname').eq('id', session.user.id).single();
-      currentUser = user;
+    try {
+      const { data: { session } } = await soolClient.auth.getSession();
+      if (session) {
+        const { data: user } = await soolClient.from('users').select('id, nickname').eq('id', session.user.id).single();
+        currentUser = user;
+      }
+
+      if (itemType === 'nolo') { await loadNoloDetail(); } else { await loadPickDetail(); }
+    } catch (error) {
+      console.error('초기화 실패:', error);
+    } finally {
+      document.getElementById('page-loading').classList.add('hide');
     }
-
-    if (itemType === 'nolo') { await loadNoloDetail(); } else { await loadPickDetail(); }
-    document.getElementById('page-loading').classList.add('hide');
   }
 
   // ── 무알코올 음료 상세 ──────────────────────
@@ -189,29 +195,45 @@
     `).join('');
   }
 
+  let isSubmittingReview = false;
+
   async function submitReview() {
-    if (!currentUser) return;
+    if (!currentUser || isSubmittingReview) return;
     const msg = document.getElementById('review-msg');
     if (writeStar === 0) { msg.textContent = '별점을 선택해주세요'; return; }
     const content = document.getElementById('review-content').value.trim();
 
-    const { error } = await soolClient.from('cafe_nolo_reviews').insert({
-      nolo_drink_id: itemId, user_id: currentUser.id, rating: writeStar, content
-    });
-    if (error) { console.error('리뷰 등록 실패:', error); msg.textContent = '등록에 실패했어요'; return; }
+    isSubmittingReview = true;
+    const btn = document.querySelector('#review-write-section .submit-btn');
+    if (btn) btn.disabled = true;
 
-    const { data: reviews } = await soolClient.from('cafe_nolo_reviews').select('rating').eq('nolo_drink_id', itemId);
-    let avg = 0;
-    if (reviews && reviews.length > 0) {
-      avg = reviews.reduce((s, r) => s + r.rating, 0) / reviews.length;
-      await soolClient.from('cafe_nolo_drinks').update({ avg_rating: Math.round(avg * 100) / 100, review_count: reviews.length }).eq('id', itemId);
+    try {
+      const { error } = await soolClient.from('cafe_nolo_reviews').insert({
+        nolo_drink_id: itemId, user_id: currentUser.id, rating: writeStar, content
+      });
+      if (error) { console.error('리뷰 등록 실패:', error); msg.textContent = '등록에 실패했어요'; return; }
+
+      // 평점/리뷰수는 DB 트리거가 자동 갱신 → 최신 값만 다시 조회
+      const { data: drinkData, error: fetchError } = await soolClient
+        .from('cafe_nolo_drinks').select('avg_rating, review_count').eq('id', itemId).single();
+      if (fetchError) {
+        console.error('평점 갱신 조회 실패:', fetchError);
+        msg.textContent = '리뷰는 등록됐지만 평점 갱신 확인에 실패했어요';
+      } else {
+        const reviewCount = drinkData?.review_count || 0;
+        document.getElementById('p-rating').textContent = reviewCount > 0
+          ? `★ ${drinkData.avg_rating} · 리뷰 ${reviewCount}개`
+          : '아직 평점 없어요';
+      }
+
+      setStar(0);
+      document.getElementById('review-content').value = '';
+      msg.textContent = '';
+      await loadReviews();
+    } finally {
+      isSubmittingReview = false;
+      if (btn) btn.disabled = false;
     }
-    document.getElementById('p-rating').textContent = `★ ${Math.round(avg * 100) / 100} · 리뷰 ${reviews.length}개`;
-
-    setStar(0);
-    document.getElementById('review-content').value = '';
-    msg.textContent = '';
-    await loadReviews();
   }
 
   // ── 오늘의 한 잔 상세 ──────────────────────

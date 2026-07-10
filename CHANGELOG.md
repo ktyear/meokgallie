@@ -90,6 +90,57 @@ Unity 전환 이후 간단한 도트 수준의 존재 표시만 검토.
 
 ---
 
+## [v1.6.13] — 2026-07-10 · 전체 페이지 보안·안정성 점검 (XSS, 데이터 정합성, 문법 오류)
+
+### 🔴 긴급 수정 — drink-detail.html 문법 오류
+- `loadServe()` 내 `const el` 중복 선언으로 **전체 스크립트가 실행되지 않던 치명적 버그** 수정
+- 수정 모달(`edit-modal-bg`) HTML이 2벌, 관련 함수(`openEditModal`·`closeEditModal`·`saveEdit`) 4개, CSS 한 블록이 전부 중복 존재 — 축소판 제거하고 확장판(가격대·음용법·향·맛·피니시·페어링 포함) 하나만 남김
+- `node --check`로 문법 검증 완료
+
+### XSS / 보안 점검 및 수정 (전체 페이지)
+- `esc()` 없던 페이지 전수 조사 후 적용: `bar.html`, `drink-detail.html`, `community.html`, `community-posts.html`, `post-detail.html`, `library.html`, `course-detail.html`, `admin.html`
+- `course-detail.html` 텍스트형 강의 본문에 `DOMPurify` 적용 (서식은 허용하되 위험 태그만 제거)
+- 검색 결과 `onclick` 문자열 조합 방식 → id 기반 안전한 방식으로 전환 (`bar.html`)
+- 음용 방법 태그(`drink-detail.html`)는 `onclick` 문자열 조합 대신 안전한 DOM 생성 + `addEventListener` 방식으로 재작성
+- `community-shared.js` 신규 — `esc`/`escAttr`/`safeSlice`/`getYoutubeId`/`isAllowedUrl` 공용 유틸 (community.html, community-posts.html 공용)
+- 이미지 URL, iframe URL(영상/음성), 외부 링크에 프로토콜(`http/https`) 검증 및 도메인 화이트리스트(유튜브/Vimeo) 적용 (`course-detail.html`, `shop.html`, `external-detail.html`)
+- `from` 파라미터 오픈 리다이렉트 방지 (허용 목록 검증) — bar/brewery/cafe/community/pairing/post-detail 전체 상세페이지
+
+### 데이터 정합성 — DB 트리거·RPC로 전환
+- 좋아요·댓글 카운트를 프론트 계산 방식에서 **DB 트리거 기반 자동 집계**로 전환 (동시 사용자 환경에서 숫자 꼬임 방지): 양조장, 술 리뷰(reviews), 소버카페 리뷰, 마리아주, 외부구매 후기
+- 조회수 증가를 원자적 RPC(`increment_brewery_view`, `increment_pairing_view`)로 전환
+- 강의 수료 처리 + XP 지급을 `complete_course` RPC 하나로 묶어 원자적 처리 (하나만 성공하는 상태 방지)
+- 상점 장바구니 담기를 `add_to_cart` RPC(upsert)로 전환, `cart_items`에 `UNIQUE(user_id, product_id)` 추가
+- **주문(결제)을 `checkout_cart` RPC로 전환 — 총액을 서버에서 상품 현재가 기준으로 재계산** (브라우저 조작으로 가격을 바꿀 수 없도록)
+
+### 오류 처리 · UX 개선 (전체 페이지 공통 적용)
+- Supabase 조회 실패와 "데이터 없음"을 구분해서 안내하도록 각 목록 페이지 로직 보강
+- `init()` 함수들에 `try/catch/finally` 적용 — 초기화 중 예외가 나도 로딩 화면이 안 사라지는 문제 방지
+- `.single()` → `.maybeSingle()` 전환 (좋아요/북마크 등 "없는 게 정상"인 조회 전반)
+- 등록·좋아요·댓글·수강신청·수료·저장 버튼 전체에 중복 클릭 방지 (`isSubmitting` 플래그 + 버튼 비활성화)
+- 초기 데이터 로딩 순차 실행 → `Promise.all` 병렬화 (library.html, restaurant.html, shop.html)
+- 가격비교·챌린지 참여자 수·공동구매 참여자 수 N+1 쿼리를 한 번의 조회로 개선
+- 모달 공통 UX 추가: 배경 클릭 닫기, `Escape` 키 닫기, 열릴 때 배경 스크롤 잠금, 첫 입력란 자동 포커스 (cafe.html, shop.html, restaurant.html)
+- 숫자 입력 검증 강화: 공동구매 목표수량/가격 음수·0 방지, 별점 범위(1~5) 제한, 챌린지 진행률 0으로 나누기 방지
+- `infoCenter.html`: 뒤로가기 로직 단순화, 채팅 스크립트 로드 실패 방어, 건물 아이콘을 실제 3D 마을 데이터와 통일(커뮤니티 🏛️·내공간 🏠·소버카페 🌿), 미구현 기능(레벨 잠금 안내, 취향 등록 버튼) 문구를 실제 상태에 맞게 수정
+
+### 신규 파일
+- `brewery-write.html` — 양조 이야기/양조장 소개/양조 방법 글쓰기 페이지 (기존에 없어서 글쓰기 버튼이 404였음)
+- `community-shared.js` — 커뮤니티 공용 유틸
+
+### DB 변경 요약 (SQL 다수 실행 필요)
+- 트리거: `brewery_likes`/`comments`, `cafe_nolo_reviews`, `pairing_likes`/`comments`, `external_purchase_likes`/`comments`, `reviews`(술 평점) → 각 게시물 테이블의 카운트/평점 자동 갱신
+- RPC: `increment_brewery_view`, `increment_pairing_view`, `complete_course`, `add_to_cart`, `checkout_cart`
+- CHECK 제약: 그룹구매 수량/가격, 리뷰 평점 범위, 마리아주 글자수 제한 등
+- UNIQUE 제약: `cart_items(user_id, product_id)`, `review_reactions(review_id, user_id)` 등
+- RLS 정책: `courses`(관리자·담당강사만 수정), `cart_items`/`orders`/`order_items`(본인 데이터만)
+
+### 기술 결정
+- 이번 세션은 외부 AI 코드 리뷰 여러 건을 순차적으로 검증하며 진행 — 각 리뷰를 실제 코드와 대조 확인 후 반영 (일부 리뷰는 부정확한 내용 포함되어 있어 걸러냄)
+- `drink-detail.html`의 중복 코드는 과거(이번 세션 이전) 어느 시점에 생긴 것으로 추정 — 원인은 명확하지 않으나 `node --check`로 재발 방지 확인하는 습관을 들이기로 함
+
+---
+
 ## [v1.6.12] — 2026-07-08 · 채팅 시스템 (월드 채팅 + 건물별 채팅)
 
 ### Supabase DB 변경

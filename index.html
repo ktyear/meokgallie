@@ -336,7 +336,7 @@
     };
 
     function moveToBuilding(x, z, buildingId) {
-      if (!window.SoolControls || typeof SoolControls.moveTo !== 'function') {
+      if (typeof SoolControls === 'undefined' || typeof SoolControls.moveTo !== 'function') {
         console.warn('SoolControls가 아직 준비되지 않았어요. 잠시 후 다시 시도해주세요.');
         return;
       }
